@@ -1,10 +1,13 @@
 # Hi, Jonas here! 
-Or as we say in the north of Germany: "Moin Moin!" 
+Or as we say in the north of Germany: **"Moin Moin!"**<br>
 I am a Microsoft Premier Field Engineer (PFE) based in Hamburg and a while back I was asked to analyze the update compliance status of a customers SCCM (ConfigMgr/MECM) environment.
-I used different reports to look for clients not installing the necessary updates, but it was time consuming ans I was missing a general overview with some meanigful KPIs. I ended up with a comprehensive SQL query and an Excel sheet, but changed that to a SQL Server Reporting Services (SSRS) report and made that available to several departments in the organization later on.As mentioned before, it's been a while since I created the report and if I would start now it would be a PowerBI version or I would simply grab one of the PowerBI reports available right now, but since I still use the report and find it quite helpful, I decided to share that with the rest of the world.
+I used different reports to look for clients not installing the necessary updates, but it was time consuming ans I was missing a general overview with some meanigful KPIs. I ended up with a comprehensive SQL query and an Excel sheet, but changed that to a SQL Server Reporting Services (SSRS) report and made that available to several departments in the organization later on.<br>
+As mentioned before, it's been a while since I created the report and if I would start now it would be a PowerBI version or I would simply grab one of the PowerBI reports available right now, but since I still use the report and find it quite helpful, I decided to share that with the rest of the world.
 
 # TL/DR
-The following report should help you identify update problems within a specific collection and is designed to work well for a few thousand clients. If you have more then 10k systems, then the query might run long and you might need to improve it or run it not within business hours to show results. The installation guide for the custom update reporting can be found at the end of this post but you should at least start with the "Some key facts and prerequisites" section.If you're just looking for the SQL statement behind the report, copy the query from the "UpdatesSummary.rsd" file and use it in SQL directly. 
+The following report should help you identify update problems within a specific collection and is designed to work well for a few thousand clients. If you have more then 10k systems, then the query might run long and you might need to improve it or run it not within business hours to show results.<br>
+The installation guide for the custom update reporting can be found at the end of this post but you should at least start with the "Some key facts and prerequisites" section.<br>
+If you're just looking for the SQL statement behind the report, copy the query from the "UpdatesSummary.rsd" file and use it in SQL directly. 
 
 # Some key facts and prerequisites:
 - The report is made to show the update compliance status of members of a collection or multiple collections no matter what type of systems are a member or which or how many updates are deployed to each of the systems.
@@ -37,7 +40,7 @@ I used different KPIs to measure update compliance and the following report comb
 | Number | Name                    | Description |
 |--------|-------------------------|----------------------------------|
 | 1      | Filter Collection Name  | A filter to easily find the collections you are looking for. Especially helpful if you have a lot of them. <br> If you don't know the correct name of the collection use the % sign as a wildcard. <br> The filter will filter the result of the "Choose Collections" parameter and reduce the number of collections visible in the drop down list.            |
-| 2      | Choose Collections      |  The drop down list will show collections based on the filter you set. You can choose just one collection or multiple ones.<br>If you choose more then one collection, the combined compliance status of all the systems will be shown in the report.<br>The report will always open with a default collection if the filter and the collection is set correctly during setup. Meaning, if the filter is set to "All%" the "All Systems" collection will be used.            |
+| 2      | Choose Collections      |  The drop down list will show collections based on the filter you set.<br> You can choose just one collection or multiple ones.<br>If you choose more then one collection, the combined compliance status of all the systems will be shown in the report.<br>The report will always open with a default collection if the filter and the collection is set correctly during setup. Meaning, if the filter is set to "All%" the "All Systems" collection will be used.            |
 | 3      |       |             |
 | 4      |       |             |
 | 5      |       |             |
