@@ -34,7 +34,7 @@ The main report dashboard looks like this:
 
 ![Update dashboard](/.attachments/UpdateReporting001.PNG)
 
-The report has basically two sub-reports. One to show you a list of systems in a specific state and one for single system and a list of missing updates.
+The report has basically two sub-reports. One to show you a list of systems in a specific state and one for a single system view and a list of missing updates.
 
 ![Update dashboard levels](/.attachments/UpdateReporting001-level.PNG)
 
@@ -59,8 +59,8 @@ I used different KPIs to measure update compliance and the following report comb
 | 13     | Last SCCM Policy request      |  The pie chart is using default SCCM data and is divided into three parts. <br>	Group A (green) systems were the last policy request was in the current month. <br>	Group B (yellow) systems were the last policy request was in the last month. <br>Group C (red) systems were the last policy request was before two or more month           |
 | 14     |  Top 10 systems with missing updates     | A list of the top 10 systems with the most missing updates. You might want to check those systems first.<br> I also tried the top 10 by month since last security update installation, but that list mostly contained systems which are decommissioned or off for a while, so I changed it to most missing updates.            |
 
-		
-Sub-reports
+
+## Sub-reports
 
 Almost each bar or pie chart links to a sub-report to show compliance state of that subset of systems to give you better visibility.
 This is an example of all the uncompliant systems from the first bar in the dashboard and is basically how the Excel list in the early days looked like:
@@ -75,8 +75,8 @@ This is an example of all the uncompliant systems from the first bar in the dash
 | 4      |  WSUSVersion |  The WSUS client version, which should be the same for each OS type |
 | 5      |  Defender Pattern |  The currently installed Defender pattern version. <br> Just as reference. A very old version can also indicate a software update problem. <br> Should be empty if you're not using Defender as your AntiVirus solution.  |
 | 6      |  Pending Reboot |  Will show yes if a reboot is pending. The type of reboot can be found in the ConfigMgr/MECM console in the "Pending Restart" column.  <br> (You might need to add the column first)|
-| 7      |  sdsd |   sdsd |
-| 8      |  sdsd |   sdsd |
+| 7      |  Days since last online |   The column is using the last time the ConfigMgr/MECM client requested a policy. <br> If no data is available the value will be 999 <br>A greater value might explain a missing update, because the client is off or not working anymore and not capable of installing updates.|
+| 8      |  Days since last AADSLogon |   The column is using the "LastLogonTimeStamp" from "AD System Discovery"<br> If no data is available the value will be 999 <br> A greater value might explain a missing update, because the client is off or not working anymore or simply has been disposed and is not capable of installing updates. |
 | 9      |  sdsd |   sdsd |
 | 10      |  sdsd |   sdsd |
 | 11     |  sdsd |   sdsd |
