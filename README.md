@@ -32,7 +32,14 @@ If you're just looking for the SQL statement behind the report, copy the query f
 # The report explained:
 The main report dashboard looks like this:
 
-![Update dashboard](/.attachments/UpdateReporting001.PNG)
+|    |
+|---------------------------------------------------------|
+| ![Update dashboard](/.attachments/UpdateReporting001.PNG) |
+
+
+<table><tr><td>
+    <img src="/.attachments/UpdateReporting001.PNG)"/>
+</td></tr></table>
 
 I used different KPIs to measure update compliance and the following report combines all that into one dashboard. The main KPI is the first bar and all the others should simply help identify patch problems or flaws in your deployment strategy.  
 
