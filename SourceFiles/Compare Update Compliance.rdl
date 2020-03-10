@@ -146,7 +146,7 @@ order by Name0</CommandText>
                           <Paragraph>
                             <TextRuns>
                               <TextRun>
-                                <Value>Choose systems that are equal related to there operating system and installed roles.</Value>
+                                <Value>Choose systems that are equal related to their operating system and installed roles.</Value>
                                 <Style />
                               </TextRun>
                             </TextRuns>
@@ -155,7 +155,7 @@ order by Name0</CommandText>
                           <Paragraph>
                             <TextRuns>
                               <TextRun>
-                                <Value>This report will not show any updates that are not applicable to the selected systsms. Like Windows 10 Updates if Server 2016 is selected.</Value>
+                                <Value>The report will only show applicable updates to the specific system and not a list of all updates available.</Value>
                                 <Style />
                               </TextRun>
                             </TextRuns>
