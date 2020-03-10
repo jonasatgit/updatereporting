@@ -32,84 +32,60 @@ If you're just looking for the SQL statement behind the report, copy the query f
 # The report explained:
 The main report dashboard looks like this:
 
-|    |
-|---------------------------------------------------------|
-| ![Update dashboard](/.attachments/UpdateReporting001.PNG) |
+![Update dashboard](/.attachments/UpdateReporting001.PNG)
 
+The report has basically two sub-reports. One to show you a list of systems in a specific state and one for single system and a list of missing updates.
 
-<table><tr><td>
-    <img src="/.attachments/UpdateReporting001.PNG)"/>
-</td></tr></table>
+![Update dashboard levels](/.attachments/UpdateReporting001-level.PNG)
+
 
 I used different KPIs to measure update compliance and the following report combines all that into one dashboard. The main KPI is the first bar and all the others should simply help identify patch problems or flaws in your deployment strategy.  
 
 
-| Number | Name                    | Description |
-|--------|-------------------------|----------------------------------|
+| Nr | Name                    | Description |
+|----|-------------------------|----------------------------------|
 | 1      | Filter Collection Name  | A filter to easily find the collections you are looking for. Especially helpful if you have a lot of them. <br> If you don't know the correct name of the collection use the % sign as a wildcard. <br> The filter will filter the result of the "Choose Collections" parameter and reduce the number of collections visible in the drop down list.            |
-| 2      | Choose Collections      |  The drop down list will show collections based on the filter you set.<br> You can choose just one collection or multiple ones.<br>If you choose more then one collection, the combined compliance status of all the systems will be shown in the report.<br>The report will always open with a default collection if the filter and the collection is set correctly during setup. Meaning, if the filter is set to "All%" the "All Systems" collection will be used.            |
-| 3      |       |             |
-| 4      |       |             |
-| 5      |       |             |
-| 6      |       |             |
-| 7      |       |             |
-| 8      |       |             |
-| 9      |       |             |
-| 10     |       |             |
-| 11     |       |             |
-| 12     |       |             |
-| 13     |       |             |
+| 2      | Choose Collections      |  The drop down list will show collections based on the filter you set.<br> You can choose just one collection or multiple ones.<br>If you choose more then one collection, the combined compliance status of all the systems will be shown in the report.<br>The report will always open with a default collection if the filter and the collection is set correctly during setup. Meaning, if the filter is set to "All%" and the default CollectionID is set to "SMS00001" the "All Systems" collection will be used.            |
+| 3      | Show report      |  Will run the report with the currently selected collections           |
+| 4      | Update compliance      |   "Compliant" (green bar) means, all the deployed updates to the systems are installed and at least one security update was installed within the month. The report is using the Win32_QuickfixEngineering class to determine the last installation time. (See also the: "Some key facts and prerequisites" section) <br> Click either on the green bar to get a sub-report which shows a list of compliant systems or the yellow bar to get a list of non compliant systems.          |
+| 5      |  Updates approved     | The green bar will indicate that all the security and critical updates each system needs are deployed and could be installed by the system. <br> The yellow bar indicates systems which are missing security and critical updates which are currently not deployed to the systems. <br> It could mean that your update group is simply missing some important updates, which should be deployed. <br> You can click on the yellow bar to get a list of the updates missing for the systems in the chosen collection/s.          |
+| 6      |Last Rollup Installed       | Green means the system has either the last or the current rollup installed. <br> Either the cumulative update or the Security Monthly Quality Rollup like this: <br> _2020-01 Cumulative Update for Windows%_ <br> _2020-01 Security Monthly Quality Rollup%_ <br> <br>Yellow means, the system is missing the rollup of the last month. <br> Since Microsoft is releasing updates with a year and date prefix, it is easy to determine the rollup of a given month by just that prefix. Like 2020-01 for the January rollup of 2020. <br> Click either on the green bar to get a sub-report which shows a list of compliant systems or the yellow bar to get a list of non compliant systems.            |
+| 7      | Current Rollup Installed     | Green means the system has the current rollup installed. <br> Either the cumulative update or the Security Monthly Quality Rollup like this: <br> _2020-02 Cumulative Update for Windows%_ <br> _2020-02 Security Monthly Quality Rollup%_  <br> <br> Yellow means, the system is missing the current rollup. <br>Click either on the green bar to get a sub-report which shows a list of compliant systems or the yellow bar to get a list of non compliant systems.  <br> <br> Keep in mind that the green bar depends on when you open up the report. So if you want to report the compliance for lets say January, but you open up the report the 1st of February, then the current rollup bar will be using February as the current month and should only show yellow. <br> In that case the "Last Rollup Installed" is a good indicator, because it will show the rollup compliance based on January.            |
+| 8      | Reboot pending      | Green means there is no reboot pending. <br> Yellow means, the system needs a reboot. Since the data is coming from the SCCM client via fast channel and not via hardware inventory or other method, the status should update quite fast.  <br>Click on the yellow bar to get to a sub-report of systems in need for a reboot.           |
+| 9      |   WSUS-Scan Error    |  Green means there is no problem with the WSUS client scanning for updates. <br> Yellow means, the system reported a WSUS client scan error and the WSUS client should be checked. <br> The WindowsUpdate.log is a good starting point. <br> Click on the yellow bar to get to a sub-report of systems with a wsus client scan error.           |
+| 10     | Last Update Installation      |   The pie chart is using data from Win32_QuickfixEngineering and is divided into three parts. <br> Group A (green) systems were the last security update was installed in the current month. <br>	Group B (yellow) systems were the last security update was installed in the last month.<br>Group C (red) systems were the last security update was installed before two or more month.          |
+| 11     | Last Reboot      |  The pie chart is using data from hardware inventory and is divided into three parts. <br>Group A (green) systems were the last reboot was in the current month. <br>Group B (yellow) systems were the last reboot was in the last month. <br>Group C (red) systems were the last reboot was before two or more month           |
+| 12     | Last ADDS Login      | The pie chart is using data from AD system discovery and is divided into three parts. <br> Group A (green) systems were the last logon in AD was in the current month. <br>	Group B (yellow) systems were the last logon in AD was in the last month. <br>Group C (red) systems were the last logon in AD was before two or more month            |
+| 13     | Last SCCM Policy request      |  The pie chart is using default SCCM data and is divided into three parts. <br>	Group A (green) systems were the last policy request was in the current month. <br>	Group B (yellow) systems were the last policy request was in the last month. <br>Group C (red) systems were the last policy request was before two or more month           |
+| 14     |  Top 10 systems with missing updates     | A list of the top 10 systems with the most missing updates. You might want to check those systems first.<br> I also tried the top 10 by month since last security update installation, but that list mostly contained systems which are decommissioned or off for a while, so I changed it to most missing updates.            |
+
+		
+Sub-reports
+
+Almost each bar or pie chart links to a sub-report to show compliance state of that subset of systems to give you better visibility.
+This is an example of all the uncompliant systems from the first bar in the dashboard and is basically how the Excel list in the early days looked like:
+
+![Update sub-report](/.attachments/UpdateReporting002.PNG)
+
+| Nr | Name                    | Description |
+|----|-------------------------|----------------------------------|
+| 1      |  Name |   Name of the system |
+| 2      |  OSType |   OS name coming from hardware inventory |
+| 3      |  Client Version |   The SCCM client version, which should normally be the same for all systems |
+| 4      |  WSUSVersion |  The WSUS client version, which should be the same for each OS type |
+| 5      |  Defender Pattern |  The currently installed Defender pattern version. <br> Just as reference. A very old version can also indicate a software update problem. <br> Should be empty if you're not using Defender as your AntiVirus solution.  |
+| 6      |  Pending Reboot |  Will show yes if a reboot is pending. The type of reboot can be found in the ConfigMgr/MECM console in the "Pending Restart" column.  <br> (You might need to add the column first)|
+| 7      |  sdsd |   sdsd |
+| 8      |  sdsd |   sdsd |
+| 9      |  sdsd |   sdsd |
+| 10      |  sdsd |   sdsd |
+| 11     |  sdsd |   sdsd |
+| 12      |  sdsd |   sdsd |
+| 13      |  sdsd |   sdsd |
+| 14      |  sdsd |   sdsd |
+| 15      |  sdsd |   sdsd |
 
 
 
-
-3	Show report	Will run the report with the currently selected collections
-4	Update compliance	"Compliant" (green bar) means, all the deployed updates to the systems are installed and at least one security update was installed within the month. The report is using the Win32_QuickfixEngineering class to determine the last installation time. (See also the: "Some key facts and prerequisites" section)Click either on the green bar to get a sub-report which shows a list of compliant systems or the yellow bar to get a list of non compliant systems.
-		
-5	Updates approved	The green bar will indicate that all the security and critical updates each system need is deployed and could be installed by the system.
-		The yellow bar indicates systems which are missing security and critical updates which are currently not deployed to the systems. 
-		It could mean that your update group is simply missing some important updates, which should be deployed. You can click on the yellow bar to get a list of the updates missing for the systems in the chosen collection/s.
-		
-6	Last Rollup Installed	Green means the system has either the last or the current rollup installed. 
-		Either the cumulative update or the Security Monthly Quality Rollup like this:
-		2020-01 Cumulative Update for Windows%
-		2020-01 Security Monthly Quality Rollup%
-		
-		Yellow means, the system is missing the rollup of the last month.Since Microsoft is releasing updates with a year and date prefix, it is easy to determine the rollup of a given month by just that prefix. Like 2020-01 for the January rollup of 2020.Click either on the green bar to get a sub-report which shows a list of compliant systems or the yellow bar to get a list of non compliant systems.
-7	Current Rollup Installed	Green means the system has the current rollup installed. 
-		Either the cumulative update or the Security Monthly Quality Rollup like this:
-		2020-01 Cumulative Update for Windows%
-		2020-01 Security Monthly Quality Rollup%
-		
-		Yellow means, the system is missing the current rollup.Since Microsoft is releasing updates with a year and date prefix, it is easy to determine the rollup of a given month by just that prefix. Like 2020-01 for the January rollup of 2020.Click either on the green bar to get a sub-report which shows a list of compliant systems or the yellow bar to get a list of non compliant systems.
-		
-		Keep in mind that the green bar depends on when you open up the report. So if you want to report the compliance for lets say January, but you open up the report the 1st of February, then the current rollup bar will be using February as the current month and should only show yellow.In that case the "Last Rollup Installed" is a good indicator, because it will show the rollup compliance based on January.
-		
-8	Reboot pending	Green means there is no reboot pending. 
-		Yellow means, the system needs a reboot. Since the data is coming from the SCCM client via fast channel and not via hardware inventory or other method, the status should update quite fast. Click on the yellow bar to get to a sub-report of systems in need for a reboot.
-		
-9	WSUS-Scan Error	Green means there is no problem with the WSUS client scanning for updates. 
-		Yellow means, the system reported a WSUS client scan error and the WSUS client should be checked. 
-		The WindowsUpdate.log is a good starting point. Click on the yellow bar to get to a sub-report of systems with a wsus client scan error.
-		
-10	Last Update Installation	The pie chart is using data from Win32_QuickfixEngineering and is divided into three parts. 
-		Group A (green) systems were the last security update was installed in the current month. 
-		Group B (yellow) systems were the last security update was installed in the last month.Group C (red) systems were the last security update was installed before two or more month.
-		
-11	Last Reboot	The pie chart is using data from hardware inventory and is divided into three parts. 
-		Group A (green) systems were the last reboot was in the current month. 
-		Group B (yellow) systems were the last reboot was in the last month. Group C (red) systems were the last reboot was before two or more month
-		
-12	Last ADDS Login	The pie chart is using data from AD system discovery and is divided into three parts. 
-		Group A (green) systems were the last logon in AD was in the current month. 
-		Group B (yellow) systems were the last logon in AD was in the last month. Group C (red) systems were the last logon in AD was before two or more month
-		
-13	Last SCCM Policy request	The pie chart is using data from normal SCCM data and is divided into three parts. 
-		Group A (green) systems were the last policy request was in the current month. 
-		Group B (yellow) systems were the last policy request was in the last month. Group C (red) systems were the last policy request was before two or more month
-		
-14	Top 10 systems with missing updates	A list of the top 10 systems with the most missing updates. You might want to check those systems first.
-		I also tried the top 10 by month since last security update installation, but that list mostly contained systems which are decommissioned or off for a while, so I changed it to most missing updates.
-		
 
 
