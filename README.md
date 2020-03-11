@@ -1,7 +1,7 @@
 # Hi, Jonas here! 
 Or as we say in the north of Germany: **"Moin Moin!"**<br>
-I am a Microsoft Premier Field Engineer (PFE) based in Hamburg and a while back I was asked to analyze the update compliance status of a customers SCCM (ConfigMgr/MECM) environment.
-I used different reports to look for clients not installing the necessary updates, but it was time consuming ans I was missing a general overview with some meanigful KPIs. I ended up with a comprehensive SQL query and an Excel sheet, but changed that to a SQL Server Reporting Services (SSRS) report and made that available to several departments in the organization later on.<br>
+I am a Microsoft Premier Field Engineer (PFE) based in Hamburg and a while back (years in fact) I was asked to analyze the update compliance status of a customers SCCM (ConfigMgr/MECM) environment. <br>
+I used different reports to look for clients not installing the necessary updates, but it was time consuming and I was missing a general overview with some meanigful KPIs. I ended up with a comprehensive SQL query and an Excel sheet, but changed that to a SQL Server Reporting Services (SSRS) report and made that available to several departments in the organization later on.<br>
 As mentioned before, it's been a while since I created the report and if I would start now it would be a PowerBI version or I would simply grab one of the PowerBI reports available right now, but since I still use the report and find it quite helpful, I decided to share that with the rest of the world.
 
 # TL/DR
