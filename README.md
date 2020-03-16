@@ -77,15 +77,65 @@ This is an example of all the uncompliant systems from the first bar in the dash
 | 6      |  Pending Reboot |  Will show yes if a reboot is pending. The type of reboot can be found in the ConfigMgr/MECM console in the "Pending Restart" column.  <br> (You might need to add the column first)|
 | 7      |  Days since last online |   The column is using the last time the ConfigMgr/MECM client requested a policy. <br> If no data is available the value will be 999 <br>A greater value might explain a missing update, because the client is off or not working anymore and not capable of installing updates.|
 | 8      |  Days since last AADSLogon |   The column is using the "LastLogonTimeStamp" from "AD System Discovery"<br> If no data is available the value will be 999 <br> A greater value might explain a missing update, because the client is off or not working anymore or simply has been disposed and is not capable of installing updates. |
-| 9      |  sdsd |   sdsd |
-| 10      |  sdsd |   sdsd |
-| 11     |  sdsd |   sdsd |
-| 12      |  sdsd |   sdsd |
-| 13      |  sdsd |   sdsd |
-| 14      |  sdsd |   sdsd |
-| 15      |  sdsd |   sdsd |
+| 9      |  Days Since Last Boot |   This column is using hardware inventory data to calculate the last time the system was booted. <br> Note: If the reboot is older then ~30 days, this might indicate a problem, because the system should have been rebooted by the SCCM client after the update installation if you allow that to happen. <br> If no data is available the value will be 999 <br> A greater value might explain a missing update, because the client is off or not working anymore or simply has been disposed and is not capable of installing updates.  |
+| 10      |  Month Since Last Update Install |   This column is using data from Win32_Quickfixengineering and is either an indicator of missing hardware inventory or an indication of an update installation problem. <br> The value will be shown in red if it is greater or equal to two month. |
+| 11     |  Missing Updates All |   Count of all missing updates of all possible update categories for that system not just the ones that are deployed.  |
+| 12      |  Missing updates Approved |   This is the most important column and shows the count of missing updates which are deployed to the system. <br> The value will be shown in red if it is greater or equal to one. |
+| 13      |  Last Rollup Status |   The status will be "Missing" or "Installed" depending on the installation status of the rollup of the last month. The  Status will also be "Installed" if the rollup of the current month is installed, because each rollup is cumulative. <br> The value will be shown in red if it the status is "Missing".  |
+| 14      |  Current Rollup Status |  The status will be "Missing" or "Installed" depending on the installation status of the rollup of the current month. <br> (As mentioned before, the status depends on the on time the report was opened. See 7 above.) <br> The value will be shown in red if it the status is "Missing". |
+| 15      |  Update Collections |  A list of collections were the system is a member of and for which are updates deployed. <br> A missing collection name for example might indicate that the system is not part of the correct or not all needed collections and might not receive updates because of that.  |
 
 
 
+# 2nd Level sub-report per system
+If you click on the number of missing updates in the column "missing updates appoved" a per system sub-report will be opend which will only show the specific missing updates for the selected system.
+The report also shows installations errors if any happened.  Each error will link to a bing search with the hex value of the error.
+The search looks like this: SEARCHSTRING
+
+![Update sub-report per system](/.attachments/UpdateReporting003.PNG)
+
+The sub-report is pre-filtered to only show "Deployed and missing updates", but the filter can be ajusted to show: "Not deployed but missing" or just "All Updates per device" to get the full list.
+
+# How to subscribe to a report
+LOREM IPSUM
+
+# How to install
+1. Make sure you have enabled **Win32_Quickfixengineering** in the client settings for hardware inventory
+1. You could also use AD System Discovery to have further data, but that's no hard requirement. 
+1. Create a new folder on any drive you want on your SSRS report server
+1. Copy the script **"Import-SSRSReports.ps1"** in that folder
+1. Create a subfolder called **"Sourcefiles"** and copy all the report files into the **"Sourcefiles"** folder
+1. Create a new folder on the report server website were the reports should be imported to.
+   1. The folder should be under the normal configmgr folder, but can also be at the root level of your Reporting Services Server. But keep in mind that report subscriptions are only visible in the SCCM console, if the report, you have subscribed for, is below the normal configMgr folder. The subscription will not be visible in the SCCM console if the report was placed at the root level.
+1. Start a PowerShell session as admin. 
+	a. The user running PowerShell also needs to have admin rights on the SQL Reporting Services Server in order to upload the reports
+1. Change the directory to the folder were you placed the import script
+1. Start the script **"Import-SSRSReports.ps1"** with the appropriate parameters (see below)
+   1. The script will copy each rdl and rsd file from the **"Sourcefiles"** folder to a new **"work"** folder
+	 1. The script will then simply replace some values with the parameter values you provided
+	 1. The script will then upload the datasets and the reports to the server and the folder you provided as parameters
+	 1. The files in the **"work"** folder will not be deleted and can be used as a backup or for manual uploads if necessary and will contain the data you provided as parameters to the script
+	 1. **IMPORTANT:** If you need to re-run the script, delete each report and dataset on the Reporting Server in the folder you chose for the reports first. It is possible to overwrite the reports automatically, but I faced some issues with some settings not to be overwritten as desired and don't use that method anymore. That's why everything should be deleted first. 
 
 
+| Parameter | Required  | Example value                    |Description |
+|-----------|-----------|----------------------------------|----------------------------------|
+|ReportServerURI| Yes |  http://reportserver.domain.local/reportserver | The URL of the SQL Reporting Services Server. <br> Can be found in the ConfigMgr Console or the report **LOREM IPSUM**|
+| TargetFolderPath | Yes  | Example value |ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602} |
+| DefaultCollection | No  | Example value |SMS00001 |
+| DefaultCollectionFilter | No  | Example value | All% |
+| DoNotHideReports | No  | 'Software Updates Compliance - Overview','Compare Update Compliance' |Array of reports which should not be set to hidden. You should not use the parameter unless you really want more reports to be visible.|
+| Upload | No  | $true |If set to $false the reports will not be uploaded. That might be helpful, if you do not have the rights to upload and need to give the files to another person for example. In that case, just use the report files in the work folder |
+| UseViewForDataset | No  | $false |All reports can either use a dataset called "UpdatesSummary", which is the default and will execute the full sql query right from the Reporting Services Server, or a dataset called "UpdatesSummaryView" which will select from a sql view which needs to be created first. (I will not explain that process in detail) <br> $false will use the default dataset and $true will use the dataset using a sql view. |
+| ReportSourcePath | No  | $PSScriptRoot or "C:\Temp\Reports"                   |The script will use the script root path to look for a folder called "Sourcefiles" and will copy all the report files from there.  But you could also provide a different path where the script should look for a "Sourcefiles" folder
+ |
+
+
+
+  ## Example: 
+.\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath = "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}"
+
+
+# How to read the report (FAQ)
+
+LOREM IPSUM
