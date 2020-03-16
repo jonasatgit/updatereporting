@@ -1,17 +1,77 @@
-﻿#************************************************************************************************************
-# Disclaimer
-#
-# This sample script is not supported under any Microsoft standard support program or service. This sample
-# script is provided AS IS without warranty of any kind. Microsoft further disclaims all implied warranties
-# including, without limitation, any implied warranties of merchantability or of fitness for a particular
-# purpose. The entire risk arising out of the use or performance of this sample script and documentation
-# remains with you. In no event shall Microsoft, its authors, or anyone else involved in the creation,
-# production, or delivery of this script be liable for any damages whatsoever (including, without limitation,
-# damages for loss of business profits, business interruption, loss of business information, or other
-# pecuniary loss) arising out of the use of or inability to use this sample script or documentation, even
-# if Microsoft has been advised of the possibility of such damages.
-#************************************************************************************************************
+﻿<#
+.SYNOPSIS
+Uploads SQL Server Reporting Services report and dataset files.
 
+.DESCRIPTION
+The script will change the content of rdl and rsd files and will upload them to a SQL Server Reporting Services (SSRS) of your choice.
+The rdl and rsd files contain specific strings which are simply replaced by the parameter values of this script. 
+
+Disclaimer
+This sample script is not supported under any Microsoft standard support program or service. This sample
+script is provided AS IS without warranty of any kind. Microsoft further disclaims all implied warranties
+including, without limitation, any implied warranties of merchantability or of fitness for a particular
+purpose. The entire risk arising out of the use or performance of this sample script and documentation
+remains with you. In no event shall Microsoft, its authors, or anyone else involved in the creation,
+production, or delivery of this script be liable for any damages whatsoever (including, without limitation,
+damages for loss of business profits, business interruption, loss of business information, or other
+pecuniary loss) arising out of the use of or inability to use this sample script or documentation, even
+if Microsoft has been advised of the possibility of such damages.
+
+.PARAMETER ReportServerURI
+The URL of the SQL Reporting Services Server. Like this for example: http://reportserver.domain.local/reportserver
+
+.PARAMETER TargetFolderPath
+The folder were the reports should be placed in. I created a folder called "Custom_UpdateReporting" below the default SCCM reporting folder. My sitecode is P11, so the default folder is called "ConfigMgr_P11".
+Like this for example: "ConfigMgr_P11/Custom_UpdateReporting"
+Use "/"" instead of "\"" because it's a website
+
+.PARAMETER TargetDataSourcePath
+The path should point to the default ConfigMgr datas ource. 
+In my case the Sitecode is P11 and the default data source is therefore in the folder "ConfigMgr_P11" and has the ID "{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}"
+The path with the default folder is required. Like this for example: "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}""
+Use "/"" instead of "\"" because it's a website
+
+.PARAMETER DefaultCollection
+The report can show data of a default collection when it will be run, so that you don't need to provide a collection name each time you run the report. 
+The default value is "SMS00001" which is the CollectionID of "All Systems", which might not be the best choice for bigger environments. 
+
+.PARAMETER DefaultCollectionFilter
+The filter is used to find the collection you are interested in and the value needs to match the name of the collection you choose to be the default collection for the parameter "defaultCollection". 
+In my case "All%" or All Syst% or "Servers%" to get the "Servers of the environment" collection for  example. 
+
+.PARAMETER DoNotHideReports
+Array of reports which should not be set to hidden. You should not use the parameter unless you really want more reports to be visible.
+
+.PARAMETER Upload
+If set to $false the reports will be changed to have the correct values, but will not be uploaded. 
+That might be helpful, if you do not have the rights to upload and need to give the files to another perso, so that they can be uploaded manually
+
+.PARAMETER UseViewForDataset
+All reports can either use a dataset called "UpdatesSummary", which is the default and will execute the full sql query right from the Reporting Services Server, or a dataset called "UpdatesSummaryView" which will select from a sql view which needs to be created first. (I will not explain that process in detail)
+$false will use the default dataset and $true will use the dataset using a SQL view.
+
+.PARAMETER ReportSourcePath
+The script will use the script root path to look for a folder called "Sourcefiles" and will copy all the report files from there. 
+ But you could also provide a different path where the script should look for a "Sourcefiles" folder.
+
+.INPUTS
+None. You cannot pipe objects to Import-SSRSReports.ps1
+
+.OUTPUTS
+Just normal console output. Nothing to work with. 
+
+.EXAMPLE
+PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath = "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}"
+
+.EXAMPLE
+PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath = "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -Upload $false
+
+.EXAMPLE
+PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath = "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -DefaultCollection "P1100012" -DefaultCollectionFilter "All Servers of Contoso%"
+
+.LINK
+https://github.com/jonasatgit/updatereporting
+#>
 [CmdletBinding()]
 param(
 
@@ -19,10 +79,10 @@ param(
     [string]$ReportServerUri = "http://reportserver.domain.local/reportserver",
 
     [parameter(Mandatory=$true)]
-    [string]$TargetFolderPath = 'ConfigMgr_P11/Custom_UpdateReporting', # use / instead of \ because it's a website
+    [string]$TargetFolderPath = 'ConfigMgr_P11/Custom_UpdateReporting',
 
     [parameter(Mandatory=$true)]
-    [string]$TargetDataSourcePath = 'ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}', # use / instead of \ because it's a website
+    [string]$TargetDataSourcePath = 'ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}',
 
     [parameter(Mandatory=$false)]
     [string]$DefaultCollectionID = 'SMS00001',

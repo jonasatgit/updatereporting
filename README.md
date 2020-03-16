@@ -57,7 +57,7 @@ I used different KPIs to measure update compliance and the following report comb
 | 11     | Last Reboot      |  The pie chart is using data from hardware inventory and is divided into three parts. <br>Group A (green) systems were the last reboot was in the current month. <br>Group B (yellow) systems were the last reboot was in the last month. <br>Group C (red) systems were the last reboot was before two or more month           |
 | 12     | Last ADDS Login      | The pie chart is using data from AD system discovery and is divided into three parts. <br> Group A (green) systems were the last logon in AD was in the current month. <br>	Group B (yellow) systems were the last logon in AD was in the last month. <br>Group C (red) systems were the last logon in AD was before two or more month            |
 | 13     | Last SCCM Policy request      |  The pie chart is using default SCCM data and is divided into three parts. <br>	Group A (green) systems were the last policy request was in the current month. <br>	Group B (yellow) systems were the last policy request was in the last month. <br>Group C (red) systems were the last policy request was before two or more month           |
-| 14     |  Top 10 systems with missing updates     | A list of the top 10 systems with the most missing updates. You might want to check those systems first.<br> I also tried the top 10 by month since last security update installation, but that list mostly contained systems which are decommissioned or off for a while, so I changed it to most missing updates.            |
+| 14     |  Top 10 systems with missing updates     | A list of the top 10 systems with the most missing updates. You might want to check those systems first.<br> I also tried the top 10 by month since last security update installation, but that list mostly contained systems which are decommissioned or off for a while, so I changed it to most missing updates.  |
 
 
 ## Sub-reports
@@ -102,16 +102,14 @@ LOREM IPSUM
 # How to install
 1. Make sure you have enabled **Win32_Quickfixengineering** in the client settings for hardware inventory
 1. You could also use AD System Discovery to have further data, but that's no hard requirement. 
-1. Create a new folder on any drive you want on your SSRS report server
-1. Copy the script **"Import-SSRSReports.ps1"** in that folder
-1. Create a subfolder called **"Sourcefiles"** and copy all the report files into the **"Sourcefiles"** folder
-1. Create a new folder on the report server website were the reports should be imported to.
-   1. The folder should be under the normal configmgr folder, but can also be at the root level of your Reporting Services Server. But keep in mind that report subscriptions are only visible in the SCCM console, if the report, you have subscribed for, is below the normal configMgr folder. The subscription will not be visible in the SCCM console if the report was placed at the root level.
+1. Either clone the repository or download the whole content.
+1. Copy the whole contentn on the SQL Server Reporting Services Server (SSRS) 1. Create a new folder on the report server website were the reports should be imported to.
+   1. The folder should be under the normal configmgr folder, but can also be at the root level of your Reporting Services Server. But keep in mind that report subscriptions are only visible in the SCCM console, if the report, you have subscribed for, is below the normal configMgr folder. <br> The subscription will not be visible in the SCCM console if the report was placed at the root level.
 1. Start a PowerShell session as admin. 
 	a. The user running PowerShell also needs to have admin rights on the SQL Reporting Services Server in order to upload the reports
-1. Change the directory to the folder were you placed the import script
+1. Change the directory to the folder were the import script **"Import-SSRSReports.ps1"** can be found.
 1. Start the script **"Import-SSRSReports.ps1"** with the appropriate parameters (see below)
-   1. The script will copy each rdl and rsd file from the **"Sourcefiles"** folder to a new **"work"** folder
+   1. The script will copy each rdl and rsd file from the **"Sourcefiles"** folder to a new **"work"** folder in the same directory the script resides.
 	 1. The script will then simply replace some values with the parameter values you provided
 	 1. The script will then upload the datasets and the reports to the server and the folder you provided as parameters
 	 1. The files in the **"work"** folder will not be deleted and can be used as a backup or for manual uploads if necessary and will contain the data you provided as parameters to the script
@@ -127,15 +125,167 @@ LOREM IPSUM
 | DoNotHideReports | No  | 'Software Updates Compliance - Overview','Compare Update Compliance' |Array of reports which should not be set to hidden. You should not use the parameter unless you really want more reports to be visible.|
 | Upload | No  | $true |If set to $false the reports will not be uploaded. That might be helpful, if you do not have the rights to upload and need to give the files to another person for example. In that case, just use the report files in the work folder |
 | UseViewForDataset | No  | $false |All reports can either use a dataset called "UpdatesSummary", which is the default and will execute the full sql query right from the Reporting Services Server, or a dataset called "UpdatesSummaryView" which will select from a sql view which needs to be created first. (I will not explain that process in detail) <br> $false will use the default dataset and $true will use the dataset using a sql view. |
-| ReportSourcePath | No  | $PSScriptRoot or "C:\Temp\Reports"                   |The script will use the script root path to look for a folder called "Sourcefiles" and will copy all the report files from there.  But you could also provide a different path where the script should look for a "Sourcefiles" folder
- |
-
-
+| ReportSourcePath | No  | $PSScriptRoot or "C:\Temp\Reports"                   |The script will use the script root path to look for a folder called "Sourcefiles" and will copy all the report files from there.  But you could also provide a different path where the script should look for a "Sourcefiles" folder|
 
   ## Example: 
 .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath = "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}"
 
+```code
+PS> Get-Gelp .\Import-SSRSReports.ps1 -Full
 
-# How to read the report (FAQ)
+NAME
+    .\Import-SSRSReports.ps1
+    
+SYNOPSIS
+    Uploads SQL Server Reporting Services report and dataset files.
+    
+    
+SYNTAX
+    .\Import-SSRSReports.ps1 [-ReportServerUri] <String> [-TargetFolderPath] <String> [-TargetDataSourcePath] <String> [[-DefaultCollectionID] <String>] [[-DefaultCollectionFilter] <String>] 
+    [[-DoNotHideReports] <Array>] [[-Upload] <Boolean>] [[-UseViewForDataset] <Boolean>] [[-ReportSourcePath] <String>] [<CommonParameters>]
+    
+    
+DESCRIPTION
+    The script will change the content of rdl and rsd files and will upload them to a SQL Server Reporting Services (SSRS) of your choice.
+    The rdl and rsd files contain specific strings which are simply replaced by the parameter values of this script. 
+    
+    Disclaimer
+    This sample script is not supported under any Microsoft standard support program or service. This sample
+    script is provided AS IS without warranty of any kind. Microsoft further disclaims all implied warranties
+    including, without limitation, any implied warranties of merchantability or of fitness for a particular
+    purpose. The entire risk arising out of the use or performance of this sample script and documentation
+    remains with you. In no event shall Microsoft, its authors, or anyone else involved in the creation,
+    production, or delivery of this script be liable for any damages whatsoever (including, without limitation,
+    damages for loss of business profits, business interruption, loss of business information, or other
+    pecuniary loss) arising out of the use of or inability to use this sample script or documentation, even
+    if Microsoft has been advised of the possibility of such damages.
+    
+
+PARAMETERS
+    -ReportServerUri <String>
+        The URL of the SQL Reporting Services Server. Like this for example: http://reportserver.domain.local/reportserver
+        
+        Required?                    true
+        Position?                    1
+        Default value                http://reportserver.domain.local/reportserver
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -TargetFolderPath <String>
+        The folder were the reports should be placed in. I created a folder called "Custom_UpdateReporting" below the default SCCM reporting folder. My sitecode is P11, so the default folder is called "ConfigMgr_P11".
+        Like this for example: "ConfigMgr_P11/Custom_UpdateReporting"
+        Use '/' instead of '\' because it's a website
+        
+        Required?                    true
+        Position?                    2
+        Default value                ConfigMgr_P11/Custom_UpdateReporting
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -TargetDataSourcePath <String>
+        The path should point to the default ConfigMgr datas ource. 
+        In my case the Sitecode is P11 and the default data source is therefore in the folder "ConfigMgr_P11" and has the ID "{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}"
+        The path with the default folder is required. Like this for example: "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}""
+        Use "/"" instead of "\"" because it's a website
+        
+        Required?                    true
+        Position?                    3
+        Default value                ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -DefaultCollectionID <String>
+        
+        Required?                    false
+        Position?                    4
+        Default value                SMS00001
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -DefaultCollectionFilter <String>
+        The filter is used to find the collection you are interested in and the value needs to match the name of the collection you choose to be the default collection for the parameter "defaultCollection". 
+        In my case "All%" or All Syst% or "Servers%" to get the "Servers of the environment" collection for  example.
+        
+        Required?                    false
+        Position?                    5
+        Default value                All%
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -DoNotHideReports <Array>
+        Array of reports which should not be set to hidden. You should not use the parameter unless you really want more reports to be visible.
+        
+        Required?                    false
+        Position?                    6
+        Default value                @('Software Updates Compliance - Overview','Compare Update Compliance','Software Updates Compliance - Offline Scan Results')
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -Upload <Boolean>
+        If set to $false the reports will be changed to have the correct values, but will not be uploaded. 
+        That might be helpful, if you do not have the rights to upload and need to give the files to another perso, so that they can be uploaded manually
+        
+        Required?                    false
+        Position?                    7
+        Default value                True
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -UseViewForDataset <Boolean>
+        All reports can either use a dataset called "UpdatesSummary", which is the default and will execute the full sql query right from the Reporting Services Server, or a dataset called "UpdatesSummaryView" which will select 
+        from a sql view which needs to be created first. (I will not explain that process in detail)
+        $false will use the default dataset and $true will use the dataset using a SQL view.
+        
+        Required?                    false
+        Position?                    8
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -ReportSourcePath <String>
+        The script will use the script root path to look for a folder called "Sourcefiles" and will copy all the report files from there. 
+         But you could also provide a different path where the script should look for a "Sourcefiles" folder.
+        
+        Required?                    false
+        Position?                    9
+        Default value                $($PSScriptRoot)
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    <CommonParameters>
+        This cmdlet supports the common parameters: Verbose, Debug,
+        ErrorAction, ErrorVariable, WarningAction, WarningVariable,
+        OutBuffer, PipelineVariable, and OutVariable. For more information, see 
+        about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216). 
+    
+INPUTS
+    None. You cannot pipe objects to Import-SSRSReports.ps1
+    
+    
+OUTPUTS
+    Just normal console output. Nothing to work with.
+ 
+    -------------------------- EXAMPLE 1 --------------------------
+    
+    PS>.\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath = 
+    "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}"
+    
+    -------------------------- EXAMPLE 2 --------------------------
+    
+    PS>.\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath = 
+    "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -Upload $false
+
+    -------------------------- EXAMPLE 3 --------------------------
+    
+    PS>.\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath = 
+    "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -DefaultCollection "P1100012" -DefaultCollectionFilter "All Servers of Contoso%"
+    
+RELATED LINKS
+    https://github.com/jonasatgit/updatereporting
+``` 
+
+
+
+# Some tipps
 
 LOREM IPSUM
