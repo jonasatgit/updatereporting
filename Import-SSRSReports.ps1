@@ -21,12 +21,12 @@ if Microsoft has been advised of the possibility of such damages.
 The URL of the SQL Reporting Services Server. Like this for example: http://reportserver.domain.local/reportserver
 
 .PARAMETER TargetFolderPath
-The folder were the reports should be placed in. I created a folder called "Custom_UpdateReporting" below the default SCCM reporting folder. My sitecode is P11, so the default folder is called "ConfigMgr_P11".
+The folder were the reports should be placed in. I created a folder called "Custom_UpdateReporting" below the default MECM reporting folder. My sitecode is P11, so the default folder is called "ConfigMgr_P11".
 Like this for example: "ConfigMgr_P11/Custom_UpdateReporting"
 Use "/"" instead of "\"" because it's a website
 
 .PARAMETER TargetDataSourcePath
-The path should point to the default ConfigMgr datas ource. 
+The path should point to the default ConfigMgr/MECM data source. 
 In my case the Sitecode is P11 and the default data source is therefore in the folder "ConfigMgr_P11" and has the ID "{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}"
 The path with the default folder is required. Like this for example: "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}""
 Use "/"" instead of "\"" because it's a website

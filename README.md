@@ -1,6 +1,6 @@
 # Hi, Jonas here! 
 Or as we say in the north of Germany: **"Moin Moin!"**<br>
-I am a Microsoft Premier Field Engineer (PFE) based in Hamburg and a while back (years in fact) I was asked to analyze the update compliance status of a customers SCCM (ConfigMgr/MECM) environment. <br>
+I am a Microsoft Premier Field Engineer (PFE) based in Hamburg and a while back (years in fact) I was asked to analyze the update compliance status of a SCCM/ConfigMgr/MECM environment. (I will use the current name: "Microsoft Endpoint Configuration Manager" (MECM) later on)<br>
 I used different reports to look for clients not installing the necessary updates, but it was time consuming and I was missing a general overview with some meanigful KPIs. I ended up with a comprehensive SQL query and an Excel sheet, but changed that to a SQL Server Reporting Services (SSRS) report and made that available to several departments in the organization later on.<br>
 As mentioned before, it's been a while since I created the report and if I would start now it would be a PowerBI version or I would simply grab one of the PowerBI reports available right now, but since I still use the report and find it quite helpful, I decided to share that with the rest of the world.
 
@@ -15,7 +15,7 @@ If you're just looking for the SQL statement behind the report, copy the query f
 - The report will also count updates deployed as "available" and is not made to just focus on updates deployed as "required"
 - The report consists of multiple KPIs to indicate the update compliance or update/client health state and should give you an overview from different viewpoints to help identify problematic systems or a flaw in your patch strategy. 
 - The report will use data from the WMI class Win32_Quickfixengineering which needs to be enabled in the hardware inventory client settings. The class is only used to determine the last installation of A security update to identify systems which seem to be fine, but have never installed anything.
-- The report is also using the LastLogonTimeStamp from AD System Discovery to visually show systems which have not logged on to the domain in a while and which might be disposed already and could be deleted from the SCCM database. If you don't use AD system discovery the report will show all systems of the specified collection as not compliant in the pie chart "Last ADDS logon" (12).
+- The report is also using the LastLogonTimeStamp from AD System Discovery to visually show systems which have not logged on to the domain in a while and which might be disposed already and could be deleted from the MECM database. If you don't use AD system discovery the report will show all systems of the specified collection as not compliant in the pie chart "Last ADDS logon" (12).
   - AD system discovery is no hard requirement to run the report
 - The report does not show historical data and will always show the current status. So if you change a deployment in the middle of the month, the compliance percentage will drop almost immediately
 - I have defined "compliant" to be a system which has:
@@ -51,12 +51,12 @@ I used different KPIs to measure update compliance and the following report comb
 | 5      |  Updates approved     | The green bar will indicate that all the security and critical updates each system needs are deployed and could be installed by the system. <br> The yellow bar indicates systems which are missing security and critical updates which are currently not deployed to the systems. <br> It could mean that your update group is simply missing some important updates, which should be deployed. <br> You can click on the yellow bar to get a list of the updates missing for the systems in the chosen collection/s.          |
 | 6      |Last Rollup Installed       | Green means the system has either the last or the current rollup installed. <br> Either the cumulative update or the Security Monthly Quality Rollup like this: <br> _2020-01 Cumulative Update for Windows%_ <br> _2020-01 Security Monthly Quality Rollup%_ <br> <br>Yellow means, the system is missing the rollup of the last month. <br> Since Microsoft is releasing updates with a year and date prefix, it is easy to determine the rollup of a given month by just that prefix. Like 2020-01 for the January rollup of 2020. <br> Click either on the green bar to get a sub-report which shows a list of compliant systems or the yellow bar to get a list of non compliant systems.            |
 | 7      | Current Rollup Installed     | Green means the system has the current rollup installed. <br> Either the cumulative update or the Security Monthly Quality Rollup like this: <br> _2020-02 Cumulative Update for Windows%_ <br> _2020-02 Security Monthly Quality Rollup%_  <br> <br> Yellow means, the system is missing the current rollup. <br>Click either on the green bar to get a sub-report which shows a list of compliant systems or the yellow bar to get a list of non compliant systems.  <br> <br> Keep in mind that the green bar depends on when you open up the report. So if you want to report the compliance for lets say January, but you open up the report the 1st of February, then the current rollup bar will be using February as the current month and should only show yellow. <br> In that case the "Last Rollup Installed" is a good indicator, because it will show the rollup compliance based on January.            |
-| 8      | Reboot pending      | Green means there is no reboot pending. <br> Yellow means, the system needs a reboot. Since the data is coming from the SCCM client via fast channel and not via hardware inventory or other method, the status should update quite fast.  <br>Click on the yellow bar to get to a sub-report of systems in need for a reboot.           |
+| 8      | Reboot pending      | Green means there is no reboot pending. <br> Yellow means, the system needs a reboot. Since the data is coming from the MECM client via fast channel and not via hardware inventory or other method, the status should update quite fast.  <br>Click on the yellow bar to get to a sub-report of systems in need for a reboot.           |
 | 9      |   WSUS-Scan Error    |  Green means there is no problem with the WSUS client scanning for updates. <br> Yellow means, the system reported a WSUS client scan error and the WSUS client should be checked. <br> The WindowsUpdate.log is a good starting point. <br> Click on the yellow bar to get to a sub-report of systems with a wsus client scan error.           |
 | 10     | Last Update Installation      |   The pie chart is using data from Win32_QuickfixEngineering and is divided into three parts. <br> Group A (green) systems were the last security update was installed in the current month. <br>	Group B (yellow) systems were the last security update was installed in the last month.<br>Group C (red) systems were the last security update was installed before two or more month.          |
 | 11     | Last Reboot      |  The pie chart is using data from hardware inventory and is divided into three parts. <br>Group A (green) systems were the last reboot was in the current month. <br>Group B (yellow) systems were the last reboot was in the last month. <br>Group C (red) systems were the last reboot was before two or more month           |
 | 12     | Last ADDS Login      | The pie chart is using data from AD system discovery and is divided into three parts. <br> Group A (green) systems were the last logon in AD was in the current month. <br>	Group B (yellow) systems were the last logon in AD was in the last month. <br>Group C (red) systems were the last logon in AD was before two or more month            |
-| 13     | Last SCCM Policy request      |  The pie chart is using default SCCM data and is divided into three parts. <br>	Group A (green) systems were the last policy request was in the current month. <br>	Group B (yellow) systems were the last policy request was in the last month. <br>Group C (red) systems were the last policy request was before two or more month           |
+| 13     | Last SCCM Policy request      |  The pie chart is using default MECM data and is divided into three parts. <br>	Group A (green) systems were the last policy request was in the current month. <br>	Group B (yellow) systems were the last policy request was in the last month. <br>Group C (red) systems were the last policy request was before two or more month           |
 | 14     |  Top 10 systems with missing updates     | A list of the top 10 systems with the most missing updates. You might want to check those systems first.<br> I also tried the top 10 by month since last security update installation, but that list mostly contained systems which are decommissioned or off for a while, so I changed it to most missing updates.  |
 
 
@@ -71,13 +71,13 @@ This is an example of all the uncompliant systems from the first bar in the dash
 |----|-------------------------|----------------------------------|
 | 1      |  Name |   Name of the system |
 | 2      |  OSType |   OS name coming from hardware inventory |
-| 3      |  Client Version |   The SCCM client version, which should normally be the same for all systems |
+| 3      |  Client Version |   The MECM client version, which should normally be the same for all systems |
 | 4      |  WSUSVersion |  The WSUS client version, which should be the same for each OS type |
 | 5      |  Defender Pattern |  The currently installed Defender pattern version. <br> Just as reference. A very old version can also indicate a software update problem. <br> Should be empty if you're not using Defender as your AntiVirus solution.  |
-| 6      |  Pending Reboot |  Will show yes if a reboot is pending. The type of reboot can be found in the ConfigMgr/MECM console in the "Pending Restart" column.  <br> (You might need to add the column first)|
-| 7      |  Days since last online |   The column is using the last time the ConfigMgr/MECM client requested a policy. <br> If no data is available the value will be 999 <br>A greater value might explain a missing update, because the client is off or not working anymore and not capable of installing updates.|
+| 6      |  Pending Reboot |  Will show yes if a reboot is pending. The type of reboot can be found in the MECM console in the "Pending Restart" column.  <br> (You might need to add the column first)|
+| 7      |  Days since last online |   The column is using the last time the MECM client requested a policy. <br> If no data is available the value will be 999 <br>A greater value might explain a missing update, because the client is off or not working anymore and not capable of installing updates.|
 | 8      |  Days since last AADSLogon |   The column is using the "LastLogonTimeStamp" from "AD System Discovery"<br> If no data is available the value will be 999 <br> A greater value might explain a missing update, because the client is off or not working anymore or simply has been disposed and is not capable of installing updates. |
-| 9      |  Days Since Last Boot |   This column is using hardware inventory data to calculate the last time the system was booted. <br> Note: If the reboot is older then ~30 days, this might indicate a problem, because the system should have been rebooted by the SCCM client after the update installation if you allow that to happen. <br> If no data is available the value will be 999 <br> A greater value might explain a missing update, because the client is off or not working anymore or simply has been disposed and is not capable of installing updates.  |
+| 9      |  Days Since Last Boot |   This column is using hardware inventory data to calculate the last time the system was booted. <br> Note: If the reboot is older then ~30 days, this might indicate a problem, because the system should have been rebooted by the MECM client after the update installation if you allow that to happen. <br> If no data is available the value will be 999 <br> A greater value might explain a missing update, because the client is off or not working anymore or simply has been disposed and is not capable of installing updates.  |
 | 10      |  Month Since Last Update Install |   This column is using data from Win32_Quickfixengineering and is either an indicator of missing hardware inventory or an indication of an update installation problem. <br> The value will be shown in red if it is greater or equal to two month. |
 | 11     |  Missing Updates All |   Count of all missing updates of all possible update categories for that system not just the ones that are deployed.  |
 | 12      |  Missing updates Approved |   This is the most important column and shows the count of missing updates which are deployed to the system. <br> The value will be shown in red if it is greater or equal to one. |
@@ -96,15 +96,13 @@ The search looks like this: SEARCHSTRING
 
 The sub-report is pre-filtered to only show "Deployed and missing updates", but the filter can be ajusted to show: "Not deployed but missing" or just "All Updates per device" to get the full list.
 
-# How to subscribe to a report
-LOREM IPSUM
 
 # How to install
 1. Make sure you have enabled **Win32_Quickfixengineering** in the client settings for hardware inventory
 1. You could also use AD System Discovery to have further data, but that's no hard requirement. 
 1. Either clone the repository or download the whole content.
 1. Copy the whole contentn on the SQL Server Reporting Services Server (SSRS) 1. Create a new folder on the report server website were the reports should be imported to.
-   1. The folder should be under the normal configmgr folder, but can also be at the root level of your Reporting Services Server. But keep in mind that report subscriptions are only visible in the SCCM console, if the report, you have subscribed for, is below the normal configMgr folder. <br> The subscription will not be visible in the SCCM console if the report was placed at the root level.
+   1. The folder should be under the normal MECM folder, but can also be at the root level of your Reporting Services Server. But keep in mind that report subscriptions are only visible in the MECM console, if the report, you have subscribed for, is below the normal MECM folder. <br> The subscription will not be visible in the MECM console if the report was placed at the root level.
 1. Start a PowerShell session as admin. 
 	a. The user running PowerShell also needs to have admin rights on the SQL Reporting Services Server in order to upload the reports
 1. Change the directory to the folder were the import script **"Import-SSRSReports.ps1"** can be found.
@@ -172,7 +170,7 @@ PARAMETERS
         Accept wildcard characters?  false
         
     -TargetFolderPath <String>
-        The folder were the reports should be placed in. I created a folder called "Custom_UpdateReporting" below the default SCCM reporting folder. My sitecode is P11, so the default folder is called "ConfigMgr_P11".
+        The folder were the reports should be placed in. I created a folder called "Custom_UpdateReporting" below the default MECM reporting folder. My sitecode is P11, so the default folder is called "ConfigMgr_P11".
         Like this for example: "ConfigMgr_P11/Custom_UpdateReporting"
         Use '/' instead of '\' because it's a website
         
@@ -183,7 +181,7 @@ PARAMETERS
         Accept wildcard characters?  false
         
     -TargetDataSourcePath <String>
-        The path should point to the default ConfigMgr datas ource. 
+        The path should point to the default ConfigMgr/MECM data source. 
         In my case the Sitecode is P11 and the default data source is therefore in the folder "ConfigMgr_P11" and has the ID "{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}"
         The path with the default folder is required. Like this for example: "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}""
         Use "/"" instead of "\"" because it's a website
@@ -289,3 +287,5 @@ RELATED LINKS
 # Some tipps
 
 LOREM IPSUM
+
+How to subscribe to a report
