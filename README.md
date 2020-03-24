@@ -289,3 +289,15 @@ RELATED LINKS
 LOREM IPSUM
 
 How to subscribe to a report
+
+
+# Additional report
+Also a while ago I created a report to compare the patch status of a maximum of six systems which will also be upload to your SSRS if you run the install script. It shopuld just help to have a fast and simple way to spot differences. <br> The report has a filter to limit the amount of systems returned by name and you can choose a maximum of six systems to compare them. You could also choose to only view required updates to limit the view and complexity of the report. 
+
+|Name|Description|
+|-----|----|
+|Inst| Means the update is "Installed"|
+|Targ| Means the update is "Targeted" / deployed to the system |
+|Req| Means the update is "Required" by the system |
+
+![Update comparison report](/.attachments/UpdateReporting004.PNG)
