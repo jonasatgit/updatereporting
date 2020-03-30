@@ -109,6 +109,34 @@ param(
 $cleanFolder = "$reportSourcePath\SourceFiles"
 $workFolder = "$reportSourcePath\work"
 
+# not using validatepattern to genereate nice error messages
+if($ReportServerUri -notmatch '^[a-z0-9\./:\{\}\-_]+$')
+{
+    Write-host "Please use slash `"/`" instead of backslash `"\`" for parameter `"ReportServerUri`". Parameter needs to match regex: '^[a-z0-9\./:\{\}\-_]+$'" -ForegroundColor Yellow
+    Write-host $ReportServerUri -ForegroundColor Yellow
+    Write-host "Will try to fix URL..." -ForegroundColor Green
+    $ReportServerUri = $ReportServerUri.Replace('\','/')
+    Write-host $ReportServerUri -ForegroundColor Green
+}
+
+if($TargetFolderPath -notmatch '^[a-z0-9\./:\{\}\-_]+$')
+{
+    Write-host "Please use slash `"/`" instead of backslash `"\`" for parameter `"TargetFolderPath`". Parameter needs to match regex: '^[a-z0-9\./:\{\}\-_]+$'" -ForegroundColor Yellow
+    Write-host $TargetFolderPath -ForegroundColor Yellow
+    Write-host "Will try to fix URL..." -ForegroundColor Green
+    $TargetFolderPath = $TargetFolderPath.Replace('\','/')
+    Write-host $TargetFolderPath -ForegroundColor Green
+}
+
+if($TargetDataSourcePath -notmatch '^[a-z0-9\./:\{\}\-_]+$')
+{
+    Write-host "Please use slash `"/`" instead of backslash `"\`" for parameter `"TargetDataSourcePath`". Parameter needs to match regex: '^[a-z0-9\./:\{\}\-_]+$'" -ForegroundColor Yellow
+    Write-host $TargetDataSourcePath -ForegroundColor Yellow
+    Write-host "Will try to fix URL..." -ForegroundColor Green
+    $TargetDataSourcePath = $TargetDataSourcePath.Replace('\','/')
+    Write-host $TargetDataSourcePath -ForegroundColor Green
+}
+
 if(-not (Test-Path $cleanFolder))
 {
     Write-Host "Folder `"$($cleanFolder)`" not found!"  -ForegroundColor Yellow
@@ -177,7 +205,7 @@ if($reportsToWorkWith.Count -gt 0)
                     $itemType = "Report"
                 }
                 $warnings = $null
-                $report = $ReportServerConnection.CreateCatalogItem(
+                $null = $ReportServerConnection.CreateCatalogItem(
                     $itemType,        # Catalog item type: Report, Model, Dataset, Component, Resource, and DataSource
                     $reportName,      # Name of the item
                     $targetPath,      # Destination folder
