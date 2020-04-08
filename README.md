@@ -1,7 +1,7 @@
 # Hi, Jonas here! 
 Or as we say in the north of Germany: **"Moin Moin!"**<br>
-I am a Microsoft Premier Field Engineer (PFE) based in Hamburg and a while back (years in fact) I was asked to analyze the update compliance status of a SCCM/ConfigMgr/MECM environment. (I will use the current name: "Microsoft Endpoint Configuration Manager" (MECM) later on)<br>
-I used different reports to look for clients not installing the necessary updates, but it was time consuming and I was missing a general overview with some meaningful KPIs. I ended up with a comprehensive SQL query and an Excel sheet, but changed that to a SQL Server Reporting Services (SSRS) report and made that available to several departments in the organization later on.<br>
+I am a Microsoft Premier Field Engineer (PFE) based in Hamburg and a while back (years in fact) I was asked to analyze the update compliance status of a SCCM/ConfigMgr/MECM environment. (I will use the current name: "Microsoft Endpoint Configuration Manager" (MECM) in the rest of the blog)<br>
+I used different reports to look for clients not installing the necessary updates, but it was time consuming and I was missing a general overview with some meaningful KPIs. I ended up with a comprehensive SQL query and an Excel sheet, but changed that to a SQL Server Reporting Services (SSRS) report and made that available to several departments in the organization.<br>
 As mentioned before, it's been a while since I created the report and if I would start now it would be a PowerBI version or I would simply grab one of the PowerBI reports available right now, but since I still use the report and find it quite helpful, I decided to share that with the rest of the world.
 
 # TL/DR
@@ -9,37 +9,19 @@ The following report should help you identify update problems within a specific 
 The installation guide for the custom update reporting can be found at the end of this post but you should at least start with the "Some key facts and prerequisites" section.<br>
 If you're just looking for the SQL statement behind the report, copy the query from the "UpdatesSummary.rsd" file and use it in SQL directly. 
 
-# Some key facts and prerequisites:
-- The report is made to show the update compliance status of members of a collection or multiple collections no matter what type of systems are a member or which or how many updates are deployed to each of the systems.
-- If you have a simple group of systems and deploy every needed update with one deployment, the deployment status might be enough, but if you have a more complex setup, you might want to see details based on a specific group of systems no matter if, how or how many updates are deployed to each system.
-- The report will also count updates deployed as "available" and is not made to just focus on updates deployed as "required"
-- The report consists of multiple KPIs to indicate the update compliance or update/client health state and should give you an overview from different viewpoints to help identify problematic systems or a flaw in your patch strategy. 
-- The report will use data from the WMI class Win32_Quickfixengineering which needs to be enabled in the hardware inventory client settings. The class is only used to determine the last installation of A security update to identify systems which seem to be fine, but have never installed anything.
-- The report is also using the LastLogonTimeStamp from AD System Discovery to visually show systems which have not logged on to the domain in a while and which might be disposed already and could be deleted from the MECM database. If you don't use AD system discovery the report will show all systems of the specified collection as not compliant in the pie chart "Last ADDS logon" (12).
-  - AD system discovery is no hard requirement to run the report
-- The report does not show historical data and will always show the current status. So if you change a deployment in the middle of the month, the compliance percentage will drop almost immediately
-- I have defined "compliant" to be a system which has:
-   - all the updates installed which are deployed
-   - the last security update installation in Win32_Quickfixengineering was in the current month (not necessarily the monthly security rollup, just one security update)
-- The update report has multiple sub-reports to drill further down and each report will use the same dataset
-- The SQL query of the dataset is made to filter out Defender Update Deployments, because they normally will be changed every x hours and could interfere with the overall compliance state and should be monitored with other reports. 
-- The 2nd Level sub-report per system will also show Defender updates, even if they are filtered out on the dashboard
-- The SQL query might run long in bigger environments (<10.000 clients) depending on SQL performance and SQL maintenance
-- There are several sub-reports with the same look and feel, because it was simpler to copy the report and just change the filter for the specific need.
-- Each sub-report will be hidden in SSRS to avoid direct usage and keep the folder as clean as possible.
-- The reports are made on SSRS 2017. I haven't tested other versions. 
 
 # The report explained:
 The main report dashboard looks like this:
 
 ![Update dashboard](/.attachments/UpdateReporting001-N.PNG)
 
-The report has basically two sub-reports. One to show you a list of systems in a specific state and one for a single system view and a list of missing updates.
+I used different KPIs to measure update compliance and the report combines all that into one dashboard. The main KPI is the first bar and all the others should simply help identify patch problems or flaws in your deployment strategy.  
+
+The report also has two sub-reports. One to show you a list of systems in a specific state (1st sub-report) and one for a list of missing updates for a single system (2nd sub-report).
 
 ![Update dashboard levels](/.attachments/UpdateReporting001-level.PNG)
 
-
-I used different KPIs to measure update compliance and the following report combines all that into one dashboard. The main KPI is the first bar and all the others should simply help identify patch problems or flaws in your deployment strategy.  
+If you click on a different graph, basically the same sub-report will be opened, but with a list of systems in that specific state. 
 
 
 | Nr | Name                    | Description |
@@ -60,7 +42,7 @@ I used different KPIs to measure update compliance and the following report comb
 | 14     |  Top 10 systems with missing updates     | A list of the top 10 systems with the most missing updates. You might want to check those systems first.<br> I also tried the top 10 by month since last security update installation, but that list mostly contained systems which are decommissioned or off for a while, so I changed it to most missing updates.  |
 
 
-## Sub-reports
+## 1st sub-reports (list of systems)
 
 Almost each bar or pie chart links to a sub-report to show compliance state of that subset of systems to give you better visibility.
 This is an example of all the uncompliant systems from the first bar in the dashboard and is basically how the Excel list in the early days looked like:
@@ -87,7 +69,7 @@ This is an example of all the uncompliant systems from the first bar in the dash
 
 
 
-# 2nd Level sub-report per system
+# 2nd sub-report (per system)
 If you click on the number of missing updates in the column "missing updates approved" a per system sub-report will be opened which will only show the specific missing updates for the selected system.
 The report also shows installations errors if any happened.  Each error will link to a bing search with the hex value of the error.
 The search string looks like this: ***https://www.bing.com/search?q=error+0x80070005***
@@ -114,6 +96,25 @@ The search string looks like this: ***https://www.bing.com/search?q=error+0x8007
 |13|Error Time| The date and time an installation error happened.|
 |14|Las Error Code|Will be empty if no error occurred. <br> Will contain the integer value of the last error. <br> If you click on the error a bing search will open as mentioned above.|
 
+# Some key facts and prerequisites:
+- The report is made to show the update compliance status of members of a collection or multiple collections no matter what type of systems are a member or which or how many updates are deployed to each of the systems.
+- If you have a simple group of systems and deploy every needed update with one deployment, the deployment status might be enough, but if you have a more complex setup, you might want to see details based on a specific group of systems no matter if, how or how many updates are deployed to each system.
+- The report will also count updates deployed as "available" and is not made to just focus on updates deployed as "required"
+- The report consists of multiple KPIs to indicate the update compliance or update/client health state and should give you an overview from different viewpoints to help identify problematic systems or a flaw in your patch strategy. 
+- The report will use data from the WMI class Win32_Quickfixengineering which needs to be enabled in the hardware inventory client settings. The class is only used to determine the last installation of A security update to identify systems which seem to be fine, but have never installed anything.
+- The report is also using the LastLogonTimeStamp from AD System Discovery to visually show systems which have not logged on to the domain in a while and which might be disposed already and could be deleted from the MECM database. If you don't use AD system discovery the report will show all systems of the specified collection as not compliant in the pie chart "Last ADDS logon" (12).
+  - AD system discovery is no hard requirement to run the report
+- The report does not show historical data and will always show the current status. So if you change a deployment in the middle of the month, the compliance percentage will drop almost immediately
+- I have defined "compliant" to be a system which has:
+   - all the updates installed which are deployed
+   - the last security update installation in Win32_Quickfixengineering was in the current month (not necessarily the monthly security rollup, just one security update)
+- The update report has multiple sub-reports to drill further down and each report will use the same dataset
+- The SQL query of the dataset is made to filter out Defender Update Deployments, because they normally will be changed every x hours and could interfere with the overall compliance state and should be monitored with other reports. 
+- The 2nd Level sub-report per system will also show Defender updates, even if they are filtered out on the dashboard
+- The SQL query might run long in bigger environments (<10.000 clients) depending on SQL performance and SQL maintenance
+- There are several sub-reports with the same look and feel, because it was simpler to copy the report and just change the filter for the specific need.
+- Each sub-report will be hidden in SSRS to avoid direct usage and keep the folder as clean as possible.
+- The reports are made on SSRS 2017. I haven't tested other versions. 
 
 # How to install
 1. Make sure you have enabled **Win32_Quickfixengineering** in the client settings for hardware inventory
@@ -130,7 +131,7 @@ The search string looks like this: ***https://www.bing.com/search?q=error+0x8007
 	 1. The script will then simply replace some values with the parameter values you provided
 	 1. The script will then upload the datasets and the reports to the server and the folder you provided as parameters
 	 1. The files in the **"work"** folder will not be deleted and can be used as a backup or for manual uploads if necessary and will contain the data you provided as parameters to the script
-	 1. **IMPORTANT:** If you need to re-run the script, delete the folder with all it's content first an re-create the folder!. It is possible to overwrite the reports automatically, but I faced some issues with some settings not being overwritten as desired and I don't use that method anymore. That's why everything should be deleted first. 
+	 1. **IMPORTANT:** If you need to re-run the script, delete the folder with all its content first an re-create the folder! It is possible to overwrite the reports automatically, but I faced some issues with some settings not being overwritten as desired and I don't use that method anymore. That's why everything should be deleted first. 
 
 
 | Parameter | Required  | Example value                    |Description |
