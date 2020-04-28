@@ -61,13 +61,13 @@ None. You cannot pipe objects to Import-SSRSReports.ps1
 Just normal console output. Nothing to work with. 
 
 .EXAMPLE
-PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath = "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}"
+PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}"
 
 .EXAMPLE
-PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath = "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -Upload $false
+PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -Upload $false
 
 .EXAMPLE
-PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath = "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -DefaultCollection "P1100012" -DefaultCollectionFilter "All Servers of Contoso%"
+PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -DefaultCollection "P1100012" -DefaultCollectionFilter "All Servers of Contoso%"
 
 .LINK
 https://github.com/jonasatgit/updatereporting
@@ -112,29 +112,35 @@ $workFolder = "$reportSourcePath\work"
 # not using validatepattern to genereate nice error messages
 if($ReportServerUri -notmatch '^[a-z0-9\./:\{\}\-_]+$')
 {
-    Write-host "Please use slash `"/`" instead of backslash `"\`" for parameter `"ReportServerUri`". Parameter needs to match regex: '^[a-z0-9\./:\{\}\-_]+$'" -ForegroundColor Yellow
-    Write-host $ReportServerUri -ForegroundColor Yellow
-    Write-host "Will try to fix URL..." -ForegroundColor Green
-    $ReportServerUri = $ReportServerUri.Replace('\','/')
-    Write-host $ReportServerUri -ForegroundColor Green
+    Write-host "Parameter `"ReportServerUri`" needs to match regex: '^[a-z0-9\./:\{\}\-_]+$'" -ForegroundColor Yellow
+    Write-host "Please use slash `"/`" instead of backslash `"\`" for parameter `"ReportServerUri`"" -ForegroundColor Yellow
+    Write-Host "Run `"Get-Help .\Import-SSRSReports.ps1 -Full`" to get help" -ForegroundColor Yellow
+    Write-Host " "
+    Write-Host "Get-Help .\Import-SSRSReports.ps1 -Examples"
+    Get-Help .\Import-SSRSReports.ps1 -Examples
+    break
 }
 
 if($TargetFolderPath -notmatch '^[a-z0-9\./:\{\}\-_]+$')
 {
-    Write-host "Please use slash `"/`" instead of backslash `"\`" for parameter `"TargetFolderPath`". Parameter needs to match regex: '^[a-z0-9\./:\{\}\-_]+$'" -ForegroundColor Yellow
-    Write-host $TargetFolderPath -ForegroundColor Yellow
-    Write-host "Will try to fix URL..." -ForegroundColor Green
-    $TargetFolderPath = $TargetFolderPath.Replace('\','/')
-    Write-host $TargetFolderPath -ForegroundColor Green
+    Write-host "Parameter `"TargetFolderPath`" needs to match regex: '^[a-z0-9\./:\{\}\-_]+$'" -ForegroundColor Yellow
+    Write-host "Please use slash `"/`" instead of backslash `"\`" for parameter `"TargetFolderPath`"" -ForegroundColor Yellow
+    Write-Host "Run `"Get-Help .\Import-SSRSReports.ps1 -Full`" to get help" -ForegroundColor Yellow
+    Write-Host " "
+    Write-Host "Get-Help .\Import-SSRSReports.ps1 -Examples"
+    Get-Help .\Import-SSRSReports.ps1 -Examples
+    break
 }
 
 if($TargetDataSourcePath -notmatch '^[a-z0-9\./:\{\}\-_]+$')
 {
-    Write-host "Please use slash `"/`" instead of backslash `"\`" for parameter `"TargetDataSourcePath`". Parameter needs to match regex: '^[a-z0-9\./:\{\}\-_]+$'" -ForegroundColor Yellow
-    Write-host $TargetDataSourcePath -ForegroundColor Yellow
-    Write-host "Will try to fix URL..." -ForegroundColor Green
-    $TargetDataSourcePath = $TargetDataSourcePath.Replace('\','/')
-    Write-host $TargetDataSourcePath -ForegroundColor Green
+    Write-host "Parameter `"TargetDataSourcePath`" needs to match regex: '^[a-z0-9\./:\{\}\-_]+$'" -ForegroundColor Yellow
+    Write-host "Please use slash `"/`" instead of backslash `"\`" for parameter `"TargetDataSourcePath`"" -ForegroundColor Yellow
+    Write-Host "Run `"Get-Help .\Import-SSRSReports.ps1 -Full`" to get help" -ForegroundColor Yellow
+    Write-Host " "
+    Write-Host "Get-Help .\Import-SSRSReports.ps1 -Examples"
+    Get-Help .\Import-SSRSReports.ps1 -Examples
+    break
 }
 
 if(-not (Test-Path $cleanFolder))

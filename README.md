@@ -5,7 +5,7 @@ I used different reports to look for clients not installing the necessary update
 As mentioned before, it's been a while since I created the report and if I would start now it would be a PowerBI version or I would simply grab one of the PowerBI reports available right now, but since I still use the report and find it quite helpful, I decided to share that with the rest of the world.
 
 # TL/DR
-The following report should help you identify update problems within a specific collection and is designed to work well for a few thousand clients. If you have more then 10k systems, then the query might run long and you might need to improve it or run it not within business hours to show results.<br>
+The following report should help you identify update problems within a specific collection and is designed to work well for a few thousand clients. The query might run longer in bigger environments and you might need to improve it or run it not within business hours to show results.<br>
 The installation guide for the custom update reporting can be found at the end of this post but you should at least start with the "Some key facts and prerequisites" section.<br>
 If you're just looking for the SQL statement behind the report, copy the query from the "UpdatesSummary.rsd" file and use it in SQL directly. 
 
@@ -71,8 +71,8 @@ This is an example of all the uncompliant systems from the first bar in the dash
 
 # 2nd sub-report (per system)
 If you click on the number of missing updates in the column "missing updates approved" a per system sub-report will be opened which will only show the specific missing updates for the selected system.
-The report also shows installations errors if any happened.  Each error will link to a bing search with the hex value of the error.
-The search string looks like this: ***https://www.bing.com/search?q=error+0x80070005***
+The report also shows installations errors if any happened. <br> Each error will link to a Bing search with the hex value of the error.
+The search string looks like this: <br> ***https://www.bing.com/search?q=error+0x80070005***
 <br>The report is basically a copy of one of the default MECM reports with some adjustments. 
 
 ![Update sub-report per system](/.attachments/UpdateReporting003-N.PNG)
@@ -111,7 +111,7 @@ The search string looks like this: ***https://www.bing.com/search?q=error+0x8007
 - The update report has multiple sub-reports to drill further down and each report will use the same dataset
 - The SQL query of the dataset is made to filter out Defender Update Deployments, because they normally will be changed every x hours and could interfere with the overall compliance state and should be monitored with other reports. 
 - The 2nd Level sub-report per system will also show Defender updates, even if they are filtered out on the dashboard
-- The SQL query might run long in bigger environments (<10.000 clients) depending on SQL performance and SQL maintenance
+- The SQL query might run long in bigger environments depending on SQL performance and SQL maintenance
 - There are several sub-reports with the same look and feel, because it was simpler to copy the report and just change the filter for the specific need.
 - Each sub-report will be hidden in SSRS to avoid direct usage and keep the folder as clean as possible.
 - The reports are made on SSRS 2017. I haven't tested other versions. 
@@ -126,7 +126,7 @@ The search string looks like this: ***https://www.bing.com/search?q=error+0x8007
 1. Start a PowerShell session as admin. 
 	1. The user running PowerShell also needs to have admin rights on the SQL Reporting Services Server in order to upload the reports
 1. Change the directory to the folder were the import script **"Import-SSRSReports.ps1"** can be found.
-1. Start the script **"Import-SSRSReports.ps1"** with the appropriate parameters (see below)
+1. Start the script **".\Import-SSRSReports.ps1"** with the appropriate parameters (see below)
    1. The script will copy each rdl and rsd file from the **"Sourcefiles"** folder to a new **"work"** folder in the same directory the script resides.
 	 1. The script will then simply replace some values with the parameter values you provided
 	 1. The script will then upload the datasets and the reports to the server and the folder you provided as parameters
@@ -140,7 +140,7 @@ The search string looks like this: ***https://www.bing.com/search?q=error+0x8007
 | TargetFolderPath | Yes  | ConfigMgr_P11/Custom_UpdateReporting |The folder were the reports should be placed in. I created a folder called "Custom_UpdateReporting" below the default MECM reporting folder. My sitecode is P11, so the default folder is called "ConfigMgr_P11". <br> Like this for example: "ConfigMgr_P11/Custom_UpdateReporting" <br> **IMPORTANT:** Use '/' instead of '\' because it's a website.  |
 | TargetDataSourcePath | Yes  | ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602} | The path should point to the default ConfigMgr/MECM data source. <br> In my case the Sitecode is P11 and the default data source is therefore in the folder "ConfigMgr_P11" and has the ID "{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" <br> The path with the default folder is required. Like this for example: "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" <br> **IMPORTANT:** Use '/' instead of '\' because it's a website. |
 | DefaultCollection | No  | SMS00001 | The report can show data of a default collection when it will be run, so that you don't need to provide a collection name each time you run the report. <br> The default value is "SMS00001" which is the CollectionID of "All Systems", which might not be the best choice for bigger environments. report. <br> **IMPORTANT:**  |
-| DefaultCollectionFilter | No  | All% | The filter is used to find the collection you are interested in and the value needs to match the name of the collection you choose to be the default collection for the parameter "defaultCollection". <br> In my case "All%" or All Syst% or "Servers%" to get the "Servers of the environment" collection for  example. |
+| DefaultCollectionFilter | No  | All% | The filter is used to find the collection you are interested in and the value needs to match the name of the collection you choose to be the default collection for the parameter "defaultCollection". <br> In my case "All%" or "All Syst%" or "Servers%" to get the "Servers of the environment" collection for  example. |
 | DoNotHideReports | No  | 'Software Updates Compliance - Overview','Compare Update Compliance' |Array of reports which should not be set to hidden. You should not use the parameter unless you really want more reports to be visible.|
 | Upload | No  | $true |If set to $false the reports will not be uploaded. That might be helpful, if you do not have the rights to upload and need to give the files to another person for example. In that case, just use the report files in the work folder |
 | UseViewForDataset | No  | $false |All reports can either use a dataset called "UpdatesSummary", which is the default and will execute the full sql query right from the Reporting Services Server, or a dataset called "UpdatesSummaryView" which will select from a sql view which needs to be created first. (I will not explain that process in detail) <br> $false will use the default dataset and $true will use the dataset using a sql view. |
