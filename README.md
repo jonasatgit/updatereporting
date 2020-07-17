@@ -3,6 +3,7 @@ Or as we say in the north of Germany: **"Moin Moin!"**<br>
 I am a Microsoft Premier Field Engineer (PFE) based in Hamburg and a while back (years in fact) I was asked to analyze the update compliance status of a SCCM/ConfigMgr/MECM environment. (I will use the current name: "Microsoft Endpoint Configuration Manager" (MECM) in the rest of the blog)<br>
 I used different reports to look for clients not installing the necessary updates, but it was time consuming and I was missing a general overview with some meaningful KPIs. I ended up with a comprehensive SQL query and an Excel sheet, but changed that to a SQL Server Reporting Services (SSRS) report and made that available to several departments in the organization.<br>
 As mentioned before, it's been a while since I created the report and if I would start now it would be a PowerBI version or I would simply grab one of the PowerBI reports available right now, but since I still use the report and find it quite helpful, I decided to share that with the rest of the world.
+The original blog can be found here: https://techcommunity.microsoft.com/t5/premier-field-engineering/mastering-configuration-manager-patch-compliance-reporting/ba-p/1415088
 
 # TL/DR
 The following report should help you identify update problems within a specific collection and is designed to work well for a few thousand clients. The query might run longer in bigger environments and you might need to improve it or run it not within business hours to show results.<br>
