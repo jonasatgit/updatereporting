@@ -3424,20 +3424,6 @@ order by Name</CommandText>
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Name</rd:DefaultName>
-                          <ActionInfo>
-                            <Actions>
-                              <Action>
-                                <Drillthrough>
-                                  <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/_Computer Dashboard_2</ReportName>
-                                  <Parameters>
-                                    <Parameter Name="ResourceID">
-                                      <Value>=Fields!ResourceID.Value</Value>
-                                    </Parameter>
-                                  </Parameters>
-                                </Drillthrough>
-                              </Action>
-                            </Actions>
-                          </ActionInfo>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -5411,6 +5397,37 @@ order by Name</CommandText>
               <BackgroundGradientType>None</BackgroundGradientType>
             </Style>
           </Chart>
+          <Textbox Name="Textbox11">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>v2.0</Value>
+                    <Style />
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox11</rd:DefaultName>
+            <Top>30.66227cm</Top>
+            <Left>0.92766cm</Left>
+            <Height>0.60477cm</Height>
+            <Width>1.30528cm</Width>
+            <ZIndex>22</ZIndex>
+            <Style>
+              <Border>
+                <Color>White</Color>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>					  
         </ReportItems>
         <Height>316.14535mm</Height>
         <Style>
