@@ -325,7 +325,7 @@ ELSE
                                 <TextRun>
                                   <Value>=Fields!Netbios_Name0.Value</Value>
                                   <Style>
-                                    <TextDecoration>Underline</TextDecoration>
+                                    <TextDecoration>None</TextDecoration>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -333,20 +333,6 @@ ELSE
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Netbios_Name03</rd:DefaultName>
-                          <ActionInfo>
-                            <Actions>
-                              <Action>
-                                <Drillthrough>
-                                  <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/_Computer Dashboard_2</ReportName>
-                                  <Parameters>
-                                    <Parameter Name="ResourceID">
-                                      <Value>=Fields!ResourceID.Value</Value>
-                                    </Parameter>
-                                  </Parameters>
-                                </Drillthrough>
-                              </Action>
-                            </Actions>
-                          </ActionInfo>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>

@@ -67,12 +67,12 @@ PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/
 PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -Upload $false
 
 .EXAMPLE
-PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -DefaultCollection "P1100012" -DefaultCollectionFilter "All Servers of Contoso%"
+PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -DefaultCollectionID "P1100012" -DefaultCollectionFilter "All Servers of Contoso%"
 
 .LINK
 https://github.com/jonasatgit/updatereporting
 #>
-[CmdletBinding()]
+[CmdletBinding(DefaultParametersetName='None')]
 param(
 
     [parameter(Mandatory=$true)]
@@ -84,10 +84,10 @@ param(
     [parameter(Mandatory=$true)]
     [string]$TargetDataSourcePath = 'ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}',
 
-    [parameter(Mandatory=$false)]
+    [parameter(ParameterSetName = 'CollectionInfo',Mandatory=$false)]
     [string]$DefaultCollectionID = 'SMS00001',
 
-    [parameter(Mandatory=$false)]
+    [parameter(ParameterSetName = 'CollectionInfo',Mandatory=$true)]
     [string]$DefaultCollectionFilter = 'All%',
 
     [parameter(Mandatory=$false)]
@@ -156,7 +156,7 @@ if(-not (Test-Path $workFolder))
 Write-host "Copy `"$($cleanFolder)\*`" to `"$($workFolder)\`"" -ForegroundColor Green
 $null = Copy-Item -Path "$($cleanFolder)\*" -Destination "$($workFolder)\" -Force
 
-$reportsToWorkWith = Get-ChildItem -Path "$reportSourcePath\work" | Where-Object {$_.Extension -eq '.rdl' -or $_.Extension -eq '.rsd'}
+[array]$reportsToWorkWith = Get-ChildItem -Path "$reportSourcePath\work" | Where-Object {$_.Extension -eq '.rdl' -or $_.Extension -eq '.rsd'}
 Write-host "Found $($reportsToWorkWith.Count) .rdl and .rsd files in `"$reportSourcePath\work`"" -ForegroundColor Green
 if($reportsToWorkWith.Count -gt 0)
 {
@@ -220,7 +220,7 @@ if($reportsToWorkWith.Count -gt 0)
                     $null,            # Item properties
                     [ref]$warnings)   # Warnings during upload
  
-                if($warnings.count -gt 0)
+                if(-NOT($warnings -eq $null))
                 {
                     $warnings | ForEach-Object {
                         Write-Host "Warning: $($_.Message)" -ForegroundColor Yellow
