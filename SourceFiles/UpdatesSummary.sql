@@ -1,4 +1,4 @@
----SCRIPTVERSION: 202000302
+---SCRIPTVERSION: 20201103
 
 -----------------------------------------------------------------------------------------------------------------------
 ---- Disclaimer
@@ -13,6 +13,9 @@
 ---- pecuniary loss) arising out of the use of or inability to use this sample script or documentation, even
 ---- if Microsoft has been advised of the possibility of such damages.
 -----------------------------------------------------------------------------------------------------------------------
+---- Changelog:
+---- 20201103: Changed 'Windows Defender' to 'Microsoft Defender Antivirus'
+---- 20201103: Changed 'max(CASE WHEN (ISDATE(QFE.InstalledOn0) = 0' to 'max(CASE WHEN (LEN(QFE.InstalledOn0) > 10' due to language problems
 
 ----- just for testing in SQL directly
 declare @CollectionIDs as varchar(8)
@@ -27,7 +30,7 @@ DECLARE @CurrentRollupPrefix as char(7);
 SET @CurrentRollupPrefix = (SELECT convert(char(7),DATEADD(MONTH,0,GETDATE()),126)); 
 
 declare @productlist as int
-set @productlist = (select distinct CICI.CategoryInstanceID from v_CICategoryInfo CICI where CICI.CategoryInstanceName = 'Windows Defender');
+set @productlist = (select distinct CICI.CategoryInstanceID from v_CICategoryInfo CICI where CICI.CategoryInstanceName = 'Microsoft Defender Antivirus');
 
 /*
 ---- Query to filter by product
@@ -186,14 +189,14 @@ left join (
 ---- join last update installdate for security updates just as a reference to find problematic clients not installing securita updates at all
 ---- need to convert datetime for older OS from 64bit binary to datetime
 left join (
-		Select QFE.ResourceID
-       ,LastInstallTime = max(CASE WHEN (ISDATE(QFE.InstalledOn0) = 0 and QFE.InstalledOn0 != '') 
+	   Select QFE.ResourceID
+       ,LastInstallTime = max(CASE WHEN (LEN(QFE.InstalledOn0) > 10 and QFE.InstalledOn0 != '') ---- due to some older systems sending datetime as binary like this: 01cc31160e1c4bac
 								THEN CAST((CONVERT(BIGINT,CONVERT(VARBINARY(64), '0x' + QFE.InstalledOn0,1)) / 864000000000.0 - 109207) AS DATETIME) 
 							WHEN QFE.InstalledOn0 = '' 
 								THEN '01.01.1999 00:00:00'
 							ELSE QFE.InstalledOn0
 							END)
-       from v_GS_QUICK_FIX_ENGINEERING QFE ---- needs to be activated in hardwrae inventory
+       from v_GS_QUICK_FIX_ENGINEERING QFE ---- needs to be activated in hardware inventory
 	   where (QFE.Description0 = 'Security Update' or QFE.Description0 is null)
 	   group by QFE.ResourceID
 

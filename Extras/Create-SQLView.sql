@@ -27,9 +27,11 @@ create view [dbo].[zcustom_Update_ComplianceStatus] as
 ---# Support policy for manual database changes in a configuration manager environment:
 ---# https://support.microsoft.com/en-us/help/3106512/support-policy-for-manual-database-changes-in-a-configuration-manager
 ---# 
----# SCRIPTVERSION: 20200302
+---# SCRIPTVERSION: 20201103
 ---#************************************************************************************************************
-
+---- Changelog:
+---- 20201103: Changed 'Windows Defender' to 'Microsoft Defender Antivirus'
+---- 20201103: Changed 'max(CASE WHEN (ISDATE(QFE.InstalledOn0) = 0' to 'max(CASE WHEN (LEN(QFE.InstalledOn0) > 10' due to language problems
 -- SCEP and Defender Updates will be filtered out, because they will be updated more frequently
 With ExcludedUpdates (CI_ID, AssignmentID) as
 	(	
@@ -38,7 +40,7 @@ With ExcludedUpdates (CI_ID, AssignmentID) as
 		inner join v_CIAssignmentToCI CIATOCI on CIATOCI.AssignmentID = CIA.AssignmentID 
 		inner join v_CICategoryInfo CICI on CICI.Ci_ID = CIATOCI.CI_ID and CICI.CategoryInstanceID in 
 			(
-			select distinct CICI.CategoryInstanceID from v_CICategoryInfo CICI where CICI.CategoryInstanceName= 'Windows Defender'
+			select distinct CICI.CategoryInstanceID from v_CICategoryInfo CICI where CICI.CategoryInstanceName= 'Microsoft Defender Antivirus'
 			)
 
 	),
@@ -184,14 +186,14 @@ left join (
 -- join last update installdate for security updates just as a reference to find problematic clients not installing updates. QUICK_FIX_ENGINEERING needs to be activated in Hardware Inventory.
 -- need to convert datetime for older OS from 64bit binary to datetime
 left join (
-		Select QFE.ResourceID
-       ,LastInstallTime = max(CASE WHEN (ISDATE(QFE.InstalledOn0) = 0 and QFE.InstalledOn0 != '') 
+	   Select QFE.ResourceID
+       ,LastInstallTime = max(CASE WHEN (LEN(QFE.InstalledOn0) > 10 and QFE.InstalledOn0 != '') ---- due to some older systems sending datetime as binary like this: 01cc31160e1c4bac
 								THEN CAST((CONVERT(BIGINT,CONVERT(VARBINARY(64), '0x' + QFE.InstalledOn0,1)) / 864000000000.0 - 109207) AS DATETIME) 
 							WHEN QFE.InstalledOn0 = '' 
 								THEN '01.01.1999 00:00:00'
 							ELSE QFE.InstalledOn0
 							END)
-       from v_GS_QUICK_FIX_ENGINEERING QFE
+       from v_GS_QUICK_FIX_ENGINEERING QFE ---- needs to be activated in hardware inventory
 	   where (QFE.Description0 = 'Security Update' or QFE.Description0 is null)
 	   group by QFE.ResourceID
 
