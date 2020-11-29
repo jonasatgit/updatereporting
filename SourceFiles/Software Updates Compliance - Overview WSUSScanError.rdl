@@ -4,7 +4,7 @@
   <DataSets>
     <DataSet Name="ClientSecurityOverview">
       <SharedDataSet>
-        <SharedDataSetReference>/ConfigMgr_P11/Custom_UpdateReporting/UpdatesSummary</SharedDataSetReference>
+        <SharedDataSetReference>UpdatesSummary</SharedDataSetReference>
         <QueryParameters>
           <QueryParameter Name="@CollectionIDs">
             <Value>=Parameters!CollectionIDs.Value</Value>
@@ -277,7 +277,7 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox8</rd:DefaultName>
@@ -312,7 +312,7 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox10</rd:DefaultName>
@@ -347,7 +347,7 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox12</rd:DefaultName>
@@ -382,7 +382,7 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox14</rd:DefaultName>
@@ -414,7 +414,7 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox4</rd:DefaultName>
@@ -449,7 +449,7 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox16</rd:DefaultName>
@@ -484,7 +484,7 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox1</rd:DefaultName>
@@ -519,7 +519,7 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox18</rd:DefaultName>
@@ -554,7 +554,7 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox20</rd:DefaultName>
@@ -589,7 +589,7 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox22</rd:DefaultName>
@@ -624,7 +624,7 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox24</rd:DefaultName>
@@ -659,7 +659,7 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox26</rd:DefaultName>
@@ -694,7 +694,7 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox28</rd:DefaultName>
@@ -729,18 +729,7 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
-                            </Paragraph>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>(not Srv 2008)</Value>
-                                  <Style>
-                                    <FontWeight>Normal</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox30</rd:DefaultName>
@@ -775,18 +764,7 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
-                            </Paragraph>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>(not Srv 2008)</Value>
-                                  <Style>
-                                    <FontWeight>Normal</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox32</rd:DefaultName>
@@ -821,7 +799,7 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox34</rd:DefaultName>
@@ -853,13 +831,28 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!Name.Value</Value>
-                                  <Style />
                                 </TextRun>
                               </TextRuns>
-                              <Style />
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Name</rd:DefaultName>
+                          <ActionInfo>
+                            <Actions>
+                              <Action>
+                                <Drillthrough>
+                                  <ReportName>Software Updates Compliance - Per device</ReportName>
+                                  <Parameters>
+                                    <Parameter Name="FilterUpdates">
+                                      <Value>0</Value>
+                                    </Parameter>
+                                    <Parameter Name="ComputerName">
+                                      <Value>=Fields!Name.Value</Value>
+                                    </Parameter>
+                                  </Parameters>
+                                </Drillthrough>
+                              </Action>
+                            </Actions>
+                          </ActionInfo>							  
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -884,10 +877,10 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!OSType.Value</Value>
-                                  <Style />
+                                  
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>OSType</rd:DefaultName>
@@ -915,10 +908,10 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!ClientVersion.Value</Value>
-                                  <Style />
+                                  
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>ClientVersion</rd:DefaultName>
@@ -946,10 +939,10 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!WSUSVersion.Value</Value>
-                                  <Style />
+                                  
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>WSUSVersion</rd:DefaultName>
@@ -977,10 +970,10 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!WSUSScanError.Value</Value>
-                                  <Style />
+                                  
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>WSUSScanError</rd:DefaultName>
@@ -1016,10 +1009,10 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!DefenderPattern.Value</Value>
-                                  <Style />
+                                  
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>DefenderPattern</rd:DefaultName>
@@ -1052,7 +1045,7 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>PendingReboot</rd:DefaultName>
@@ -1080,10 +1073,10 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!DaysSinceLastOnline.Value</Value>
-                                  <Style />
+                                  
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>DaysSinceLastOnline</rd:DefaultName>
@@ -1111,10 +1104,10 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!DaysSinceLastAADSLogon.Value</Value>
-                                  <Style />
+                                  
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>DaysSinceLastAADSLogon</rd:DefaultName>
@@ -1142,10 +1135,10 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!DaysSinceLastBoot.Value</Value>
-                                  <Style />
+                                  
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>DaysSinceLastBoot</rd:DefaultName>
@@ -1178,7 +1171,7 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>MonthSinceLastUpdateInstall</rd:DefaultName>
@@ -1206,10 +1199,10 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!MissingUpdatesAll.Value</Value>
-                                  <Style />
+                                  
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>MissingUpdatesAll</rd:DefaultName>
@@ -1259,7 +1252,7 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>MissingUpdatesApproved</rd:DefaultName>
@@ -1309,7 +1302,7 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>LastRollupStatus</rd:DefaultName>
@@ -1342,7 +1335,7 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>CurrentRollupStatus</rd:DefaultName>
@@ -1375,7 +1368,7 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>UpdateCollections</rd:DefaultName>
@@ -1472,7 +1465,7 @@
         <TopMargin>20mm</TopMargin>
         <BottomMargin>20mm</BottomMargin>
         <ColumnSpacing>0.13cm</ColumnSpacing>
-        <Style />
+        
       </Page>
     </ReportSection>
   </ReportSections>

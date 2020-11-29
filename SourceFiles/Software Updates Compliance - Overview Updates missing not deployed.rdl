@@ -128,10 +128,26 @@ ELSE
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox149</rd:DefaultName>
+                          <ActionInfo>
+                            <Actions>
+                              <Action>
+                                <Drillthrough>
+                                  <ReportName>Software Updates Compliance - Per device</ReportName>
+                                  <Parameters>
+                                    <Parameter Name="FilterUpdates">
+                                      <Value>0</Value>
+                                    </Parameter>
+                                    <Parameter Name="ComputerName">
+                                      <Value>=Fields!Netbios_Name0.Value</Value>
+                                    </Parameter>
+                                  </Parameters>
+                                </Drillthrough>
+                              </Action>
+                            </Actions>
+                          </ActionInfo>							  
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -160,7 +176,7 @@ ELSE
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox150</rd:DefaultName>
@@ -192,7 +208,7 @@ ELSE
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox168</rd:DefaultName>
@@ -224,10 +240,8 @@ ELSE
                               <TextRuns>
                                 <TextRun>
                                   <Value>="Systems with same update missing: " &amp; First(Fields!SystemsWithSameUpdate.Value)</Value>
-                                  <Style />
                                 </TextRun>
                               </TextRuns>
-                              <Style />
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>SystemsWithSameUpdate1</rd:DefaultName>
@@ -260,7 +274,7 @@ ELSE
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox159</rd:DefaultName>
@@ -292,7 +306,7 @@ ELSE
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox169</rd:DefaultName>
@@ -329,7 +343,7 @@ ELSE
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Netbios_Name03</rd:DefaultName>
@@ -362,7 +376,7 @@ ELSE
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>DatePosted3</rd:DefaultName>
@@ -389,10 +403,10 @@ ELSE
                               <TextRuns>
                                 <TextRun>
                                   <Value>=IIf(Fields!IsSuperseded.Value = 1, "Yes", "No")</Value>
-                                  <Style />
+                                  
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>IsSuperseded</rd:DefaultName>
@@ -439,7 +453,7 @@ ELSE
                                 </Style>
                               </TextRun>
                             </TextRuns>
-                            <Style />
+                            
                           </Paragraph>
                         </Paragraphs>
                         <rd:DefaultName>Textbox152</rd:DefaultName>
@@ -484,10 +498,10 @@ ELSE
                             <TextRuns>
                               <TextRun>
                                 <Value>=Fields!Title.Value</Value>
-                                <Style />
+                                
                               </TextRun>
                             </TextRuns>
-                            <Style />
+                            
                           </Paragraph>
                         </Paragraphs>
                         <rd:DefaultName>Title2</rd:DefaultName>
@@ -577,7 +591,7 @@ ELSE
                 <TextRuns>
                   <TextRun>
                     <Value>(Superseded can be filtered above)</Value>
-                    <Style />
+                    
                   </TextRun>
                 </TextRuns>
                 <Style>
@@ -619,7 +633,7 @@ ELSE
         <TopMargin>20mm</TopMargin>
         <BottomMargin>20mm</BottomMargin>
         <ColumnSpacing>0.13cm</ColumnSpacing>
-        <Style />
+        
       </Page>
     </ReportSection>
   </ReportSections>

@@ -11,7 +11,7 @@
   <DataSets>
     <DataSet Name="ClientSecurityOverview">
       <SharedDataSet>
-        <SharedDataSetReference>/ConfigMgr_P11/Custom_UpdateReporting/UpdatesSummary</SharedDataSetReference>
+        <SharedDataSetReference>UpdatesSummary</SharedDataSetReference>
         <QueryParameters>
           <QueryParameter Name="@CollectionIDs">
             <Value>=Parameters!CollectionIDs.Value</Value>
@@ -265,7 +265,7 @@ order by Name</CommandText>
                         <Y>=Sum(IIf(Fields!UpdateAssignmentCompliance.Value = 1, 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -273,7 +273,7 @@ order by Name</CommandText>
                         <Actions>
                           <Action>
                             <Drillthrough>
-                              <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Overview all compliant</ReportName>
+                              <ReportName>Software Updates Compliance - Overview all compliant</ReportName>
                               <Parameters>
                                 <Parameter Name="CollectionIDs">
                                   <Value>=Parameters!CollectionIDs.Value</Value>
@@ -287,21 +287,21 @@ order by Name</CommandText>
                         <Color>Green</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                     </ChartDataPoint>
                   </ChartDataPoints>
                   <Type>Bar</Type>
                   <Subtype>PercentStacked</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ChartItemInLegend>
@@ -321,7 +321,7 @@ order by Name</CommandText>
                         <Y>=Sum(IIf(Fields!UpdateAssignmentCompliance.Value = 0, 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -329,7 +329,7 @@ order by Name</CommandText>
                         <Actions>
                           <Action>
                             <Drillthrough>
-                              <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Overview all uncompliant</ReportName>
+                              <ReportName>Software Updates Compliance - Overview all uncompliant</ReportName>
                               <Parameters>
                                 <Parameter Name="CollectionIDs">
                                   <Value>=Parameters!CollectionIDs.Value</Value>
@@ -343,21 +343,21 @@ order by Name</CommandText>
                         <Color>Orange</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                     </ChartDataPoint>
                   </ChartDataPoints>
                   <Type>Bar</Type>
                   <Subtype>PercentStacked</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ChartItemInLegend>
@@ -409,7 +409,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                   <ChartAxis Name="Secondary">
@@ -446,7 +446,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                 </ChartCategoryAxes>
@@ -484,7 +484,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                   <ChartAxis Name="Secondary">
@@ -520,7 +520,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                 </ChartValueAxes>
@@ -630,7 +630,7 @@ order by Name</CommandText>
                         <Y>=Sum(IIf(Fields!MonthSinceLastUpdateInstallABC.Value="A",1,0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -639,7 +639,7 @@ order by Name</CommandText>
                         <Actions>
                           <Action>
                             <Drillthrough>
-                              <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Overview ABC Last Update Install</ReportName>
+                              <ReportName>Software Updates Compliance - Overview ABC Last Update Install</ReportName>
                               <Parameters>
                                 <Parameter Name="CollectionIDs">
                                   <Value>=Parameters!CollectionIDs.Value</Value>
@@ -656,7 +656,7 @@ order by Name</CommandText>
                         <Color>Green</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                       <ChartItemInLegend>
@@ -666,14 +666,14 @@ order by Name</CommandText>
                   </ChartDataPoints>
                   <Type>Shape</Type>
                   <Subtype>Doughnut</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ValueAxisName>Primary</ValueAxisName>
@@ -690,7 +690,7 @@ order by Name</CommandText>
                         <Y>=Sum(IIf(Fields!MonthSinceLastUpdateInstallABC.Value="B",1,0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -698,7 +698,7 @@ order by Name</CommandText>
                         <Actions>
                           <Action>
                             <Drillthrough>
-                              <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Overview ABC Last Update Install</ReportName>
+                              <ReportName>Software Updates Compliance - Overview ABC Last Update Install</ReportName>
                               <Parameters>
                                 <Parameter Name="CollectionIDs">
                                   <Value>=Parameters!CollectionIDs.Value</Value>
@@ -715,7 +715,7 @@ order by Name</CommandText>
                         <Color>Orange</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                       <ChartItemInLegend>
@@ -725,14 +725,14 @@ order by Name</CommandText>
                   </ChartDataPoints>
                   <Type>Shape</Type>
                   <Subtype>Doughnut</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ValueAxisName>Primary</ValueAxisName>
@@ -749,7 +749,7 @@ order by Name</CommandText>
                         <Y>=Sum(IIf(Fields!MonthSinceLastUpdateInstallABC.Value="C",1,0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -757,7 +757,7 @@ order by Name</CommandText>
                         <Actions>
                           <Action>
                             <Drillthrough>
-                              <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Overview ABC Last Update Install</ReportName>
+                              <ReportName>Software Updates Compliance - Overview ABC Last Update Install</ReportName>
                               <Parameters>
                                 <Parameter Name="CollectionIDs">
                                   <Value>=Parameters!CollectionIDs.Value</Value>
@@ -774,7 +774,7 @@ order by Name</CommandText>
                         <Color>Red</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                       <ChartItemInLegend>
@@ -784,14 +784,14 @@ order by Name</CommandText>
                   </ChartDataPoints>
                   <Type>Shape</Type>
                   <Subtype>Doughnut</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ValueAxisName>Primary</ValueAxisName>
@@ -839,7 +839,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                   <ChartAxis Name="Secondary">
@@ -876,7 +876,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                 </ChartCategoryAxes>
@@ -913,7 +913,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                   <ChartAxis Name="Secondary">
@@ -949,7 +949,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                 </ChartValueAxes>
@@ -1040,7 +1040,7 @@ order by Name</CommandText>
                         <Y>=Sum(IIf(Fields!MonthSinceLastBootABC.Value = "A", 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -1049,7 +1049,7 @@ order by Name</CommandText>
                         <Actions>
                           <Action>
                             <Drillthrough>
-                              <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Overview ABC Last Reboot</ReportName>
+                              <ReportName>Software Updates Compliance - Overview ABC Last Reboot</ReportName>
                               <Parameters>
                                 <Parameter Name="CollectionIDs">
                                   <Value>=Parameters!CollectionIDs.Value</Value>
@@ -1066,7 +1066,7 @@ order by Name</CommandText>
                         <Color>Green</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                       <ChartItemInLegend>
@@ -1076,14 +1076,14 @@ order by Name</CommandText>
                   </ChartDataPoints>
                   <Type>Shape</Type>
                   <Subtype>Doughnut</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ValueAxisName>Primary</ValueAxisName>
@@ -1100,7 +1100,7 @@ order by Name</CommandText>
                         <Y>=Sum(IIf(Fields!MonthSinceLastBootABC.Value = "B", 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -1108,7 +1108,7 @@ order by Name</CommandText>
                         <Actions>
                           <Action>
                             <Drillthrough>
-                              <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Overview ABC Last Reboot</ReportName>
+                              <ReportName>Software Updates Compliance - Overview ABC Last Reboot</ReportName>
                               <Parameters>
                                 <Parameter Name="CollectionIDs">
                                   <Value>=Parameters!CollectionIDs.Value</Value>
@@ -1125,7 +1125,7 @@ order by Name</CommandText>
                         <Color>Orange</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                       <ChartItemInLegend>
@@ -1135,14 +1135,14 @@ order by Name</CommandText>
                   </ChartDataPoints>
                   <Type>Shape</Type>
                   <Subtype>Doughnut</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ValueAxisName>Primary</ValueAxisName>
@@ -1159,7 +1159,7 @@ order by Name</CommandText>
                         <Y>=Sum(IIf(Fields!MonthSinceLastBootABC.Value = "C", 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -1167,7 +1167,7 @@ order by Name</CommandText>
                         <Actions>
                           <Action>
                             <Drillthrough>
-                              <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Overview ABC Last Reboot</ReportName>
+                              <ReportName>Software Updates Compliance - Overview ABC Last Reboot</ReportName>
                               <Parameters>
                                 <Parameter Name="CollectionIDs">
                                   <Value>=Parameters!CollectionIDs.Value</Value>
@@ -1184,7 +1184,7 @@ order by Name</CommandText>
                         <Color>Red</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                       <ChartItemInLegend>
@@ -1194,14 +1194,14 @@ order by Name</CommandText>
                   </ChartDataPoints>
                   <Type>Shape</Type>
                   <Subtype>Doughnut</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ValueAxisName>Primary</ValueAxisName>
@@ -1249,7 +1249,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                   <ChartAxis Name="Secondary">
@@ -1286,7 +1286,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                 </ChartCategoryAxes>
@@ -1323,7 +1323,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                   <ChartAxis Name="Secondary">
@@ -1359,7 +1359,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                 </ChartValueAxes>
@@ -1450,7 +1450,7 @@ order by Name</CommandText>
                         <Y>=Sum(IIf(Fields!MonthSinceLastAADSLogonABC.Value = "A", 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -1459,7 +1459,7 @@ order by Name</CommandText>
                         <Actions>
                           <Action>
                             <Drillthrough>
-                              <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Overview ABC Last ADDS Logon</ReportName>
+                              <ReportName>Software Updates Compliance - Overview ABC Last ADDS Logon</ReportName>
                               <Parameters>
                                 <Parameter Name="CollectionIDs">
                                   <Value>=Parameters!CollectionIDs.Value</Value>
@@ -1476,7 +1476,7 @@ order by Name</CommandText>
                         <Color>Green</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                       <ChartItemInLegend>
@@ -1486,14 +1486,14 @@ order by Name</CommandText>
                   </ChartDataPoints>
                   <Type>Shape</Type>
                   <Subtype>Doughnut</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ValueAxisName>Primary</ValueAxisName>
@@ -1510,7 +1510,7 @@ order by Name</CommandText>
                         <Y>=Sum(IIf(Fields!MonthSinceLastAADSLogonABC.Value = "B", 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -1518,7 +1518,7 @@ order by Name</CommandText>
                         <Actions>
                           <Action>
                             <Drillthrough>
-                              <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Overview ABC Last ADDS Logon</ReportName>
+                              <ReportName>Software Updates Compliance - Overview ABC Last ADDS Logon</ReportName>
                               <Parameters>
                                 <Parameter Name="CollectionIDs">
                                   <Value>=Parameters!CollectionIDs.Value</Value>
@@ -1535,7 +1535,7 @@ order by Name</CommandText>
                         <Color>Orange</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                       <ChartItemInLegend>
@@ -1545,14 +1545,14 @@ order by Name</CommandText>
                   </ChartDataPoints>
                   <Type>Shape</Type>
                   <Subtype>Doughnut</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ValueAxisName>Primary</ValueAxisName>
@@ -1569,7 +1569,7 @@ order by Name</CommandText>
                         <Y>=Sum(IIf(Fields!MonthSinceLastAADSLogonABC.Value = "C", 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -1577,7 +1577,7 @@ order by Name</CommandText>
                         <Actions>
                           <Action>
                             <Drillthrough>
-                              <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Overview ABC Last ADDS Logon</ReportName>
+                              <ReportName>Software Updates Compliance - Overview ABC Last ADDS Logon</ReportName>
                               <Parameters>
                                 <Parameter Name="CollectionIDs">
                                   <Value>=Parameters!CollectionIDs.Value</Value>
@@ -1594,7 +1594,7 @@ order by Name</CommandText>
                         <Color>Red</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                       <ChartItemInLegend>
@@ -1604,14 +1604,14 @@ order by Name</CommandText>
                   </ChartDataPoints>
                   <Type>Shape</Type>
                   <Subtype>Doughnut</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ValueAxisName>Primary</ValueAxisName>
@@ -1659,7 +1659,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                   <ChartAxis Name="Secondary">
@@ -1696,7 +1696,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                 </ChartCategoryAxes>
@@ -1733,7 +1733,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                   <ChartAxis Name="Secondary">
@@ -1769,7 +1769,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                 </ChartValueAxes>
@@ -1860,7 +1860,7 @@ order by Name</CommandText>
                         <Y>=Sum(IIf(Fields!MonthSinceLastOnlineABC.Value = "A", 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -1869,7 +1869,7 @@ order by Name</CommandText>
                         <Actions>
                           <Action>
                             <Drillthrough>
-                              <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Overview ABC Last Policy Update</ReportName>
+                              <ReportName>Software Updates Compliance - Overview ABC Last Policy Update</ReportName>
                               <Parameters>
                                 <Parameter Name="CollectionIDs">
                                   <Value>=Parameters!CollectionIDs.Value</Value>
@@ -1886,7 +1886,7 @@ order by Name</CommandText>
                         <Color>Green</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                       <ChartItemInLegend>
@@ -1896,14 +1896,14 @@ order by Name</CommandText>
                   </ChartDataPoints>
                   <Type>Shape</Type>
                   <Subtype>Doughnut</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ValueAxisName>Primary</ValueAxisName>
@@ -1920,7 +1920,7 @@ order by Name</CommandText>
                         <Y>=Sum(IIf(Fields!MonthSinceLastOnlineABC.Value = "B", 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -1928,7 +1928,7 @@ order by Name</CommandText>
                         <Actions>
                           <Action>
                             <Drillthrough>
-                              <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Overview ABC Last Policy Update</ReportName>
+                              <ReportName>Software Updates Compliance - Overview ABC Last Policy Update</ReportName>
                               <Parameters>
                                 <Parameter Name="CollectionIDs">
                                   <Value>=Parameters!CollectionIDs.Value</Value>
@@ -1945,7 +1945,7 @@ order by Name</CommandText>
                         <Color>Orange</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                       <ChartItemInLegend>
@@ -1955,14 +1955,14 @@ order by Name</CommandText>
                   </ChartDataPoints>
                   <Type>Shape</Type>
                   <Subtype>Doughnut</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ValueAxisName>Primary</ValueAxisName>
@@ -1979,7 +1979,7 @@ order by Name</CommandText>
                         <Y>=Sum(IIf(Fields!MonthSinceLastOnlineABC.Value = "C", 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -1987,7 +1987,7 @@ order by Name</CommandText>
                         <Actions>
                           <Action>
                             <Drillthrough>
-                              <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Overview ABC Last Policy Update</ReportName>
+                              <ReportName>Software Updates Compliance - Overview ABC Last Policy Update</ReportName>
                               <Parameters>
                                 <Parameter Name="CollectionIDs">
                                   <Value>=Parameters!CollectionIDs.Value</Value>
@@ -2004,7 +2004,7 @@ order by Name</CommandText>
                         <Color>Red</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                       <ChartItemInLegend>
@@ -2014,14 +2014,14 @@ order by Name</CommandText>
                   </ChartDataPoints>
                   <Type>Shape</Type>
                   <Subtype>Doughnut</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ValueAxisName>Primary</ValueAxisName>
@@ -2069,7 +2069,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                   <ChartAxis Name="Secondary">
@@ -2106,7 +2106,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                 </ChartCategoryAxes>
@@ -2143,7 +2143,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                   <ChartAxis Name="Secondary">
@@ -2179,7 +2179,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                 </ChartValueAxes>
@@ -2251,7 +2251,7 @@ order by Name</CommandText>
                 <TextRuns>
                   <TextRun>
                     <Value>(during the current month)</Value>
-                    <Style />
+                    
                   </TextRun>
                 </TextRuns>
                 <Style>
@@ -2297,7 +2297,7 @@ order by Name</CommandText>
                 <TextRuns>
                   <TextRun>
                     <Value>(during the last month)</Value>
-                    <Style />
+                    
                   </TextRun>
                 </TextRuns>
                 <Style>
@@ -2343,7 +2343,7 @@ order by Name</CommandText>
                 <TextRuns>
                   <TextRun>
                     <Value>(more then two month)</Value>
-                    <Style />
+                    
                   </TextRun>
                 </TextRuns>
                 <Style>
@@ -2417,16 +2417,16 @@ order by Name</CommandText>
                     </Style>
                   </TextRun>
                 </TextRuns>
-                <Style />
+                
               </Paragraph>
               <Paragraph>
                 <TextRuns>
                   <TextRun>
                     <Value>Deployed Updates are installed and Security Update Installation happened within the current month</Value>
-                    <Style />
+                    
                   </TextRun>
                 </TextRuns>
-                <Style />
+                
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox1</rd:DefaultName>
@@ -2459,27 +2459,18 @@ order by Name</CommandText>
                     </Style>
                   </TextRun>
                 </TextRuns>
-                <Style />
+                
               </Paragraph>
               <Paragraph>
                 <TextRuns>
                   <TextRun>
                     <Value>Either the cumulative security rollup of the last- or the current month is installed</Value>
-                    <Style />
+                    
                   </TextRun>
                 </TextRuns>
-                <Style />
+                
               </Paragraph>
-              <Paragraph>
-                <TextRuns>
-                  <TextRun>
-                    <Value>(does not apply to Server 2008)</Value>
-                    <Style />
-                  </TextRun>
-                </TextRuns>
-                <Style />
-              </Paragraph>
-            </Paragraphs>
+             </Paragraphs>
             <rd:DefaultName>Textbox1</rd:DefaultName>
             <Top>65.72955mm</Top>
             <Left>366.28144mm</Left>
@@ -2510,27 +2501,18 @@ order by Name</CommandText>
                     </Style>
                   </TextRun>
                 </TextRuns>
-                <Style />
+                
               </Paragraph>
               <Paragraph>
                 <TextRuns>
                   <TextRun>
                     <Value>The cumulative security rollup of  the current month is installed.</Value>
-                    <Style />
+                    
                   </TextRun>
                 </TextRuns>
-                <Style />
+                
               </Paragraph>
-              <Paragraph>
-                <TextRuns>
-                  <TextRun>
-                    <Value>(does not apply to Server 2008)</Value>
-                    <Style />
-                  </TextRun>
-                </TextRuns>
-                <Style />
-              </Paragraph>
-            </Paragraphs>
+             </Paragraphs>
             <rd:DefaultName>Textbox1</rd:DefaultName>
             <Top>92.98163mm</Top>
             <Left>366.28144mm</Left>
@@ -2585,7 +2567,7 @@ order by Name</CommandText>
                         <Y>=Fields!AllSystems.Value - Fields!SystemsWithUpdatesMissing.Value</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -2593,21 +2575,21 @@ order by Name</CommandText>
                         <Color>Green</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                     </ChartDataPoint>
                   </ChartDataPoints>
                   <Type>Bar</Type>
                   <Subtype>PercentStacked</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ChartItemInLegend>
@@ -2627,7 +2609,7 @@ order by Name</CommandText>
                         <Y>=Fields!SystemsWithUpdatesMissing.Value</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -2635,7 +2617,7 @@ order by Name</CommandText>
                         <Actions>
                           <Action>
                             <Drillthrough>
-                              <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Overview Updates missing not deployed</ReportName>
+                              <ReportName>Software Updates Compliance - Overview Updates missing not deployed</ReportName>
                               <Parameters>
                                 <Parameter Name="CollectionIDs">
                                   <Value>=Parameters!CollectionIDs.Value</Value>
@@ -2649,21 +2631,21 @@ order by Name</CommandText>
                         <Color>Orange</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                     </ChartDataPoint>
                   </ChartDataPoints>
                   <Type>Bar</Type>
                   <Subtype>PercentStacked</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ChartItemInLegend>
@@ -2715,7 +2697,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                   <ChartAxis Name="Secondary">
@@ -2752,7 +2734,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                 </ChartCategoryAxes>
@@ -2790,7 +2772,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                   <ChartAxis Name="Secondary">
@@ -2826,7 +2808,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                 </ChartValueAxes>
@@ -2910,13 +2892,13 @@ order by Name</CommandText>
                     </Style>
                   </TextRun>
                 </TextRuns>
-                <Style />
+                
               </Paragraph>
               <Paragraph>
                 <TextRuns>
                   <TextRun>
                     <Value>Updates for specific systems are approved. Uncompliant means, </Value>
-                    <Style />
+                    
                   </TextRun>
                   <TextRun>
                     <Value>critical or security updates</Value>
@@ -2926,7 +2908,7 @@ order by Name</CommandText>
                   </TextRun>
                   <TextRun>
                     <Value> are </Value>
-                    <Style />
+                    
                   </TextRun>
                   <TextRun>
                     <Value>NOT yet approved</Value>
@@ -2935,7 +2917,7 @@ order by Name</CommandText>
                     </Style>
                   </TextRun>
                 </TextRuns>
-                <Style />
+                
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox1</rd:DefaultName>
@@ -3014,7 +2996,7 @@ order by Name</CommandText>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox8</rd:DefaultName>
@@ -3049,7 +3031,7 @@ order by Name</CommandText>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox10</rd:DefaultName>
@@ -3081,7 +3063,7 @@ order by Name</CommandText>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox115</rd:DefaultName>
@@ -3116,7 +3098,7 @@ order by Name</CommandText>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox16</rd:DefaultName>
@@ -3151,7 +3133,7 @@ order by Name</CommandText>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox18</rd:DefaultName>
@@ -3186,7 +3168,7 @@ order by Name</CommandText>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox20</rd:DefaultName>
@@ -3221,7 +3203,7 @@ order by Name</CommandText>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox22</rd:DefaultName>
@@ -3256,7 +3238,7 @@ order by Name</CommandText>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox24</rd:DefaultName>
@@ -3291,7 +3273,7 @@ order by Name</CommandText>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox28</rd:DefaultName>
@@ -3326,18 +3308,7 @@ order by Name</CommandText>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
-                            </Paragraph>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>(not Srv 2008)</Value>
-                                  <Style>
-                                    <FontWeight>Normal</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox30</rd:DefaultName>
@@ -3372,18 +3343,7 @@ order by Name</CommandText>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
-                            </Paragraph>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>(not Srv 2008)</Value>
-                                  <Style>
-                                    <FontWeight>Normal</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox32</rd:DefaultName>
@@ -3415,15 +3375,29 @@ order by Name</CommandText>
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!Name.Value</Value>
-                                  <Style>
-                                    <TextDecoration>Underline</TextDecoration>
-                                  </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Name</rd:DefaultName>
+                          <ActionInfo>
+                            <Actions>
+                              <Action>
+                                <Drillthrough>
+                                  <ReportName>Software Updates Compliance - Per device</ReportName>
+                                  <Parameters>
+                                    <Parameter Name="FilterUpdates">
+                                      <Value>0</Value>
+                                    </Parameter>
+                                    <Parameter Name="ComputerName">
+                                      <Value>=Fields!Name.Value</Value>
+                                    </Parameter>
+                                  </Parameters>
+                                </Drillthrough>
+                              </Action>
+                            </Actions>
+                          </ActionInfo>									  
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -3448,10 +3422,10 @@ order by Name</CommandText>
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!OSType.Value</Value>
-                                  <Style />
+                                  
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>OSType</rd:DefaultName>
@@ -3484,7 +3458,7 @@ order by Name</CommandText>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>PendingReboot</rd:DefaultName>
@@ -3512,10 +3486,10 @@ order by Name</CommandText>
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!DefenderPattern.Value</Value>
-                                  <Style />
+                                  
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>DefenderPattern</rd:DefaultName>
@@ -3543,10 +3517,10 @@ order by Name</CommandText>
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!DaysSinceLastOnline.Value</Value>
-                                  <Style />
+                                  
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>DaysSinceLastOnline</rd:DefaultName>
@@ -3574,10 +3548,10 @@ order by Name</CommandText>
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!DaysSinceLastAADSLogon.Value</Value>
-                                  <Style />
+                                  
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>DaysSinceLastAADSLogon</rd:DefaultName>
@@ -3605,10 +3579,10 @@ order by Name</CommandText>
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!DaysSinceLastBoot.Value</Value>
-                                  <Style />
+                                  
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>DaysSinceLastBoot</rd:DefaultName>
@@ -3641,7 +3615,7 @@ order by Name</CommandText>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>MonthSinceLastUpdateInstall</rd:DefaultName>
@@ -3675,7 +3649,7 @@ order by Name</CommandText>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>MissingUpdatesApproved</rd:DefaultName>
@@ -3683,7 +3657,7 @@ order by Name</CommandText>
                             <Actions>
                               <Action>
                                 <Drillthrough>
-                                  <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Per device</ReportName>
+                                  <ReportName>Software Updates Compliance - Per device</ReportName>
                                   <Parameters>
                                     <Parameter Name="FilterUpdates">
                                       <Value>1</Value>
@@ -3725,7 +3699,7 @@ order by Name</CommandText>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>LastRollupStatus</rd:DefaultName>
@@ -3758,7 +3732,7 @@ order by Name</CommandText>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style />
+                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>CurrentRollupStatus</rd:DefaultName>
@@ -3852,7 +3826,7 @@ order by Name</CommandText>
                     </Style>
                   </TextRun>
                 </TextRuns>
-                <Style />
+                
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox47</rd:DefaultName>
@@ -3884,25 +3858,25 @@ order by Name</CommandText>
                     </Style>
                   </TextRun>
                 </TextRuns>
-                <Style />
+                
               </Paragraph>
               <Paragraph>
                 <TextRuns>
                   <TextRun>
                     <Value>No pending reboot.</Value>
-                    <Style />
+                    
                   </TextRun>
                 </TextRuns>
-                <Style />
+                
               </Paragraph>
               <Paragraph>
                 <TextRuns>
                   <TextRun>
                     <Value>Uncompliant means, reboot pending and might block other installations</Value>
-                    <Style />
+                    
                   </TextRun>
                 </TextRuns>
-                <Style />
+                
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox1</rd:DefaultName>
@@ -3959,7 +3933,7 @@ order by Name</CommandText>
                         <Y>=Sum(IIf((Fields!LastRollupStatus.Value = 3) Or (Fields!LastRollupStatus.Value = 99), 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -3967,7 +3941,7 @@ order by Name</CommandText>
                         <Actions>
                           <Action>
                             <Drillthrough>
-                              <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Overview last rollup compliant</ReportName>
+                              <ReportName>Software Updates Compliance - Overview last rollup compliant</ReportName>
                               <Parameters>
                                 <Parameter Name="CollectionIDs">
                                   <Value>=Parameters!CollectionIDs.Value</Value>
@@ -3981,21 +3955,21 @@ order by Name</CommandText>
                         <Color>Green</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                     </ChartDataPoint>
                   </ChartDataPoints>
                   <Type>Bar</Type>
                   <Subtype>PercentStacked</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ChartItemInLegend>
@@ -4015,7 +3989,7 @@ order by Name</CommandText>
                         <Y>=Sum(IIf((Fields!LastRollupStatus.Value &lt;&gt; 3) And (Fields!LastRollupStatus.Value &lt;&gt; 99), 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -4023,7 +3997,7 @@ order by Name</CommandText>
                         <Actions>
                           <Action>
                             <Drillthrough>
-                              <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Overview last rollup uncompliant</ReportName>
+                              <ReportName>Software Updates Compliance - Overview last rollup uncompliant</ReportName>
                               <Parameters>
                                 <Parameter Name="CollectionIDs">
                                   <Value>=Parameters!CollectionIDs.Value</Value>
@@ -4037,21 +4011,21 @@ order by Name</CommandText>
                         <Color>Orange</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                     </ChartDataPoint>
                   </ChartDataPoints>
                   <Type>Bar</Type>
                   <Subtype>PercentStacked</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ChartItemInLegend>
@@ -4103,7 +4077,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                   <ChartAxis Name="Secondary">
@@ -4140,7 +4114,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                 </ChartCategoryAxes>
@@ -4178,7 +4152,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                   <ChartAxis Name="Secondary">
@@ -4214,7 +4188,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                 </ChartValueAxes>
@@ -4322,7 +4296,7 @@ order by Name</CommandText>
                         <Y>=Sum(IIf((Fields!CurrentRollupStatus.Value = 3) Or (Fields!CurrentRollupStatus.Value = 99), 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -4330,7 +4304,7 @@ order by Name</CommandText>
                         <Actions>
                           <Action>
                             <Drillthrough>
-                              <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Overview current rollup compliant</ReportName>
+                              <ReportName>Software Updates Compliance - Overview current rollup compliant</ReportName>
                               <Parameters>
                                 <Parameter Name="CollectionIDs">
                                   <Value>=Parameters!CollectionIDs.Value</Value>
@@ -4344,21 +4318,21 @@ order by Name</CommandText>
                         <Color>Green</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                     </ChartDataPoint>
                   </ChartDataPoints>
                   <Type>Bar</Type>
                   <Subtype>PercentStacked</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ChartItemInLegend>
@@ -4378,7 +4352,7 @@ order by Name</CommandText>
                         <Y>=Sum(IIf((Fields!CurrentRollupStatus.Value &lt;&gt; 3) And (Fields!CurrentRollupStatus.Value &lt;&gt; 99), 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -4386,7 +4360,7 @@ order by Name</CommandText>
                         <Actions>
                           <Action>
                             <Drillthrough>
-                              <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Overview current rollup uncompliant</ReportName>
+                              <ReportName>Software Updates Compliance - Overview current rollup uncompliant</ReportName>
                               <Parameters>
                                 <Parameter Name="CollectionIDs">
                                   <Value>=Parameters!CollectionIDs.Value</Value>
@@ -4400,21 +4374,21 @@ order by Name</CommandText>
                         <Color>Orange</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                     </ChartDataPoint>
                   </ChartDataPoints>
                   <Type>Bar</Type>
                   <Subtype>PercentStacked</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ChartItemInLegend>
@@ -4466,7 +4440,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                   <ChartAxis Name="Secondary">
@@ -4503,7 +4477,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                 </ChartCategoryAxes>
@@ -4541,7 +4515,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                   <ChartAxis Name="Secondary">
@@ -4577,7 +4551,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                 </ChartValueAxes>
@@ -4661,25 +4635,25 @@ order by Name</CommandText>
                     </Style>
                   </TextRun>
                 </TextRuns>
-                <Style />
+                
               </Paragraph>
               <Paragraph>
                 <TextRuns>
                   <TextRun>
                     <Value>No WSUS-Scan error.</Value>
-                    <Style />
+                    
                   </TextRun>
                 </TextRuns>
-                <Style />
+                
               </Paragraph>
               <Paragraph>
                 <TextRuns>
                   <TextRun>
                     <Value>Uncompliant means, WSUS-Scan error happened</Value>
-                    <Style />
+                    
                   </TextRun>
                 </TextRuns>
-                <Style />
+                
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox1</rd:DefaultName>
@@ -4736,7 +4710,7 @@ order by Name</CommandText>
                         <Y>=Sum(IIf(Fields!PendingReboot.Value &gt;= 1, 0, 1))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -4744,21 +4718,21 @@ order by Name</CommandText>
                         <Color>Green</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                     </ChartDataPoint>
                   </ChartDataPoints>
                   <Type>Bar</Type>
                   <Subtype>PercentStacked</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ChartItemInLegend>
@@ -4778,7 +4752,7 @@ order by Name</CommandText>
                         <Y>=Sum(IIf(Fields!PendingReboot.Value &gt;= 1, 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -4786,7 +4760,7 @@ order by Name</CommandText>
                         <Actions>
                           <Action>
                             <Drillthrough>
-                              <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Overview Pending Reboot</ReportName>
+                              <ReportName>Software Updates Compliance - Overview Pending Reboot</ReportName>
                               <Parameters>
                                 <Parameter Name="CollectionIDs">
                                   <Value>=Parameters!CollectionIDs.Value</Value>
@@ -4800,21 +4774,21 @@ order by Name</CommandText>
                         <Color>Orange</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                     </ChartDataPoint>
                   </ChartDataPoints>
                   <Type>Bar</Type>
                   <Subtype>PercentStacked</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ChartItemInLegend>
@@ -4866,7 +4840,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                   <ChartAxis Name="Secondary">
@@ -4903,7 +4877,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                 </ChartCategoryAxes>
@@ -4941,7 +4915,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                   <ChartAxis Name="Secondary">
@@ -4977,7 +4951,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                 </ChartValueAxes>
@@ -5085,7 +5059,7 @@ order by Name</CommandText>
                         <Y>=Sum(IIf(Fields!WSUSScanError.Value = 0, 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -5093,21 +5067,21 @@ order by Name</CommandText>
                         <Color>Green</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                     </ChartDataPoint>
                   </ChartDataPoints>
                   <Type>Bar</Type>
                   <Subtype>PercentStacked</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ChartItemInLegend>
@@ -5127,7 +5101,7 @@ order by Name</CommandText>
                         <Y>=Sum(IIf(Fields!WSUSScanError.Value &lt;&gt; 0, 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <Style />
+                        
                         <UseValueAsLabel>true</UseValueAsLabel>
                         <Visible>true</Visible>
                       </ChartDataLabel>
@@ -5135,7 +5109,7 @@ order by Name</CommandText>
                         <Actions>
                           <Action>
                             <Drillthrough>
-                              <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Overview WSUSScanError</ReportName>
+                              <ReportName>Software Updates Compliance - Overview WSUSScanError</ReportName>
                               <Parameters>
                                 <Parameter Name="CollectionIDs">
                                   <Value>=Parameters!CollectionIDs.Value</Value>
@@ -5149,21 +5123,21 @@ order by Name</CommandText>
                         <Color>Orange</Color>
                       </Style>
                       <ChartMarker>
-                        <Style />
+                        
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                     </ChartDataPoint>
                   </ChartDataPoints>
                   <Type>Bar</Type>
                   <Subtype>PercentStacked</Subtype>
-                  <Style />
+                  
                   <ChartEmptyPoints>
-                    <Style />
+                    
                     <ChartMarker>
-                      <Style />
+                      
                     </ChartMarker>
                     <ChartDataLabel>
-                      <Style />
+                      
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ChartItemInLegend>
@@ -5215,7 +5189,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                   <ChartAxis Name="Secondary">
@@ -5252,7 +5226,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                 </ChartCategoryAxes>
@@ -5290,7 +5264,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                   <ChartAxis Name="Secondary">
@@ -5326,7 +5300,7 @@ order by Name</CommandText>
                     <Minimum>NaN</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
-                      <Style />
+                      
                     </ChartAxisScaleBreak>
                   </ChartAxis>
                 </ChartValueAxes>
@@ -5404,11 +5378,11 @@ order by Name</CommandText>
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>v2.0</Value>
-                    <Style />
+                    <Value>v2.1</Value>
+                    
                   </TextRun>
                 </TextRuns>
-                <Style />
+                
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox11</rd:DefaultName>
@@ -5445,7 +5419,7 @@ order by Name</CommandText>
         <TopMargin>2cm</TopMargin>
         <BottomMargin>2cm</BottomMargin>
         <ColumnSpacing>0.13cm</ColumnSpacing>
-        <Style />
+        
       </Page>
     </ReportSection>
   </ReportSections>

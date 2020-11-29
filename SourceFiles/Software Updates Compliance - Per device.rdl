@@ -1271,7 +1271,7 @@ END
                 <TextRuns>
                   <TextRun>
                     <Value>="Defender updates are also visible, which are not part of the dashboard and the first sub-report!"</Value>
-                    <Style />
+                    
                   </TextRun>
                 </TextRuns>
                 <Style>
@@ -1296,7 +1296,7 @@ END
           </Textbox>
         </ReportItems>
         <Height>1.54861in</Height>
-        <Style />
+        
       </Body>
       <Width>19.82292in</Width>
       <Page>
@@ -1324,7 +1324,7 @@ END
         <RightMargin>1in</RightMargin>
         <TopMargin>1in</TopMargin>
         <BottomMargin>1in</BottomMargin>
-        <Style />
+        
       </Page>
     </ReportSection>
   </ReportSections>
