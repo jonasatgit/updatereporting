@@ -12,7 +12,7 @@
           <rd:IsMultiValued>false</rd:IsMultiValued>
         </DataSetParameter>
       </DataSetParameters>
-      <CommandText>---SCRIPTVERSION: 20201124
+      <CommandText>---SCRIPTVERSION: 20201130
 
 -----------------------------------------------------------------------------------------------------------------------
 ---- Disclaimer
@@ -28,6 +28,7 @@
 ---- if Microsoft has been advised of the possibility of such damages.
 -----------------------------------------------------------------------------------------------------------------------
 ---- Changelog:
+---- 20201130: Added "System Center Endpoint Protection" back to the exclusion list
 ---- 20201124: Changed some descriptions, the QuickFixEngineering query due to missing date entries and the language problem from 20201103, 
 ----           QuickFixEngineering query will also use the rollups as a reference if possible, simplified the current- and last-rollup queries and removed the limitation for Server 2008
 ---- 20201103: Changed 'max(CASE WHEN (ISDATE(QFE.InstalledOn0) = 0' to 'max(CASE WHEN (LEN(QFE.InstalledOn0) &gt; 10' due to language problems
@@ -44,9 +45,6 @@ SET @LastRollupPrefix = (SELECT convert(char(7),DATEADD(MONTH,-1,GETDATE()),126)
 -- using prefix like "2017-08" to filter for the current security rollup
 DECLARE @CurrentRollupPrefix as char(7);
 SET @CurrentRollupPrefix = (SELECT convert(char(7),DATEADD(MONTH,0,GETDATE()),126)); 
-
-declare @productlist as int
-set @productlist = (select distinct CICI.CategoryInstanceID from v_CICategoryInfo CICI where CICI.CategoryInstanceName = 'Microsoft Defender Antivirus');
 
 -- calculate 2nd Tuesday of month to add the correct date string in case install date is missing in v_GS_QUICK_FIX_ENGINEERING
 DECLARE @FirstDayOfMonth datetime;
@@ -78,7 +76,7 @@ With ExcludedUpdates (AssignmentID,CI_ID) as
                             select CIA.AssignmentID, CIATOCI.CI_ID 
                             from v_CIAssignment CIA 
                             inner join v_CIAssignmentToCI CIATOCI on CIATOCI.AssignmentID = CIA.AssignmentID 
-                            inner join v_CICategoryInfo CICI on CICI.Ci_ID = CIATOCI.CI_ID and CICI.CategoryInstanceID in (@productlist)
+                            inner join v_CICategoryInfo CICI on CICI.Ci_ID = CIATOCI.CI_ID and CICI.CategoryInstanceName in ('Microsoft Defender Antivirus','System Center Endpoint Protection')
               ),
 -- list of cumulative updates of the current and the past month
 CumulativeUpdates (ArticleID,CI_ID, Latest) as
@@ -227,6 +225,7 @@ left join (
                             else --CUU.CI_ID IS null
                             (
                                          --- due to some older systems sending datetime as binary like this: 01cc31160e1c4bac and since there is no cumulative update for such systems "CUU.CI_ID is null" should always be valid
+                                         --- Found three different date strings so far: MM/dd/yyyy or yyyMMdd or binary
                                          CASE WHEN (LEN(QFE.InstalledOn0) &gt; 10) 
                                          THEN CAST((TRY_CONVERT(BIGINT,TRY_CONVERT(VARBINARY(64), '0x' + QFE.InstalledOn0,1)) / 864000000000.0 - 109207) AS DATETIME) 
                                          ELSE TRY_CONVERT(datetime,qfe.InstalledOn0,101)
