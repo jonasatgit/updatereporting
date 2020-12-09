@@ -54,6 +54,9 @@ $false will use the default dataset and $true will use the dataset using a SQL v
 The script will use the script root path to look for a folder called "Sourcefiles" and will copy all the report files from there. 
  But you could also provide a different path where the script should look for a "Sourcefiles" folder.
 
+.PARAMETER ForceLegacyFormat
+The report xml definition will be changed to the older pre SSRS 2016 format. That way the reports also work with SSRS 2014 for example.
+
 .INPUTS
 None. You cannot pipe objects to Import-SSRSReports.ps1
 
@@ -64,10 +67,13 @@ Just normal console output. Nothing to work with.
 PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}"
 
 .EXAMPLE
+PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -ForceLegacyFormat
+
+.EXAMPLE
 PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -Upload $false
 
 .EXAMPLE
-PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -DefaultCollectionID "P1100012" -DefaultCollectionFilter "All Servers of Contoso%"
+PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -DefaultCollectionID "P1100012" -DefaultCollectionFilter "All Servers of Contoso%" 
 
 .LINK
 https://github.com/jonasatgit/updatereporting
@@ -98,6 +104,9 @@ param(
 
     [parameter(Mandatory=$false)]
     [bool]$UseViewForDataset = $false,
+
+    [parameter(Mandatory=$false)]
+    [switch]$ForceLegacyFormat,
 
     [parameter(Mandatory=$false)]
     [string]$ReportSourcePath = $($PSScriptRoot)
@@ -160,6 +169,11 @@ $null = Copy-Item -Path "$($cleanFolder)\*" -Destination "$($workFolder)\" -Forc
 Write-host "Found $($reportsToWorkWith.Count) .rdl and .rsd files in `"$reportSourcePath\work`"" -ForegroundColor Green
 if($reportsToWorkWith.Count -gt 0)
 {
+    if ($ForceLegacyFormat)
+    {
+        Write-Host "Changing xml format to work with pre 2016 SSRS versions" -ForegroundColor Yellow
+    }
+
     $reportsToWorkWith | ForEach-Object {
 
         Write-host "Working on: $($_.Name)" -ForegroundColor Green
@@ -174,13 +188,31 @@ if($reportsToWorkWith.Count -gt 0)
         $reportContent = $reportContent.Replace("<Value>COLLECTIONNAMEFILTER</Value>","<Value>$defaultCollectionFilter</Value>")
         $reportContent = $reportContent.Replace('SMS00001',"$($defaultCollectionID)")
 
-        if($UseViewForDataset)
+        if ($UseViewForDataset)
         {
             $reportContent = $reportContent.Replace('UpdatesSummary</SharedDataSetReference>',"$($datasetUsingSQLView)</SharedDataSetReference>")
         }
 
-        # save all the changes to the file
-        $reportContent | Out-File -FilePath $($_.FullName) -Encoding utf8 -Force
+        if ($ForceLegacyFormat)
+        {
+            # Changing xml format to work with pre 2016 SSRS versions
+            [xml]$ContentXML=$reportContent
+            if ($ContentXML.report.xmlns -eq "http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition")
+            {
+                $ContentXML.report.xmlns = "http://schemas.microsoft.com/sqlserver/reporting/2010/01/reportdefinition"
+                $ContentXML.report.SetAttribute("cl","http://schemas.microsoft.com/sqlserver/reporting/2010/01/componentdefinition")
+            }
+            if ($ContentXML.report.ReportParameterslayout -ne $NULL)
+            {
+                [void]$ContentXML.Report.RemoveChild($ContentXML.report.ReportParameterslayout)
+            }
+            $ContentXML.Save($_.FullName)
+        }
+        else
+        {
+            # save all the changes to the file
+            $reportContent | Out-File -FilePath $($_.FullName) -Encoding utf8 -Force
+        }
     }
 
     if($Upload)
@@ -219,7 +251,7 @@ if($reportsToWorkWith.Count -gt 0)
                     $reportBytes,     # Bytes of item
                     $null,            # Item properties
                     [ref]$warnings)   # Warnings during upload
- 
+
                 if(-NOT($warnings -eq $null))
                 {
                     $warnings | ForEach-Object {
