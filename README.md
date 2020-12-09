@@ -1,9 +1,13 @@
+# Original post:
+The original blog can be found [HERE](https://techcommunity.microsoft.com/t5/premier-field-engineering/mastering-configuration-manager-patch-compliance-reporting/ba-p/1415088 "mastering configuration manager patch compliance reporting") or [HERE](https://aka.ms/JonasOhmsenBlogs "JonasOhmsenBlogs")
+
+
 # Hi, Jonas here! 
 Or as we say in the north of Germany: **"Moin Moin!"**<br>
 I am a Microsoft Premier Field Engineer (PFE) based in Hamburg and a while back (years in fact) I was asked to analyze the update compliance status of a SCCM/ConfigMgr/MECM environment. (I will use the current name: "Microsoft Endpoint Configuration Manager" (MECM) in the rest of the blog)<br>
 I used different reports to look for clients not installing the necessary updates, but it was time consuming and I was missing a general overview with some meaningful KPIs. I ended up with a comprehensive SQL query and an Excel sheet, but changed that to a SQL Server Reporting Services (SSRS) report and made that available to several departments in the organization.<br>
 As mentioned before, it's been a while since I created the report and if I would start now it would be a PowerBI version or I would simply grab one of the PowerBI reports available right now, but since I still use the report and find it quite helpful, I decided to share that with the rest of the world.
-The original blog can be found here: https://techcommunity.microsoft.com/t5/premier-field-engineering/mastering-configuration-manager-patch-compliance-reporting/ba-p/1415088
+
 
 # TL/DR
 The following report should help you identify update problems within a specific collection and is designed to work well for a few thousand clients. The query might run longer in bigger environments and you might need to improve it or run it not within business hours to show results.<br>
@@ -102,7 +106,7 @@ The search string looks like this: <br> ***https://www.bing.com/search?q=error+0
 - If you have a simple group of systems and deploy every needed update with one deployment, the deployment status might be enough, but if you have a more complex setup, you might want to see details based on a specific group of systems no matter if, how or how many updates are deployed to each system.
 - The report will also count updates deployed as "available" and is not made to just focus on updates deployed as "required"
 - The report consists of multiple KPIs to indicate the update compliance or update/client health state and should give you an overview from different viewpoints to help identify problematic systems or a flaw in your patch strategy. 
-- The report will use data from the WMI class Win32_Quickfixengineering which needs to be enabled in the hardware inventory client settings. The class is only used to determine the last installation of A security update to identify systems which seem to be fine, but have never installed anything.
+- The report will use data from the WMI class Win32_Quickfixengineering which needs to be enabled in the hardware inventory client settings. The class is only used to determine the latest or last cumulative update or A security update installation to identify systems which seem to be fine, but have never installed anything.
 - The report is also using the LastLogonTimeStamp from AD System Discovery to visually show systems which have not logged on to the domain in a while and which might be disposed already and could be deleted from the MECM database. If you don't use AD system discovery the report will show all systems of the specified collection as not compliant in the pie chart "Last ADDS logon" (12).
   - AD system discovery is no hard requirement to run the report
 - The report does not show historical data and will always show the current status. So if you change a deployment in the middle of the month, the compliance percentage will drop almost immediately
@@ -115,14 +119,14 @@ The search string looks like this: <br> ***https://www.bing.com/search?q=error+0
 - The SQL query might run long in bigger environments depending on SQL performance and SQL maintenance
 - There are several sub-reports with the same look and feel, because it was simpler to copy the report and just change the filter for the specific need.
 - Each sub-report will be hidden in SSRS to avoid direct usage and keep the folder as clean as possible.
-- The reports are made on SSRS 2017. I haven't tested other versions. 
+- The reports are made on SSRS 2017, but can be converted to the older format using the "ForceLegacyFormat" parameter. 
 
 # How to install
 1. Make sure you have enabled **Win32_Quickfixengineering** in the client settings for hardware inventory
 1. You could also use AD System Discovery to have further data, but that's no hard requirement. 
 1. Either clone the repository or download the whole content.
 1. Copy the whole content to the SQL Server Reporting Services Server (SSRS) 
-1. Create a ***new folder on the report server website*** were the reports should be imported to.
+1. Create a ***new folder on the report server website*** where the reports should be imported to.
    1. The folder should be under the normal MECM folder, but can also be at the root level of your Reporting Services Server. But keep in mind that report subscriptions are only visible in the MECM console, if the report, you have subscribed for, is below the normal MECM folder. <br> The subscription will not be visible in the MECM console if the report was placed at the root level.
 1. Start a PowerShell session as admin. 
 	1. The user running PowerShell also needs to have admin rights on the SQL Reporting Services Server in order to upload the reports
@@ -146,11 +150,16 @@ The search string looks like this: <br> ***https://www.bing.com/search?q=error+0
 | Upload | No  | $true |If set to $false the reports will not be uploaded. That might be helpful, if you do not have the rights to upload and need to give the files to another person for example. In that case, just use the report files in the work folder |
 | UseViewForDataset | No  | $false |All reports can either use a dataset called "UpdatesSummary", which is the default and will execute the full sql query right from the Reporting Services Server, or a dataset called "UpdatesSummaryView" which will select from a sql view which needs to be created first. (I will not explain that process in detail) <br> $false will use the default dataset and $true will use the dataset using a sql view. |
 | ReportSourcePath | No  | $PSScriptRoot or "C:\Temp\Reports"                   |The script will use the script root path to look for a folder called "Sourcefiles" and will copy all the report files from there.  But you could also provide a different path where the script should look for a "Sourcefiles" folder|
+| ForceLegacyFormat | No | -ForceLegacyFormat | Switch paramter to change the xml definition of each report to the older pre SSRS 2016 format. That way the reports also work with SSRS 2014 for example |
 
   ## Examples: 
 ### Upload all reports with the minimum required parameters
 ```ps
 .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}"
+```    
+### Upload all reports with the minimum required parameters and convert the reports to the pre SSRS 2016 format
+```ps
+.\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -ForceLegacyFormat
 ```    
 ### Just change the report files and do not upload them
 ```ps
