@@ -9,7 +9,7 @@ and [HERE](https://techcommunity.microsoft.com/t5/core-infrastructure-and-securi
 
 # MEM/MECM/ConfigMgr patch compliance report solution
 ![Update dashboard](/.attachments/Dashboard-B.png)
-![Update dashboard](/.attachments/Dashboard-B.png)
+![Simplified report dependencies](/.attachments/UpdateReporting001-level.PNG)
 
 
 # Changes
