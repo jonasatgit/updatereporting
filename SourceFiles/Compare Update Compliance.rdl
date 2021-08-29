@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
-  <Description>Use this report to compare Updatecompliance against a maximum of six systems. The systems should run the same operating system to be comparable. </Description>
+  <Description>Comparison of a maximum of six systems and their update compliance statuses</Description>
   <AutoRefresh>0</AutoRefresh>
   <DataSources>
     <DataSource Name="DataSource1">
@@ -496,6 +496,7 @@ order by Name0</CommandText>
                                   </Paragraph>
                                 </Paragraphs>
                                 <rd:DefaultName>Textbox5</rd:DefaultName>
+                                <ToolTip>X to indicate an installed update</ToolTip>
                                 <Style>
                                   <Border>
                                     <Color>#7292cc</Color>
@@ -540,6 +541,7 @@ order by Name0</CommandText>
                                       </Paragraph>
                                     </Paragraphs>
                                     <rd:DefaultName>Textbox19</rd:DefaultName>
+                                    <ToolTip>Count of installed updates</ToolTip>
                                     <Style>
                                       <Border>
                                         <Color>#7292cc</Color>
@@ -586,6 +588,7 @@ order by Name0</CommandText>
                                   </Paragraph>
                                 </Paragraphs>
                                 <rd:DefaultName>Textbox8</rd:DefaultName>
+                                <ToolTip>X to indicate a deployed / targeted update</ToolTip>		 
                                 <Style>
                                   <Border>
                                     <Color>#7292cc</Color>
@@ -626,6 +629,7 @@ order by Name0</CommandText>
                                       </Paragraph>
                                     </Paragraphs>
                                     <rd:DefaultName>Textbox22</rd:DefaultName>
+                                    <ToolTip>Count of deployed / targeted updates</ToolTip>	   
                                     <Style>
                                       <Border>
                                         <Color>#7292cc</Color>
@@ -668,6 +672,7 @@ order by Name0</CommandText>
                                   </Paragraph>
                                 </Paragraphs>
                                 <rd:DefaultName>Textbox11</rd:DefaultName>
+                                <ToolTip>X to indicate a required / missing update</ToolTip>		
                                 <Style>
                                   <Border>
                                     <Color>#7292cc</Color>
@@ -711,6 +716,7 @@ order by Name0</CommandText>
                                       </Paragraph>
                                     </Paragraphs>
                                     <rd:DefaultName>Textbox21</rd:DefaultName>
+                                    <ToolTip>Count of required / missing updates</ToolTip>		  
                                     <Style>
                                       <Border>
                                         <Color>#7292cc</Color>

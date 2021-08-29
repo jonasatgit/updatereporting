@@ -37,6 +37,12 @@
 		where UCS.ResourceID IN (Select ResourceID from v_FullCollectionMembership fcm where fcm.CollectionID IN (@CollectionIDs))
 		and UCS.Status = 2 and CTM.ResourceID is null --and UPD.IsSuperseded = 0
 		order by SystemsWithSameUpdate desc, UPD.Title, UPD.DatePosted
+		---- fix for SQL compat level problem 
+		---- https://support.microsoft.com/en-us/help/3196320/sql-query-times-out-or-console-slow-on-certain-configuration-manager-d
+		---- Force legacy cardinality for SQL server versions before 2016 SP1 (SQL version less than 13.0.4001.0)
+		--OPTION (QUERYTRACEON 9481)
+		---- Force legacy cardinality for SQL server versions 2016 SP1 and higher (SQL version equal or greater than 13.0.4001.0)
+		--OPTION (USE HINT ('FORCE_LEGACY_CARDINALITY_ESTIMATION'))
 ELSE
 	select UPD.Title
 		,VRS.Netbios_Name0
@@ -53,7 +59,13 @@ ELSE
 		inner join v_R_System VRS on VRS.ResourceID = UCS.ResourceID 
 		where UCS.ResourceID IN (Select ResourceID from v_FullCollectionMembership fcm where fcm.CollectionID IN (@CollectionIDs))
 		and UCS.Status = 2 and CTM.ResourceID is null and UPD.IsSuperseded = 0
-		order by SystemsWithSameUpdate desc, UPD.Title, UPD.DatePosted</CommandText>
+		order by SystemsWithSameUpdate desc, UPD.Title, UPD.DatePosted
+		---- fix for SQL compat level problem 
+		---- https://support.microsoft.com/en-us/help/3196320/sql-query-times-out-or-console-slow-on-certain-configuration-manager-d
+		---- Force legacy cardinality for SQL server versions before 2016 SP1 (SQL version less than 13.0.4001.0)
+		--OPTION (QUERYTRACEON 9481)
+		---- Force legacy cardinality for SQL server versions 2016 SP1 and higher (SQL version equal or greater than 13.0.4001.0)
+		--OPTION (USE HINT ('FORCE_LEGACY_CARDINALITY_ESTIMATION'))</CommandText>
         <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
       </Query>
       <Fields>
@@ -130,24 +142,7 @@ ELSE
                               </TextRuns>
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox149</rd:DefaultName>
-                          <ActionInfo>
-                            <Actions>
-                              <Action>
-                                <Drillthrough>
-                                  <ReportName>Software Updates Compliance - Per device</ReportName>
-                                  <Parameters>
-                                    <Parameter Name="FilterUpdates">
-                                      <Value>0</Value>
-                                    </Parameter>
-                                    <Parameter Name="ComputerName">
-                                      <Value>=Fields!Netbios_Name0.Value</Value>
-                                    </Parameter>
-                                  </Parameters>
-                                </Drillthrough>
-                              </Action>
-                            </Actions>
-                          </ActionInfo>							  
+                          <rd:DefaultName>Textbox149</rd:DefaultName>						  
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -306,7 +301,6 @@ ELSE
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox169</rd:DefaultName>
@@ -343,10 +337,26 @@ ELSE
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Netbios_Name03</rd:DefaultName>
+                          <ActionInfo>
+                            <Actions>
+                              <Action>
+                                <Drillthrough>
+                                  <ReportName>Software Updates Compliance - Per device</ReportName>
+                                  <Parameters>
+                                    <Parameter Name="FilterUpdates">
+                                      <Value>0</Value>
+                                    </Parameter>
+                                    <Parameter Name="ComputerName">
+                                      <Value>=Fields!Netbios_Name0.Value</Value>
+                                    </Parameter>
+                                  </Parameters>
+                                </Drillthrough>
+                              </Action>
+                            </Actions>
+                          </ActionInfo>						  
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -591,7 +601,6 @@ ELSE
                 <TextRuns>
                   <TextRun>
                     <Value>(Superseded can be filtered above)</Value>
-                    
                   </TextRun>
                 </TextRuns>
                 <Style>
@@ -633,7 +642,6 @@ ELSE
         <TopMargin>20mm</TopMargin>
         <BottomMargin>20mm</BottomMargin>
         <ColumnSpacing>0.13cm</ColumnSpacing>
-        
       </Page>
     </ReportSection>
   </ReportSections>

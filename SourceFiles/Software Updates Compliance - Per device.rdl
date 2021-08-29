@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <Description>Update compliance state per device</Description>
   <AutoRefresh>0</AutoRefresh>
   <DataSources>
     <DataSource Name="DataSource1">
@@ -9,175 +10,149 @@
     </DataSource>
   </DataSources>
   <DataSets>
-    <DataSet Name="DataSet0">
+    <DataSet Name="DeviceUpdateCollections">
       <Query>
         <DataSourceName>DataSource1</DataSourceName>
         <QueryParameters>
           <QueryParameter Name="@ComputerName">
             <Value>=Parameters!ComputerName.Value</Value>
           </QueryParameter>
+        </QueryParameters>
+        <CommandText>---- For tests in SQL mgmt studio only
+--Declare @ComputerName as varchar(15) = 'server1';
+
+select CIA.CollectionName
+from v_FullCollectionMembership FCM
+inner join v_CIAssignment CIA on CIA.CollectionID = FCM.CollectionID
+where CIA.AssignmentType in (1,5) and FCM.ResourceID = (select distinct ResourceID from v_R_System where Name0 = @ComputerName)
+group by CIA.CollectionName</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="CollectionName">
+          <DataField>CollectionName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="UpdatesPerDevice">
+      <SharedDataSet>
+        <SharedDataSetReference>UpdatesStatePerDevice</SharedDataSetReference>
+        <QueryParameters>
           <QueryParameter Name="@FilterUpdates">
             <Value>=Parameters!FilterUpdates.Value</Value>
           </QueryParameter>
+          <QueryParameter Name="@ComputerName">
+            <Value>=Parameters!ComputerName.Value</Value>
+          </QueryParameter>
         </QueryParameters>
-        <CommandText>-----------------------------------------------------------------------------
-------- deployed and missing updates 
-IF @FilterUpdates = 1
-BEGIN
-
-    select  
-            Vendor=vnd.CategoryInstanceName, 
-            UpdateClassification=cls.CategoryInstanceName,
-            ui.Title,             
-            ui.BulletinID, 
-            ui.ArticleID, 
-            Targeted=(case when ctm.ResourceID is not null then '*' else '' end), 
-            Installed=(case when css.Status=3 then '*' else '' end), 
-            IsRequired=(case when css.Status=2 then '*' else '' end), 
-            --Deadline=cdl.Deadline, 
-			ui.DatePosted,
-            --ui.CI_UniqueID as UniqueUpdateID, 
-            ui.InfoURL as InformationURL,
-			css.LastEnforcementMessageTime,
-			css.LastErrorCode
-          from v_UpdateComplianceStatus  css 
-          join v_UpdateInfo ui on ui.CI_ID=css.CI_ID 
-          join v_CICategoryInfo_All vnd on vnd.CI_ID=ui.CI_ID and vnd.CategoryTypeName='Company'
-          join v_CICategoryInfo_All cls on cls.CI_ID=ui.CI_ID and cls.CategoryTypeName='UpdateClassification'
-          left join v_CITargetedMachines ctm on ctm.CI_ID=css.CI_ID and ctm.ResourceID = css.ResourceID
-          --outer apply (
-          --  select Deadline=min(a.EnforcementDeadline) 
-          --  from v_CIAssignment  a 
-          --  join v_CIAssignmentToCI  atc on atc.AssignmentID=a.AssignmentID and atc.CI_ID=css.CI_ID
-          --  ) cdl
-          where css.ResourceID = (select distinct ResourceID from v_R_System where Name0 = @ComputerName)
-	and ctm.ResourceID is not null
-	and css.Status=2
-            --and (@Vendor = '' or vnd.CategoryInstanceName = @Vendor) 
-            --and (@UpdateClass = '' or cls.CategoryInstanceName = @UpdateClass) 
-          order by ui.Title
-END
---------------------------------------------------------------------------
------- missing updates which are not deployed
-IF @FilterUpdates = 2
-BEGIN
-    select  
-            Vendor=vnd.CategoryInstanceName, 
-            UpdateClassification=cls.CategoryInstanceName,
-            ui.Title,             
-            ui.BulletinID, 
-            ui.ArticleID, 
-            Targeted=(case when ctm.ResourceID is not null then '*' else '' end), 
-            Installed=(case when css.Status=3 then '*' else '' end), 
-            IsRequired=(case when css.Status=2 then '*' else '' end), 
-            --Deadline=cdl.Deadline, 
-			ui.DatePosted,
-            --ui.CI_UniqueID as UniqueUpdateID, 
-            ui.InfoURL as InformationURL,
-			css.LastEnforcementMessageTime,
-			css.LastErrorCode
-          from v_UpdateComplianceStatus  css 
-          join v_UpdateInfo ui on ui.CI_ID=css.CI_ID 
-          join v_CICategoryInfo_All vnd on vnd.CI_ID=ui.CI_ID and vnd.CategoryTypeName='Company'
-          join v_CICategoryInfo_All cls on cls.CI_ID=ui.CI_ID and cls.CategoryTypeName='UpdateClassification'
-          left join v_CITargetedMachines  ctm on ctm.CI_ID=css.CI_ID and ctm.ResourceID = css.ResourceID
-          --outer apply (
-          --  select Deadline=min(a.EnforcementDeadline) 
-          --  from v_CIAssignment  a 
-          --  join v_CIAssignmentToCI  atc on atc.AssignmentID=a.AssignmentID and atc.CI_ID=css.CI_ID
-          --  ) cdl
-          where css.ResourceID = (select distinct ResourceID from v_R_System where Name0 = @ComputerName)
-	and ctm.ResourceID is null
-	and css.Status=2
-            --and (@Vendor = '' or vnd.CategoryInstanceName = @Vendor) 
-            --and (@UpdateClass = '' or cls.CategoryInstanceName = @UpdateClass) 
-          order by ui.Title
-END
------------------------------------------------------------------------
------- show all updates
-IF @FilterUpdates = 0
-BEGIN
-    select  
-            Vendor=vnd.CategoryInstanceName, 
-            UpdateClassification=cls.CategoryInstanceName,
-            ui.Title,             
-            ui.BulletinID, 
-            ui.ArticleID, 
-            Targeted=(case when ctm.ResourceID is not null then '*' else '' end), 
-            Installed=(case when css.Status=3 then '*' else '' end), 
-            IsRequired=(case when css.Status=2 then '*' else '' end), 
-            --Deadline=cdl.Deadline,
-			ui.DatePosted,
-            --ui.CI_UniqueID as UniqueUpdateID, 
-            ui.InfoURL as InformationURL,
-			css.LastEnforcementMessageTime,
-			css.LastErrorCode
-          from v_UpdateComplianceStatus  css 
-          join v_UpdateInfo ui on ui.CI_ID=css.CI_ID 
-          join v_CICategoryInfo_All vnd on vnd.CI_ID=ui.CI_ID and vnd.CategoryTypeName='Company'
-          join v_CICategoryInfo_All cls on cls.CI_ID=ui.CI_ID and cls.CategoryTypeName='UpdateClassification'
-          left join v_CITargetedMachines  ctm on ctm.CI_ID=css.CI_ID and ctm.ResourceID = css.ResourceID
-          --outer apply (
-          --  select Deadline=min(a.EnforcementDeadline) 
-          --  from v_CIAssignment  a 
-          --  join v_CIAssignmentToCI  atc on atc.AssignmentID=a.AssignmentID and atc.CI_ID=css.CI_ID
-          --  ) cdl
-          where css.ResourceID = (select distinct ResourceID from v_R_System where Name0 = @ComputerName)
-            --and (@Vendor = '' or vnd.CategoryInstanceName = @Vendor) 
-            --and (@UpdateClass = '' or cls.CategoryInstanceName = @UpdateClass) 
-          order by ui.Title
-END
------------------------------------------------------------------------</CommandText>
-        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
-      </Query>
+        <rd:ReportServerUrl>http://reportserver.domain.local/ReportServer</rd:ReportServerUrl>
+      </SharedDataSet>
       <Fields>
         <Field Name="Vendor">
           <DataField>Vendor</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
+          <rd:UserDefined>true</rd:UserDefined>
         </Field>
         <Field Name="UpdateClassification">
           <DataField>UpdateClassification</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
+          <rd:UserDefined>true</rd:UserDefined>
         </Field>
         <Field Name="Title">
           <DataField>Title</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
+          <rd:UserDefined>true</rd:UserDefined>
         </Field>
         <Field Name="BulletinID">
           <DataField>BulletinID</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
+          <rd:UserDefined>true</rd:UserDefined>
         </Field>
         <Field Name="ArticleID">
           <DataField>ArticleID</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
+          <rd:UserDefined>true</rd:UserDefined>
         </Field>
         <Field Name="Targeted">
           <DataField>Targeted</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
+          <rd:UserDefined>true</rd:UserDefined>
         </Field>
         <Field Name="Installed">
           <DataField>Installed</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
+          <rd:UserDefined>true</rd:UserDefined>
         </Field>
         <Field Name="IsRequired">
           <DataField>IsRequired</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
+          <rd:UserDefined>true</rd:UserDefined>
         </Field>
         <Field Name="DatePosted">
           <DataField>DatePosted</DataField>
-          <rd:TypeName>System.DateTime</rd:TypeName>
+          <rd:UserDefined>true</rd:UserDefined>
         </Field>
         <Field Name="InformationURL">
           <DataField>InformationURL</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
+          <rd:UserDefined>true</rd:UserDefined>
         </Field>
         <Field Name="LastEnforcementMessageTime">
           <DataField>LastEnforcementMessageTime</DataField>
-          <rd:TypeName>System.DateTime</rd:TypeName>
+          <rd:UserDefined>true</rd:UserDefined>
         </Field>
         <Field Name="LastErrorCode">
           <DataField>LastErrorCode</DataField>
+          <rd:UserDefined>true</rd:UserDefined>
+        </Field>
+        <Field Name="ErrorDescription">
+          <DataField>ErrorDescription</DataField>
+          <rd:UserDefined>true</rd:UserDefined>
+        </Field>
+        <Field Name="Action">
+          <DataField>Action</DataField>
+          <rd:UserDefined>true</rd:UserDefined>
+        </Field>
+        <Field Name="InfoURL">
+          <DataField>InfoURL</DataField>
+          <rd:UserDefined>true</rd:UserDefined>
+        </Field>
+        <Field Name="MinDeadline">
+          <DataField>MinDeadline</DataField>
+          <rd:UserDefined>true</rd:UserDefined>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="DeviceMaintenanceWindows">
+      <Query>
+        <DataSourceName>DataSource1</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@ComputerName">
+            <Value>=Parameters!ComputerName.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandText>---- For tests in SQL mgmt studio only
+--Declare @ComputerName as varchar(15) = 'server1';
+
+Select SW.Description  
+            ,SW.StartTime 
+            ,[DurationInHours] = SW.Duration / 60  
+            ,[SWType] = Case when SW.ServiceWindowType = 1 then 'All Deployments'
+                        when SW.ServiceWindowType = 4 then 'Software Updates' 
+                        when SW.ServiceWindowType = 5 then 'Task sequences' 
+                        else 'Unknown' end 
+from v_FullCollectionMembership FCM 
+inner join v_ServiceWindow SW on FCM.CollectionID = SW.CollectionID
+where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @ComputerName)</CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+      </Query>
+      <Fields>
+        <Field Name="Description">
+          <DataField>Description</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="StartTime">
+          <DataField>StartTime</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="DurationInHours">
+          <DataField>DurationInHours</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="SWType">
+          <DataField>SWType</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
     </DataSet>
@@ -214,10 +189,19 @@ END
                   <Width>1.8in</Width>
                 </TablixColumn>
                 <TablixColumn>
+                  <Width>2in</Width>
+                </TablixColumn>
+                <TablixColumn>
                   <Width>1.27083in</Width>
                 </TablixColumn>
                 <TablixColumn>
                   <Width>1.1875in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>2.28125in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>2.05208in</Width>
                 </TablixColumn>
               </TablixColumns>
               <TablixRows>
@@ -249,6 +233,7 @@ END
                               </Style>
                             </Paragraph>
                           </Paragraphs>
+                          <ToolTip>Update title</ToolTip>			 
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -284,7 +269,7 @@ END
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>UpdateClassification</Value>
+                                  <Value>Classification</Value>
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>9pt</FontSize>
@@ -297,6 +282,7 @@ END
                               </Style>
                             </Paragraph>
                           </Paragraphs>
+                          <ToolTip>Update classification</ToolTip>	  
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -345,6 +331,7 @@ END
                               </Style>
                             </Paragraph>
                           </Paragraphs>
+                          <ToolTip>Update BulletinID</ToolTip>
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -393,6 +380,7 @@ END
                               </Style>
                             </Paragraph>
                           </Paragraphs>
+                          <ToolTip>Update ArticleID</ToolTip>
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -441,6 +429,7 @@ END
                               </Style>
                             </Paragraph>
                           </Paragraphs>
+                          <ToolTip>Star as indicator if the update is deployed to the system. No star means update is not deployed. Might help to identify missing updates in deployments. </ToolTip>					 
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -489,6 +478,7 @@ END
                               </Style>
                             </Paragraph>
                           </Paragraphs>
+                          <ToolTip>Star to indicate an installed update. No star means the update is not detected as installed.</ToolTip>													
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -537,6 +527,7 @@ END
                               </Style>
                             </Paragraph>
                           </Paragraphs>
+                          <ToolTip>Star to indicate a missing update. No star means the update is not evaluated to be missing or installed already. </ToolTip>						   
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -585,6 +576,54 @@ END
                               </Style>
                             </Paragraph>
                           </Paragraphs>
+                          <ToolTip>Date the update was posted to Microsoft Update</ToolTip>	   
+                          <Style>
+                            <Border>
+                              <Color>#557eb9</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                              <Width>1.5pt</Width>
+                            </TopBorder>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                              <Width>1.5pt</Width>
+                            </BottomBorder>
+                            <BackgroundColor>White</BackgroundColor>
+                            <VerticalAlign>Bottom</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                            <PaddingTop>5pt</PaddingTop>
+                            <PaddingBottom>5pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox8">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Earliest Deadline</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>9pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Left</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox8</rd:DefaultName>
+                          <ToolTip>Deadline of the update. If the update is a member of multiple deployments the earliest date will be shown. </ToolTip>							
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -631,6 +670,7 @@ END
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox2</rd:DefaultName>
+                          <ToolTip>Time a possible installation error was detected</ToolTip>			
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -677,6 +717,101 @@ END
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox4</rd:DefaultName>
+                          <ToolTip>Last installation attempt error code</ToolTip>		 
+                          <Style>
+                            <Border>
+                              <Color>#557eb9</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                              <Width>1.5pt</Width>
+                            </TopBorder>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                              <Width>1.5pt</Width>
+                            </BottomBorder>
+                            <BackgroundColor>White</BackgroundColor>
+                            <VerticalAlign>Bottom</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                            <PaddingTop>5pt</PaddingTop>
+                            <PaddingBottom>5pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox5">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Error Description</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>9pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Left</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox5</rd:DefaultName>
+                          <ToolTip>Error description</ToolTip>
+                          <Style>
+                            <Border>
+                              <Color>#557eb9</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                              <Width>1.5pt</Width>
+                            </TopBorder>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                              <Width>1.5pt</Width>
+                            </BottomBorder>
+                            <BackgroundColor>White</BackgroundColor>
+                            <VerticalAlign>Bottom</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                            <PaddingTop>5pt</PaddingTop>
+                            <PaddingBottom>5pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox7">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Possible Action</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>9pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Left</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox7</rd:DefaultName>
+                          <ToolTip>A possible action to fix the error based on different Microsoft docs articles or Customer Engineer experience. The possible solution might not help in every case, but should give you a starting point to fix the underlaying issue.</ToolTip>					  
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -1076,6 +1211,53 @@ END
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
+                        <Textbox Name="MinDeadline">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!MinDeadline.Value</Value>
+                                  <Style>
+                                    <FontFamily>Tahoma</FontFamily>
+                                    <FontWeight>Normal</FontWeight>
+                                    <TextDecoration>None</TextDecoration>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Left</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>MinDeadline</rd:DefaultName>
+                          <Style>
+                            <TopBorder>
+                              <Style>None</Style>
+                            </TopBorder>
+                            <BottomBorder>
+                              <Color>Silver</Color>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <LeftBorder>
+                              <Style>None</Style>
+                            </LeftBorder>
+                            <RightBorder>
+                              <Style>None</Style>
+                            </RightBorder>
+                            <BackgroundColor>=iif(RowNumber(Nothing) Mod 2, "Transparent", "Gainsboro")</BackgroundColor>
+                            <VerticalAlign>Top</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                            <PaddingTop>5pt</PaddingTop>
+                            <PaddingBottom>5pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
                         <Textbox Name="LastEnforcementMessageTime">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
@@ -1129,7 +1311,7 @@ END
                                   <Style>
                                     <FontFamily>Tahoma</FontFamily>
                                     <FontWeight>Normal</FontWeight>
-                                    <TextDecoration>None</TextDecoration>
+                                    <TextDecoration>Underline</TextDecoration>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1143,6 +1325,95 @@ END
                             <Actions>
                               <Action>
                                 <Hyperlink>="https://www.bing.com/search?q=error+" &amp; "0x" &amp; Hex(Fields!LastErrorCode.Value)</Hyperlink>
+                              </Action>
+                            </Actions>
+                          </ActionInfo>
+                          <Style>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                            <BottomBorder>
+                              <Color>Silver</Color>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <BackgroundColor>=iif(RowNumber(Nothing) Mod 2, "Transparent", "Gainsboro")</BackgroundColor>
+                            <VerticalAlign>Top</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                            <PaddingTop>5pt</PaddingTop>
+                            <PaddingBottom>5pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ErrorDescription">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!ErrorDescription.Value</Value>
+                                  <Style>
+                                    <FontFamily>Tahoma</FontFamily>
+                                    <FontWeight>Normal</FontWeight>
+                                    <TextDecoration>None</TextDecoration>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Left</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>ErrorDescription</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                            <BottomBorder>
+                              <Color>Silver</Color>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <BackgroundColor>=iif(RowNumber(Nothing) Mod 2, "Transparent", "Gainsboro")</BackgroundColor>
+                            <VerticalAlign>Top</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                            <PaddingTop>5pt</PaddingTop>
+                            <PaddingBottom>5pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Action">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!Action.Value</Value>
+                                  <Style>
+                                    <FontFamily>Tahoma</FontFamily>
+                                    <FontWeight>Normal</FontWeight>
+                                    <TextDecoration>=IIf(Fields!InfoURL.Value ="","None","Underline")</TextDecoration>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Left</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Action</rd:DefaultName>
+                          <ActionInfo>
+                            <Actions>
+                              <Action>
+                                <Hyperlink>=Fields!InfoURL.Value</Hyperlink>
                               </Action>
                             </Actions>
                           </ActionInfo>
@@ -1180,6 +1451,9 @@ END
                 <TablixMember />
                 <TablixMember />
                 <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
               </TablixMembers>
             </TablixColumnHierarchy>
             <TablixRowHierarchy>
@@ -1202,10 +1476,10 @@ END
                 </TablixMember>
               </TablixMembers>
             </TablixRowHierarchy>
-            <DataSetName>DataSet0</DataSetName>
-            <Top>0.66667in</Top>
+            <DataSetName>UpdatesPerDevice</DataSetName>
+            <Top>1.5in</Top>
             <Height>0.5in</Height>
-            <Width>19.6525in</Width>
+            <Width>25.98583in</Width>
             <Style>
               <Border>
                 <Style>Solid</Style>
@@ -1270,8 +1544,7 @@ END
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>="Defender updates are also visible, which are not part of the dashboard and the first sub-report!"</Value>
-                    
+                    <Value>="Update filter is set to: '" &amp; Parameters!FilterUpdates.Label &amp; "'.         This report does not exclude any updates even if set via the dashboard or sub-report!"</Value>
                   </TextRun>
                 </TextRuns>
                 <Style>
@@ -1282,7 +1555,7 @@ END
             <rd:DefaultName>Textbox1</rd:DefaultName>
             <Top>0.38889in</Top>
             <Height>0.24778in</Height>
-            <Width>8.23584in</Width>
+            <Width>12.32875in</Width>
             <ZIndex>2</ZIndex>
             <Style>
               <Border>
@@ -1294,11 +1567,656 @@ END
               <PaddingBottom>2pt</PaddingBottom>
             </Style>
           </Textbox>
+          <Textbox Name="Textbox6">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>="System is member of " &amp; Count(Fields!CollectionName.Value, "DeviceUpdateCollections") &amp; " update collections"</Value>
+                    <Style>
+                      <FontWeight>Bold</FontWeight>
+                      <Color>=IIf(Count(Fields!CollectionName.Value, "DeviceUpdateCollections") = 0,"Red","Black")</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Left</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox1</rd:DefaultName>
+            <Top>0.63667in</Top>
+            <Height>0.24778in</Height>
+            <Width>7.71417in</Width>
+            <ZIndex>3</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Tablix Name="Table1">
+            <TablixBody>
+              <TablixColumns>
+                <TablixColumn>
+                  <Width>7.71417in</Width>
+                </TablixColumn>
+              </TablixColumns>
+              <TablixRows>
+                <TablixRow>
+                  <Height>0.25in</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Header_Table0_Vendor2">
+                          <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!CollectionName.Value</SortExpression>
+                          </UserSort>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Collection name</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>9pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Left</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <ToolTip>List of collections the system is a member of used for update deployments. Might help to identify missing collection memberships. </ToolTip>
+                          <Style>
+                            <Border>
+                              <Color>#557eb9</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                              <Width>1.5pt</Width>
+                            </TopBorder>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                              <Width>1.5pt</Width>
+                            </BottomBorder>
+                            <BackgroundColor>White</BackgroundColor>
+                            <VerticalAlign>Bottom</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                            <PaddingTop>5pt</PaddingTop>
+                            <PaddingBottom>5pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+                <TablixRow>
+                  <Height>0.25in</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Details_Table0_Vendor2">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!CollectionName.Value</Value>
+                                  <Style>
+                                    <FontFamily>Tahoma</FontFamily>
+                                    <FontWeight>Normal</FontWeight>
+                                    <TextDecoration>None</TextDecoration>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Left</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                            <BottomBorder>
+                              <Color>Silver</Color>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <BackgroundColor>=iif(RowNumber(Nothing) Mod 2, "Transparent", "Gainsboro")</BackgroundColor>
+                            <VerticalAlign>Top</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                            <PaddingTop>5pt</PaddingTop>
+                            <PaddingBottom>5pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+              </TablixRows>
+            </TablixBody>
+            <TablixColumnHierarchy>
+              <TablixMembers>
+                <TablixMember />
+              </TablixMembers>
+            </TablixColumnHierarchy>
+            <TablixRowHierarchy>
+              <TablixMembers>
+                <TablixMember>
+                  <KeepWithGroup>After</KeepWithGroup>
+                  <RepeatOnNewPage>true</RepeatOnNewPage>
+                  <KeepTogether>true</KeepTogether>
+                </TablixMember>
+                <TablixMember>
+                  <Group Name="Table0_Details_Group2">
+                    <DataElementName>Detail</DataElementName>
+                  </Group>
+                  <TablixMembers>
+                    <TablixMember />
+                  </TablixMembers>
+                  <DataElementName>Detail_Collection</DataElementName>
+                  <DataElementOutput>Output</DataElementOutput>
+                  <KeepTogether>true</KeepTogether>
+                </TablixMember>
+              </TablixMembers>
+            </TablixRowHierarchy>
+            <DataSetName>DeviceUpdateCollections</DataSetName>
+            <Top>0.88445in</Top>
+            <Height>0.5in</Height>
+            <Width>7.71417in</Width>
+            <ZIndex>4</ZIndex>
+            <Style>
+              <Border>
+                <Style>Solid</Style>
+              </Border>
+              <TopBorder>
+                <Style>None</Style>
+              </TopBorder>
+              <BottomBorder>
+                <Style>None</Style>
+              </BottomBorder>
+              <LeftBorder>
+                <Style>None</Style>
+              </LeftBorder>
+              <RightBorder>
+                <Style>None</Style>
+              </RightBorder>
+              <FontFamily>Tahoma</FontFamily>
+              <FontSize>8pt</FontSize>
+              <FontWeight>Normal</FontWeight>
+              <TextDecoration>None</TextDecoration>
+              <TextAlign>General</TextAlign>
+              <VerticalAlign>Top</VerticalAlign>
+            </Style>
+          </Tablix>
+          <Tablix Name="Table2">
+            <TablixBody>
+              <TablixColumns>
+                <TablixColumn>
+                  <Width>5.33917in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1.66709in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1.58333in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>2.41667in</Width>
+                </TablixColumn>
+              </TablixColumns>
+              <TablixRows>
+                <TablixRow>
+                  <Height>0.25in</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Header_Table0_Vendor3">
+                          <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!Description.Value</SortExpression>
+                          </UserSort>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Maintenance windows</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>9pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Left</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                         <ToolTip>List of maintenance windows applied to the system</ToolTip>
+                          <Style>
+                            <Border>
+                              <Color>#557eb9</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                              <Width>1.5pt</Width>
+                            </TopBorder>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                              <Width>1.5pt</Width>
+                            </BottomBorder>
+                            <BackgroundColor>White</BackgroundColor>
+                            <VerticalAlign>Bottom</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                            <PaddingTop>5pt</PaddingTop>
+                            <PaddingBottom>5pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox11">
+                          <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!StartTime.Value</SortExpression>
+                          </UserSort>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Start Time</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>9pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                             </TextRuns>
+                              <Style>
+                                <TextAlign>Left</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox11</rd:DefaultName>
+                          <ToolTip>Starttime of a maintenance window</ToolTip>	  
+                          <Style>
+                            <Border>
+                              <Color>#557eb9</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                              <Width>1.5pt</Width>
+                            </TopBorder>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                              <Width>1.5pt</Width>
+                            </BottomBorder>
+                            <BackgroundColor>White</BackgroundColor>
+                            <VerticalAlign>Bottom</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                            <PaddingTop>5pt</PaddingTop>
+                            <PaddingBottom>5pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox13">
+                          <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!DurationInHours.Value</SortExpression>
+                          </UserSort>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Duration In Hours</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>9pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Left</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox13</rd:DefaultName>
+                          <ToolTip>Lengh or duration of a maintenance window</ToolTip>			  
+                          <Style>
+                            <Border>
+                              <Color>#557eb9</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                              <Width>1.5pt</Width>
+                            </TopBorder>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                              <Width>1.5pt</Width>
+                            </BottomBorder>
+                            <BackgroundColor>White</BackgroundColor>
+                            <VerticalAlign>Bottom</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                            <PaddingTop>5pt</PaddingTop>
+                            <PaddingBottom>5pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox15">
+                          <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!SWType.Value</SortExpression>
+                          </UserSort>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Maintenance window type</Value>
+                                  <Style>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>9pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Left</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox15</rd:DefaultName>
+                          <ToolTip>Type of deployments the maintenance window applies to</ToolTip>					   
+                          <Style>
+                            <Border>
+                              <Color>#557eb9</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                              <Width>1.5pt</Width>
+                            </TopBorder>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                              <Width>1.5pt</Width>
+                            </BottomBorder>
+                            <BackgroundColor>White</BackgroundColor>
+                            <VerticalAlign>Bottom</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                            <PaddingTop>5pt</PaddingTop>
+                            <PaddingBottom>5pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+                <TablixRow>
+                  <Height>0.25in</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Details_Table0_Vendor3">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!Description.Value</Value>
+                                  <Style>
+                                    <FontFamily>Tahoma</FontFamily>
+                                    <FontWeight>Normal</FontWeight>
+                                    <TextDecoration>None</TextDecoration>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Left</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                            <BottomBorder>
+                              <Color>Silver</Color>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <BackgroundColor>=iif(RowNumber(Nothing) Mod 2, "Transparent", "Gainsboro")</BackgroundColor>
+                            <VerticalAlign>Top</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                            <PaddingTop>5pt</PaddingTop>
+                            <PaddingBottom>5pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="StartTime">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!StartTime.Value</Value>
+                                  <Style>
+                                    <FontFamily>Tahoma</FontFamily>
+                                    <FontWeight>Normal</FontWeight>
+                                    <TextDecoration>None</TextDecoration>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Left</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>StartTime</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                            <BottomBorder>
+                              <Color>Silver</Color>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <BackgroundColor>=iif(RowNumber(Nothing) Mod 2, "Transparent", "Gainsboro")</BackgroundColor>
+                            <VerticalAlign>Top</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                            <PaddingTop>5pt</PaddingTop>
+                            <PaddingBottom>5pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="DurationInHours">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!DurationInHours.Value</Value>
+                                  <Style>
+                                    <FontFamily>Tahoma</FontFamily>
+                                    <FontWeight>Normal</FontWeight>
+                                    <TextDecoration>None</TextDecoration>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Left</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>DurationInHours</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                            <BottomBorder>
+                              <Color>Silver</Color>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <BackgroundColor>=iif(RowNumber(Nothing) Mod 2, "Transparent", "Gainsboro")</BackgroundColor>
+                            <VerticalAlign>Top</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                            <PaddingTop>5pt</PaddingTop>
+                            <PaddingBottom>5pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="SWType">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!SWType.Value</Value>
+                                  <Style>
+                                    <FontFamily>Tahoma</FontFamily>
+                                    <FontWeight>Normal</FontWeight>
+                                    <TextDecoration>None</TextDecoration>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Left</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>SWType</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                            <BottomBorder>
+                              <Color>Silver</Color>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <BackgroundColor>=iif(RowNumber(Nothing) Mod 2, "Transparent", "Gainsboro")</BackgroundColor>
+                            <VerticalAlign>Top</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                            <PaddingTop>5pt</PaddingTop>
+                            <PaddingBottom>5pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+              </TablixRows>
+            </TablixBody>
+            <TablixColumnHierarchy>
+              <TablixMembers>
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+              </TablixMembers>
+            </TablixColumnHierarchy>
+            <TablixRowHierarchy>
+              <TablixMembers>
+                <TablixMember>
+                  <KeepWithGroup>After</KeepWithGroup>
+                  <RepeatOnNewPage>true</RepeatOnNewPage>
+                  <KeepTogether>true</KeepTogether>
+                </TablixMember>
+                <TablixMember>
+                  <Group Name="Table0_Details_Group3">
+                    <DataElementName>Detail</DataElementName>
+                  </Group>
+                  <TablixMembers>
+                    <TablixMember />
+                  </TablixMembers>
+                  <DataElementName>Detail_Collection</DataElementName>
+                  <DataElementOutput>Output</DataElementOutput>
+                  <KeepTogether>true</KeepTogether>
+                </TablixMember>
+              </TablixMembers>
+            </TablixRowHierarchy>
+            <DataSetName>DeviceMaintenanceWindows</DataSetName>
+            <Top>0.88445in</Top>
+            <Left>20.10938cm</Left>
+            <Height>0.5in</Height>
+            <Width>11.00626in</Width>
+            <ZIndex>5</ZIndex>
+            <Style>
+              <Border>
+                <Style>Solid</Style>
+              </Border>
+              <TopBorder>
+                <Style>None</Style>
+              </TopBorder>
+              <BottomBorder>
+                <Style>None</Style>
+              </BottomBorder>
+              <LeftBorder>
+                <Style>None</Style>
+              </LeftBorder>
+              <RightBorder>
+               <Style>None</Style>
+              </RightBorder>
+              <FontFamily>Tahoma</FontFamily>
+              <FontSize>8pt</FontSize>
+              <FontWeight>Normal</FontWeight>
+              <TextDecoration>None</TextDecoration>
+              <TextAlign>General</TextAlign>
+              <VerticalAlign>Top</VerticalAlign>
+            </Style>
+          </Tablix>		   
         </ReportItems>
-        <Height>1.54861in</Height>
-        
+        <Height>2.77361in</Height>
       </Body>
-      <Width>19.82292in</Width>
+      <Width>25.98583in</Width>
       <Page>
         <PageHeader>
           <Height>0.01042in</Height>
@@ -1324,7 +2242,6 @@ END
         <RightMargin>1in</RightMargin>
         <TopMargin>1in</TopMargin>
         <BottomMargin>1in</BottomMargin>
-        
       </Page>
     </ReportSection>
   </ReportSections>
@@ -1346,6 +2263,14 @@ END
             <Value>0</Value>
             <Label>All Updates per device</Label>
           </ParameterValue>
+          <ParameterValue>
+            <Value>3</Value>
+            <Label>Missing updates with errors</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>4</Value>
+            <Label>All missing updates deployed or not</Label>
+          </ParameterValue>		  
         </ParameterValues>
       </ValidValues>
     </ReportParameter>
@@ -1378,6 +2303,6 @@ END
   </CodeModules>
   <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
   <rd:ReportUnitType>Inch</rd:ReportUnitType>
-  <rd:ReportServerUrl>http://reportserver.domain.local/reportserver</rd:ReportServerUrl>
+  <rd:ReportServerUrl>http://reportserver.domain.local/ReportServer</rd:ReportServerUrl>
   <rd:ReportID>f3e5ae98-66c5-4863-b1e2-69153dbb97e3</rd:ReportID>
 </Report>

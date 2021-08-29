@@ -1,0 +1,741 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<SharedDataSet xmlns="http://schemas.microsoft.com/sqlserver/reporting/2010/01/shareddatasetdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <DataSet Name="DataSet1">
+    <Query>
+      <DataSourceReference>/ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}</DataSourceReference>
+      <DataSetParameters>
+        <DataSetParameter Name="@ComputerName">
+          <ReadOnly>false</ReadOnly>
+          <Nullable>false</Nullable>
+          <OmitFromQuery>false</OmitFromQuery>
+          <rd:DbType>String</rd:DbType>
+          <rd:IsMultiValued>false</rd:IsMultiValued>
+        </DataSetParameter>
+        <DataSetParameter Name="@FilterUpdates">
+          <ReadOnly>false</ReadOnly>
+          <Nullable>false</Nullable>
+          <OmitFromQuery>false</OmitFromQuery>
+          <rd:DbType>Int32</rd:DbType>
+          <rd:IsMultiValued>false</rd:IsMultiValued>
+        </DataSetParameter>
+      </DataSetParameters>
+      <CommandText>---- For tests in SQL mgmt studio only
+--Declare @ComputerName as varchar(15) = 'server1';
+--Declare @FilterUpdates as int = 0
+
+--IF OBJECT_ID('tempdb..#tmpInstallErrors') IS NOT NULL
+--BEGIN
+--	DROP TABLE #tmpInstallErrors
+--END
+
+Declare @ResourceID as int = (select distinct ResourceID from v_R_System where Name0 = @ComputerName);
+
+IF OBJECT_ID('tempdb..#tmpInstallErrors') IS NULL 
+BEGIN
+	CREATE TABLE #tmpInstallErrors (
+				  ErrorCode bigint,
+				  ErrorCodeHex nvarchar(10),
+				  ErrorName nvarchar(50),
+				  ErrorDescription nvarchar(1024),
+				  Action nvarchar(1024),
+				  InfoURL nvarchar(1024)
+	)
+INSERT INTO #tmpInstallErrors (ErrorCode, ErrorCodeHex, ErrorName, ErrorDescription, Action, InfoURL)
+VALUES (-2147024883,'0x8007000D','ERROR_INVALID_DATA','The data is invalid','Try re-downloading the update and validate AntiVirus exclusions.','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-errors')
+,(-2146498529,'0x800F081F','CBS_E_SOURCE_MISSING','Source for package or file not found, ResolveSource() unsuccessful','Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2147010798,'0x80073712','ERROR_SXS_COMPONENT_STORE_CORRUPT','The component store has been corrupted.','Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2147010868,'0x800736CC','ERROR_SXS_FILE_HASH_MISMATCH','A components file does not match the verification information present in the component manifest.','Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2147023431,'0x800705B9','ERROR_XML_PARSE_ERROR','Unable to parse the requested XML data.','Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2147024314,'0x80070246','ERROR_ILLEGAL_CHARACTER','An invalid character was encountered.','Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2147010803,'0x8007370D','ERROR_SXS_IDENTITY_PARSE_ERROR','An identity string is malformed.','Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2147010805,'0x8007370B','ERROR_SXS_INVALID_IDENTITY_ATTRIBUTE_NAME','The name of an attribute in an identity is not within the valid range.','Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2147010806,'0x8007370A','ERROR_SXS_INVALID_IDENTITY_ATTRIBUTE_VALUE','The value of an attribute in an identity is not within the valid range.','Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2147024809,'0x80070057','E_INVALIDARG','The parameter is incorrect.','Possible actions: 1: Check proxy settings. 2: SFC.exe /scannow 3: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 4: DISM.exe /Online /Cleanup-image /Restorehealth 5: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2146762496,'0x800B0100','TRUST_E_NOSIGNATURE','No signature was present in the subject','Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures#scan-failures-due-to-missing-or-corrupted-components')
+,(-2146885629,'0x80092003','CRYPT_E_FILE_ERROR','An error occurred while Windows Update reads or writes to a file.','Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2146762495,'0x800B0101','CERT_E_EXPIRED','A required certificate is not within its validity period when verifying against the current system clock or the time stamp in the signed file.','Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2147010789,'0x8007371B','ERROR_SXS_TRANSACTION_CLOSURE_INCOMPLETE','One or more required members of the transaction are not present.','Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2147023728,'0x80070490','ERROR_NOT_FOUND','Element not found. Windows could not search for new updates','Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2148469124,'0x800f0984','PSFX_E_MATCHING_BINARY_MISSING','Matching component directory exist but binary missing','Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2148469126,'0x800f0986','PSFX_E_APPLY_FORWARD_DELTA_FAILED','Applying forward delta failed','Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2148469122,'0x800f0982','PSFX_E_MATCHING_COMPONENT_NOT_FOUND','Can not identify matching component for hydration','Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2146498511,'0x800F0831','CBS_E_STORE_CORRUPTION','CBS store corrupt.','Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/error-0x800f0831-installing-update')
+,(-2145124341,'0x8024000B','WU_E_CALL_CANCELLED','Operation was cancelled.','Validate update maximum run time in ConfigMgr console. Also, decline uneeded updates.','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/wsus-maintenance-guide')
+,(-2147024784,'0x80070070','ERROR_DISK_FULL','There is not enough space on the disk.','Free up space.','')
+,(-2016410012,'0x87D00664','CCM','Updates handler job was cancelled.','Validate update maximum run time in ConfigMgr console. Also, validate system speed to ensure the system can install the update without running out of time. ','')
+,(-2016409844,'0x87D0070C','CCM','Software update execution timeout.','Validate update maximum run time in ConfigMgr console. Also, validate system speed to ensure the system can install the update without running out of time. ','')
+,(-2016409851,'0x87D00705','CCM','Pause state required.','Try installing the update manually. Also, validate update maximum run time in ConfigMgr console. Or run SFC.exe /scannow','')
+,(-2016411062,'0x87D0024A','CCM','The job is already connected.','Might be a download issue.','')
+,(-2016410844,'0x87D00324','CCM_E_POSTINSTALL_DETECT_ERROR','The update was not detected after installation completed.','','')
+,(-2016410031,'0x87D00651','CCM','Post install scan failed.','Re-try installation and or stop WSUS client service, delete C:\Windows\SoftwareDistribution folder and C:\Windows\system32\catroot2, start service again and re-run WSUS scan.','')
+,(-2147023293,'0x80070643','ERROR_INSTALL_FAILURE','Fatal error during installation.','Run: SFC.exe /scannow','')
+,(-2016410026,'0x87D00656','CCM','Updates handler was unable to continue due to some generic internal error.','Run update deployment evaluation again. ','')
+,(-2016407289,'0x87D01107','CCM','Failed to access all the provided program locations.','','')
+,(-2016410008,'0x87D00668','CCM','Software update still detected as actionable after apply.','','')
+,(-2145124329,'0x80240017','WU_E_NOT_APPLICABLE','Operation was not performed because there are no applicable updates.','Might be a WSUS server memory issue.','')
+,(-2147467259,'0x80004005','E_FAIL','Unspecified error.','Could be a corrupt C:\Windows\system32\grouppolicy\Machine\Registry.pol file or additional WSUS GPO.','')
+,(-2146498270,'0x800F0922','CBS_E_INSTALLERS_FAILED','Processing advanced installers and generic commands failed.','','')
+,(-2147024864,'0x80070020','ERROR_SHARING_VIOLATION','The process cannot access the file because it is being used by another process.','Restart the system and try again.','https://docs.microsoft.com/en-US/troubleshoot/windows-server/deployment/fix-windows-update-errors')
+,(-2147024858,'0x80070026','ERROR_HANDLE_EOF','Reached the end of the file.','','')
+,(-2147023278,'0x80070652','ERROR_INSTALL_ALREADY_RUNNING','Another installation is already in progress. Complete that installation before proceeding with this install.','The system or WSUS service might have been shutdown during update installation. ','')
+,(-2147023261,'0x80070663','ERROR_PATCH_PACKAGE_OPEN_FAILED','This update package could not be opened.','','')
+,(-2147018253,'0x800719F3','ERROR_LOG_STATE_INVALID','Log service is not in the correct state to perform a requested action.','','')
+,(-2146885628,'0x80092004','CRYPT_E_NOT_FOUND','Cannot find object or property.','','')
+,(-2145124322,'0x8024001E','WU_E_SERVICE_STOP','Operation did not complete because the service or system was being shut down.','The system or WSUS service might have been shutdown during update installation. ','')
+,(-2145124307,'0x8024002D','WU_E_SOURCE_ABSENT','A full-file update could not be installed because it required the source.','Re-Install the affectect software or try the following actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2016410112,'0x87D00600','CCM_E_BGB_ERROR','Scan Tool Policy not found','','')
+,(-2016410007,'0x87d00669','CCM','Not able to get software updates content locations at this time','Make sure the system can find Distribution Points for updates. ','')
+,(-2016409967,'0x87d00691','CCM','Software update source not found','Validate settings under: HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate and validate CinfigMgr client settings','')
+,(-2016410107,'0x87d00605','CCM','Scan tool has been removed','','')
+,(-2016409957,'0x87d0069B','CCM','Possible resource, connectivity or disk space issue','Validate system resource, connectivity to WSUS server and disk space. ','')
+,(-2016409966,'0x87d00692','CCM','Group policy conflict','Validate WSUS group policy settings and make sure you dont set any WSUS servers via GPO and SCCM.','')
+,(-2016410110,'0x87d00602','CCM','Content location request timeout occurred','Validate client to Management and Distribution Point connectivity','')
+,(-2145075194,'0x8024c006','WU_E_DRV_SYNC_FAILED','Driver synchronization failed','','')
+,(-2145107941,'0x8024401b','WU_E_PT_HTTP_STATUS_PROXY_AUTH_REQ','Same as HTTP status 407 - proxy authentication is required.','Validate client to WSUS server connection. Make sure there are no firewall rules or proxy to block download URLs. Possible actions: 1. netsh winhhtp show proxy 2. Check local system settings for proxy: [HKEY_USERS\S-1-5-18\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections]. Take a network monitor trace to analyze. Re-run WSUS scan.','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(-2145107967,'0x80244001','WU_E_PT_SOAPCLIENT_INITIALIZE','Same as SOAPCLIENT_INITIALIZE_ERROR - initialization of the SOAP client failed, possibly because of an MSXML installation failure.','','')
+,(-2147023781,'0x8007045B','ERROR_SHUTDOWN_IN_PROGRESS','A system shutdown is in progress.','Start the system and retry the installation. ','')
+,(-2147023843,'0x8007041D','ERROR_SERVICE_REQUEST_TIMEOUT','The service did not respond to the start or control request in a timely fashion.','Validate system resources and retry the installation. ','')
+,(-2147024888,'0x80070008','ERROR_NOT_ENOUGH_MEMORY','Not enough memory resources are available to process this command.','Validate system resources and retry the installation. ','')
+,(-2145107961,'0x80244007','WU_E_PT_SOAPCLIENT_SOAPFAULT','Same as SOAPCLIENT_SOAPFAULT - SOAP client failed because there was a SOAP fault for reasons of WU_E_PT_SOAP_* error codes','This issue occurs when the number of updates to be synchronized exceeds the maximum number of installed prerequisites that a WSUS client can pass to SyncUpdates. Also validate WSUS server to SUSDB connectivity. ','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/error-80244007-when-wsus-client-scans-updates')
+,(-2147467262,'0x80004002','E_NOINTERFACE','No such interface supported.','Reinstall wuagent with windowsupdateagent30-x86.exe /wuforce /quiet /norestart','')
+,(-2147417848,'0x80010108','RPC_E_DISCONNECTED','RPC_E_Disconnected','Retry installation','')
+,(-2147221231,'0x80040111','CLASS_E_CLASSNOTAVAILABLE','ClassFactory cannot supply requested class','Retry installation','')
+,(-2147221164,'0x80040154','REGDB_E_CLASSNOTREG','Class not registered','Possible ATL.DLL corruption or needs reregister','')
+,(-2147219966,'0x80040602','CM_E_TOOMANYDATASOURCES','The limit on the number of indexes was reached.','Validate WSUS server configuration','https://docs.microsoft.com/en-us/security-updates/windowsupdateservices/18125970')
+,(-2147219963,'0x80040605','CM_E_CONNECTIONTIMEOUT','The network timed out trying to acquire a connection to a search server. Re-run WSUS scan again.','Validate client to WSUS server connection. Make sure there are no firewall rules or proxy to block download URLs. Possible actions: 1. netsh winhhtp show proxy 2. Check local system settings for proxy: [HKEY_USERS\S-1-5-18\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections]. Take a network monitor trace to analyze. Re-run WSUS scan.','')
+,(-2147219822,'0x80040692','WUA','Possible GPO Conflict','Possible GPO Conflict','')
+,(-2147219821,'0x80040693','WUA','WUA agent failure','Install latest servicing stack and cumulative update to fix old WUA agent.','')
+,(-2147217394,'0x8004100e','WBEM_E_INVALID_NAMESPACE','WMI invalid namespace. WMI might be corrupt. ','Troubleshoot WMI.','https://docs.microsoft.com/en-us/windows/win32/wmisdk/wmi-troubleshooting')
+,(-2147024894,'0x80070002','ERROR_FILE_NOT_FOUND','File not found. ','Possible actions: SFC.exe /scannow - Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase - DISM.exe /Online /Cleanup-image /Restorehealth - DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2147024891,'0x80070005','E_ACCESSDENIED','Access Denied','Might be a corrupt -system32\\grouppolicy\\machine\\registry.pol- file. ','')
+,(-2147024873,'0x80070017','ERROR_CRC','Data error (cyclic redundancy check)','Might be a BITS problem. Run Get-BitsTransfer -AllUsers. Install latest CU manually to update BITS. ','')
+,(-2147024770,'0x8007007E','ERROR_MOD_NOT_FOUND','The specified module could not be found','Install latest CU manually.','')
+,(-2147023838,'0x80070422','E_SERVICE_DISABLED','The service cannot be started, either because it is disabled or because it has no enabled devices associated with it.','Validate Windows Modules Installer, Windows Update and BITS service and set them to enabled. ','')
+,(-2147023436,'0x800705b4','ERROR_TIMEOUT','This operation returned because the timeout period expired.','Re-run WSUS scan.','')
+,(-2147012894,'0x80072ee2','WININET_E_TIMEOUT','The operation timed out','Validate client to WSUS server connection. Make sure there are no firewall rules or proxy to block download URLs. Possible actions: 1. netsh winhhtp show proxy 2. Check local system settings for proxy: [HKEY_USERS\S-1-5-18\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections]. Take a network monitor trace to analyze. Re-run WSUS scan. Can also be caused by using dual scan without an internet connection. Disable dualscan in that case: HKLM\Software\Microsoft\Windows\WindowsUpdate\ - DisableDualScan REG_DWORD Value=1','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(-2147012881,'0x80072eef','WININET_E_LOGIN_FAILURE','The login request was denied','Validate client to WSUS server connection. Make sure there are no firewall rules or proxy to block download URLs. Possible actions: 1. netsh winhhtp show proxy 2. Check local system settings for proxy: [HKEY_USERS\S-1-5-18\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections]. Take a network monitor trace to analyze. Re-run WSUS scan. Can also be caused by using dual scan without an internet connection. Disable dualscan in that case: HKLM\Software\Microsoft\Windows\WindowsUpdate\ - DisableDualScan REG_DWORD Value=2','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(-2147012867,'0x80072efd','WININET_E_CANNOT_CONNECT','A connection with the server could not be established','Validate client to WSUS server connection. Make sure there are no firewall rules or proxy to block download URLs. Possible actions: 1. netsh winhhtp show proxy 2. Check local system settings for proxy: [HKEY_USERS\S-1-5-18\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections]. Take a network monitor trace to analyze. Re-run WSUS scan. Can also be caused by using dual scan without an internet connection. Disable dualscan in that case: HKLM\Software\Microsoft\Windows\WindowsUpdate\ - DisableDualScan REG_DWORD Value=3','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(-2147012866,'0x80072efe','WININET_E_CONNECTION_ABORTED','The connection with the server was terminated abnormally','Validate client to WSUS server connection. Make sure there are no firewall rules or proxy to block download URLs. Possible actions: 1. netsh winhhtp show proxy 2. Check local system settings for proxy: [HKEY_USERS\S-1-5-18\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections]. Take a network monitor trace to analyze. Re-run WSUS scan. Can also be caused by using dual scan without an internet connection. Disable dualscan in that case: HKLM\Software\Microsoft\Windows\WindowsUpdate\ - DisableDualScan REG_DWORD Value=4','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(-2146959355,'0x80080005','CO_E_SERVER_EXEC_FAILURE','Server execution failed','WSUS client service might not be able to start. Also, certain drivers contain additional metadata information in the update.xml, which could lead Orchestrator to understand it as invalid data. Ensure that you have the latest Windows Update Agent installed on the machine.','')
+,(-2145124338,'0x8024000e','WU_E_XML_INVALID','Windows Update Agent found invalid information in the updates XML data.','Re-run WSUS scan.','')
+,(-2145124326,'0x8024001a','WU_E_POLICY_NOT_SET','Policy value is not set','Might be a corrupt -system32\\grouppolicy\\machine\\registry.pol- file. ','')
+,(-2145124321,'0x8024001f','WU_E_NO_CONNECTION','Operation did not complete because the network connection was unavailable.','Might be a temporary network issue.','')
+,(-2145124295,'0x80240039','WU_E_TOO_MANY_RESYNC','Agent is asked by server to resync too many times.','Re-run WSUS scan.','')
+,(-2145120253,'0x80241003','WU_E_MSP_DISABLED','Search may have missed some updates because policy has disabled Windows Installer patching.','Validate group policy settings.','')
+,(-2145116137,'0x80242017','WU_E_UH_NEW_SERVICING_STACK_REQUIRED','The OS servicing stack must be updated before this update is downloaded or installed.','Install latest servicing stack update','https://docs.microsoft.com/en-us/windows/deployment/update/servicing-stack-updates')
+,(-2145107960,'0x80244008','WU_E_PT_SOAPCLIENT_PARSEFAULT','Same as SOAPCLIENT_PARSEFAULT_ERROR - SOAP client failed to parse a SOAP fault.','Validate client to WSUS server connection. Make sure there are no firewall rules or proxy to block download URLs. Possible actions: 1. netsh winhhtp show proxy 2. Check local system settings for proxy: [HKEY_USERS\S-1-5-18\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections]. Take a network monitor trace to analyze. Re-run WSUS scan. Can also be caused by using dual scan without an internet connection. Disable dualscan in that case: HKLM\Software\Microsoft\Windows\WindowsUpdate\ - DisableDualScan REG_DWORD Value=1','')
+,(-2145107958,'0x8024400a','WU_E_PT_SOAPCLIENT_PARSE','Same as SOAPCLIENT_PARSE_ERROR - SOAP client failed to parse the response from the server.','Validate client to WSUS server connection. Make sure there are no firewall rules or proxy to block download URLs. Possible actions: 1. netsh winhhtp show proxy 2. Check local system settings for proxy: [HKEY_USERS\S-1-5-18\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections]. Take a network monitor trace to analyze. Re-run WSUS scan. Can also be caused by using dual scan without an internet connection. Disable dualscan in that case: HKLM\Software\Microsoft\Windows\WindowsUpdate\ - DisableDualScan REG_DWORD Value=2','')
+,(-2145107955,'0x8024400d','WU_E_PT_SOAP_CLIENT','Same as SOAP_E_CLIENT - SOAP client found the message was malformed; fix before resending.','Validate client to WSUS server connection. Make sure there are no firewall rules or proxy to block download URLs. Possible actions: 1. netsh winhhtp show proxy 2. Check local system settings for proxy: [HKEY_USERS\S-1-5-18\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections]. Take a network monitor trace to analyze. Re-run WSUS scan. Can also be caused by using dual scan without an internet connection. Disable dualscan in that case: HKLM\Software\Microsoft\Windows\WindowsUpdate\ - DisableDualScan REG_DWORD Value=3','')
+,(-2145107954,'0x8024400e','WU_E_PT_SOAP_SERVER','Same as SOAP_E_SERVER - The SOAP message could not be processed due to a server error; resend later.','Validate client to WSUS server connection. Make sure there are no firewall rules or proxy to block download URLs. Possible actions: 1. netsh winhhtp show proxy 2. Check local system settings for proxy: [HKEY_USERS\S-1-5-18\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections]. Take a network monitor trace to analyze. Re-run WSUS scan. Can also be caused by using dual scan without an internet connection. Disable dualscan in that case: HKLM\Software\Microsoft\Windows\WindowsUpdate\ - DisableDualScan REG_DWORD Value=4','')
+,(-2145107952,'0x80244010','WU_E_PT_EXCEEDED_MAX_SERVER_TRIPS','The number of round trips to the server exceeded the maximum limit.','Run WSUS maintenance. Also, MaxXMLPerRequest of table tbConfigurationC of SUSDB schould be set to 5242880','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/wsus-maintenance-guide')
+,(-2145107947,'0x80244015','WU_E_PT_REFRESH_CACHE_REQUIRED','The reply from the server indicates that the server was changed or the cookie was invalid; refresh the state of the internal cache and retry.','Stop WSUS client service, delete C:\Windows\SoftwareDistribution folder and C:\Windows\system32\catroot2, start service again and re-run WSUS scan.','')
+,(-2145107943,'0x80244019','WU_E_PT_HTTP_STATUS_NOT_FOUND','Same as HTTP status 404 - the server cannot find the requested URI (Uniform Resource Identifier).','Validate WSUS server configuration, WSUS content and license file availability. Make sure shared content source setup is correct. ','https://techcommunity.microsoft.com/t5/configuration-manager-archive/how-to-implement-a-shared-susdb-for-configuration-manager/ba-p/274103')
+,(-2145107934,'0x80244022','WU_E_PT_HTTP_STATUS_SERVICE_UNAVAIL','Same as HTTP status 503 - the service is temporarily overloaded.','Run WSUS maintenance and check WSUS server performance.','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/wsus-maintenance-guide')
+,(-2145107924,'0x8024402c','WU_E_PT_WINHTTP_NAME_NOT_RESOLVED','Winhttp SendRequest - ReceiveResponse failed with 0x2ee7 error. Same as ERROR_WINHTTP_NAME_NOT_RESOLVED - the proxy server or target server name cannot be resolved.	','Validate name resolution and connectivity to WSUS server. Make sure there are no firewall rules or proxy to block download URLs. Possible actions: 1. netsh winhhtp show proxy 2. Check local system settings for proxy: [HKEY_USERS\S-1-5-18\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections]. Take a network monitor trace to analyze. Re-run WSUS scan.','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(-2145091577,'0x80248007','WU_E_DS_NODATA','The information requested is not in the data store.','Stop WSUS client service, delete C:\Windows\SoftwareDistribution folder and C:\Windows\system32\catroot2, start service again and re-run WSUS scan.','')
+,(-2145091575,'0x80248009','WU_E_DS_MISSINGREF','The data store is missing required information or has a reference to missing license terms, file, localized property or linked row.','Validate WSUS server configuration, WSUS content and license file availability. Make sure shared content source setup is correct. ','https://techcommunity.microsoft.com/t5/configuration-manager-archive/how-to-implement-a-shared-susdb-for-configuration-manager/ba-p/274103')
+,(-2145091567,'0x80248011','WU_E_DS_UNABLETOSTART','Could not create a data store object in another process.','Stop WSUS client service, delete C:\Windows\SoftwareDistribution folder and C:\Windows\system32\catroot2, start service again and re-run WSUS scan.','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(-2145091565,'0x80248013','WU_E_DS_DUPLICATEUPDATEID','The server sent the same update to the client with two different revision IDs.','Run WSUS maintenance.','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/wsus-maintenance-guide')
+,(-2145107951,'0x80244011','WU_E_PT_SUS_SERVER_NOT_SET','WUServer policy value is missing in the registry.','Validate SCCM client settings for client. Might also be a corrupt -system32\\grouppolicy\\machine\\registry.pol- file. ','')
+,(-2145123272,'0x80240438','WU_E_PT_ENDPOINT_UNREACHABLE','There is no route or network connectivity to the endpoint.','Run WSUS maintenance. Validate client to WSUS server connection. Make sure there are no firewall rules or proxy to block download URLs. Possible actions: 1. netsh winhhtp show proxy 2. Check local system settings for proxy: [HKEY_USERS\S-1-5-18\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections]. Take a network monitor trace to analyze. Re-run WSUS scan.','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/wsus-maintenance-guide')
+,(-2147023890,'0x800703EE','ERROR_FILE_INVALID','The volume for a file has been externally altered so that the opened file is no longer valid.','Might be a hash check error. Stop WSUS client service, delete C:\Windows\SoftwareDistribution folder and C:\Windows\system32\catroot2, start service again and re-run WSUS scan.','')
+,(-2145123262,'0x80240442','WU_E_PT_OBJECT_FAULTED','The object is in a faulted state due to a previous error.','Stop WSUS client service, delete C:\Windows\SoftwareDistribution folder and C:\Windows\system32\catroot2, start service again and re-run WSUS scan.','')
+,(-2147023836,'0x80070424','ERROR_SERVICE_DOES_NOT_EXIST','The specified service does not exist as an installed service.','Validate BITS service. Stop WSUS client service, delete C:\Windows\SoftwareDistribution folder and C:\Windows\system32\catroot2, start service again and re-run WSUS scan.','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(-1073741819,'0xc0000005','ERROR_ACCESS_DENIED','Access is denied.','Might be a corrupt -system32\\grouppolicy\\machine\\registry.pol- file.','')
+,(-939522994,'0xc800044e','ERROR_BEGINNING_OF_MEDIA','The beginning of the tape or a partition was encountered.','Stop WSUS client service, delete C:\Windows\SoftwareDistribution folder and C:\Windows\system32\catroot2, start service again and re-run WSUS scan.','')
+,(-939522288,'0xc8000710','ERROR_NOLOGON_WORKSTATION_TRUST_ACCOUNT','The account used is a computer account. Use your global user account or local user account to access this server.','Could also be a full disk.  Stop WSUS client service, delete C:\Windows\SoftwareDistribution folder and C:\Windows\system32\catroot2, start service again and re-run WSUS scan.','')
+,(-939523074,'0xc80003fe','ERROR_NOTIFY_ENUM_DIR','A notify change request is being completed and the information is not being returned in the callers buffer. The caller now needs to enumerate the files to find the changes.','Could also be a full disk.  Stop WSUS client service, delete C:\Windows\SoftwareDistribution folder and C:\Windows\system32\catroot2, start service again and re-run WSUS scan.','')
+,(-939523586,'0xc80001fe','DISM_LOG_ERROR_FAILED_CURRENTIP','An error occurred. There was a problem finding the function CurrentIP in Wdscore.dll. Try reinstalling DISM.','','')
+,(-939523567,'0xc8000211','STATUS_RING_PREVIOUSLY_FULL','The specified ring buffer was full before the packet was successfully removed.','Could also be a full disk. Stop WSUS client service, delete C:\Windows\SoftwareDistribution folder and C:\Windows\system32\catroot2, start service again and re-run WSUS scan.','')
+,(-939523085,'0xc80003f3','ERROR_CANTOPEN','The configuration registry key could not be opened.','System might be out of memory. Validate system resources and retry.','')
+,(-939523079,'0xc80003f9','ERROR_NOT_REGISTRY_FILE','The system has attempted to load or restore a file into the registry, but the specified file is not in a registry file format.','Validate BITS service. ','')
+,(-939523078,'0xc80003fa','ERROR_KEY_DELETED','Illegal operation attempted on a registry key that has been marked for deletion.','','')
+,(-939523082,'0xc80003f6','ERROR_REGISTRY_RECOVERED','One of the files in the registry database had to be recovered by use of a log or alternate copy. The recovery was successful.','','')
+,(-939523064,'0xc8000408','hrFileAccessDenied','Unable to Access the File','Stop WSUS client service, delete C:\Windows\SoftwareDistribution folder and C:\Windows\system32\catroot2, start service again and re-run WSUS scan.','')
+,(-939522493,'0xc8000643','ERROR_INSTALL_FAILURE','Fatal error during installation.','Might be a system performance issue. Restart system. Or stop WSUS client service, delete C:\Windows\SoftwareDistribution folder and C:\Windows\system32\catroot2, start service again and re-run WSUS scan.','')
+,(-2145107969,'0x80243FFF','WU_E_AUCLIENT_UNEXPECTED','There was a user interface error not covered by another WU_E_AUCLIENT_* error code.','','')
+,(-2145083392,'0x8024A000','WU_E_AU_NOSERVICE','Automatic Updates was unable to service incoming requests.','','')
+,(-2145083390,'0x8024A002','WU_E_AU_NONLEGACYSERVER','The old version of the Automatic Updates client has stopped because the WSUS server has been upgraded.','','')
+,(-2145083389,'0x8024A003','WU_E_AU_LEGACYCLIENTDISABLED','The old version of the Automatic Updates client was disabled.','','')
+,(-2145083388,'0x8024A004','WU_E_AU_PAUSED','Automatic Updates was unable to process incoming requests because it was paused.','','')
+,(-2145083387,'0x8024A005','WU_E_AU_NO_REGISTERED_SERVICE','No unmanaged service is registered with AU.','','')
+,(-2145079297,'0x8024AFFF','WU_E_AU_UNEXPECTED','An Automatic Updates error not covered by another WU_E_AU* code.','','')
+,(-2145112063,'0x80243001','WU_E_INSTALLATION_RESULTS_UNKNOWN_VERSION','The results of download and installation could not be read from the registry due to an unrecognized data format version.','','')
+,(-2145112062,'0x80243002','WU_E_INSTALLATION_RESULTS_INVALID_DATA','The results of download and installation could not be read from the registry due to an invalid data format.','','')
+,(-2145112061,'0x80243003','WU_E_INSTALLATION_RESULTS_NOT_FOUND','The results of download and installation are not available; the operation may have failed to start.','','')
+,(-2145112060,'0x80243004','WU_E_TRAYICON_FAILURE','A failure occurred when trying to create an icon in the taskbar notification area.','','')
+,(-2145107971,'0x80243FFD','WU_E_NON_UI_MODE','Unable to show UI when in non-UI mode; WU client UI modules may not be installed.','','')
+,(-2145107970,'0x80243FFE','WU_E_WUCLTUI_UNSUPPORTED_VERSION','Unsupported version of WU client UI exported functions.','','')
+,(-2145123267,'0x8024043D','WU_E_SERVICEPROP_NOTAVAIL','The requested service property is not available.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145087487,'0x80249001','WU_E_INVENTORY_PARSEFAILED','Parsing of the rule file failed.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145087486,'0x80249002','WU_E_INVENTORY_GET_INVENTORY_TYPE_FAILED','Failed to get the requested inventory type from the server.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145087485,'0x80249003','WU_E_INVENTORY_RESULT_UPLOAD_FAILED','Failed to upload inventory result to the server.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145087484,'0x80249004','WU_E_INVENTORY_UNEXPECTED','There was an inventory error not covered by another error code.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145087483,'0x80249005','WU_E_INVENTORY_WMI_ERROR','A WMI error occurred when enumerating the instances for a particular class.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145067007,'0x8024E001','WU_E_EE_UNKNOWN_EXPRESSION','An expression evaluator operation could not be completed because an expression was unrecognized.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145067006,'0x8024E002','WU_E_EE_INVALID_EXPRESSION','An expression evaluator operation could not be completed because an expression was invalid.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145067005,'0x8024E003','WU_E_EE_MISSING_METADATA','An expression evaluator operation could not be completed because an expression contains an incorrect number of metadata nodes.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145067004,'0x8024E004','WU_E_EE_INVALID_VERSION','An expression evaluator operation could not be completed because the version of the serialized expression data is invalid.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145067003,'0x8024E005','WU_E_EE_NOT_INITIALIZED','The expression evaluator could not be initialized.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145067002,'0x8024E006','WU_E_EE_INVALID_ATTRIBUTEDATA','An expression evaluator operation could not be completed because there was an invalid attribute.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145067001,'0x8024E007','WU_E_EE_CLUSTER_ERROR','An expression evaluator operation could not be completed because the cluster state of the computer could not be determined.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145062913,'0x8024EFFF','WU_E_EE_UNEXPECTED','There was an expression evaluator error not covered by another WU_E_EE_* error code.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145095679,'0x80247001','WU_E_OL_INVALID_SCANFILE','An operation could not be completed because the scan package was invalid.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145095678,'0x80247002','WU_E_OL_NEWCLIENT_REQUIRED','An operation could not be completed because the scan package requires a greater version of the Windows Update Agent.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145091585,'0x80247FFF','WU_E_OL_UNEXPECTED','Search using the scan package failed.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145062911,'0x8024F001','WU_E_REPORTER_EVENTCACHECORRUPT','The event cache file was defective.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145062910,'0x8024F002','WU_E_REPORTER_EVENTNAMESPACEPARSEFAILED','The XML in the event namespace descriptor could not be parsed.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145062909,'0x8024F003','WU_E_INVALID_EVENT','The XML in the event namespace descriptor could not be parsed.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145062908,'0x8024F004','WU_E_SERVER_BUSY','The server rejected an event because the server was too busy.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145058817,'0x8024FFFF','WU_E_REPORTER_UNEXPECTED','There was a reporter error not covered by another error code.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145103871,'0x80245001','WU_E_REDIRECTOR_LOAD_XML','The redirector XML document could not be loaded into the DOM class.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145103870,'0x80245002','WU_E_REDIRECTOR_S_FALSE','The redirector XML document is missing some required information.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145103869,'0x80245003','WU_E_REDIRECTOR_ID_SMALLER','The redirectorId in the downloaded redirector cab is less than in the cached cab.','Stop WSUS client service, delete C:\Windows\SoftwareDistribution folder and C:\Windows\system32\catroot2, start service again and re-run WSUS scan.','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(-2145099777,'0x80245FFF','WU_E_REDIRECTOR_UNEXPECTED','The redirector failed for reasons not covered by another WU_E_REDIRECTOR_* error code.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145107968,'0x80244000','WU_E_PT_SOAPCLIENT_BASE','WU_E_PT_SOAPCLIENT_* error codes map to the SOAPCLIENT_ERROR enum of the ATL Server Library.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145107966,'0x80244002','WU_E_PT_SOAPCLIENT_OUTOFMEMORY','Same as SOAPCLIENT_OUTOFMEMORY - SOAP client failed because it ran out of memory.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145107965,'0x80244003','WU_E_PT_SOAPCLIENT_GENERATE','Same as SOAPCLIENT_GENERATE_ERROR - SOAP client failed to generate the request.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145107964,'0x80244004','WU_E_PT_SOAPCLIENT_CONNECT','Same as SOAPCLIENT_CONNECT_ERROR - SOAP client failed to connect to the server.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145107963,'0x80244005','WU_E_PT_SOAPCLIENT_SEND','Same as SOAPCLIENT_SEND_ERROR - SOAP client failed to send a message for reasons of WU_E_WINHTTP_* error codes.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145107962,'0x80244006','WU_E_PT_SOAPCLIENT_SERVER','Same as SOAPCLIENT_SERVER_ERROR - SOAP client failed because there was a server error.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145107959,'0x80244009','WU_E_PT_SOAPCLIENT_READ','Same as SOAPCLIENT_READ_ERROR - SOAP client failed while reading the response from the server.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145107957,'0x8024400B','WU_E_PT_SOAP_VERSION','Same as SOAP_E_VERSION_MISMATCH - SOAP client found an unrecognizable namespace for the SOAP envelope.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145107956,'0x8024400C','WU_E_PT_SOAP_MUST_UNDERSTAND','Same as SOAP_E_MUST_UNDERSTAND - SOAP client was unable to understand a header.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145107953,'0x8024400F','WU_E_PT_WMI_ERROR','There was an unspecified Windows Management Instrumentation (WMI) error.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145107950,'0x80244012','WU_E_PT_DOUBLE_INITIALIZATION','Initialization failed because the object was already initialized.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145107949,'0x80244013','WU_E_PT_INVALID_COMPUTER_NAME','The computer name could not be determined.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145107946,'0x80244016','WU_E_PT_HTTP_STATUS_BAD_REQUEST','Same as HTTP status 400 - the server could not process the request due to invalid syntax.','','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-error-reference')
+,(-2145107945,'0x80244017','WU_E_PT_HTTP_STATUS_DENIED','Same as HTTP status 401 - the requested resource requires user authentication.','Validate client to WSUS server connection. Make sure there are no firewall rules or proxy to block download URLs. Possible actions: 1. netsh winhhtp show proxy 2. Check local system settings for proxy: [HKEY_USERS\S-1-5-18\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections]. Take a network monitor trace to analyze. Re-run WSUS scan. Can also be caused by using dual scan without an internet connection. Disable dualscan in that case: HKLM\Software\Microsoft\Windows\WindowsUpdate\ - DisableDualScan REG_DWORD Value=1','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(-2145107944,'0x80244018','WU_E_PT_HTTP_STATUS_FORBIDDEN','Same as HTTP status 403 - server understood the request but declined to fulfill it.','Validate client to WSUS server connection. Make sure there are no firewall rules or proxy to block download URLs. Possible actions: 1. netsh winhhtp show proxy 2. Check local system settings for proxy: [HKEY_USERS\S-1-5-18\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections]. Take a network monitor trace to analyze. Re-run WSUS scan. Can also be caused by using dual scan without an internet connection. Disable dualscan in that case: HKLM\Software\Microsoft\Windows\WindowsUpdate\ - DisableDualScan REG_DWORD Value=1','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(-2145107942,'0x8024401A','WU_E_PT_HTTP_STATUS_BAD_METHOD','Same as HTTP status 405 - the HTTP method is not allowed.','','')
+,(-2145107940,'0x8024401C','WU_E_PT_HTTP_STATUS_REQUEST_TIMEOUT','Same as HTTP status 408 - the server timed out waiting for the request.','Validate client to WSUS server connection. Make sure there are no firewall rules or proxy to block download URLs. Possible actions: 1. netsh winhhtp show proxy 2. Check local system settings for proxy: [HKEY_USERS\S-1-5-18\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections]. Take a network monitor trace to analyze. Re-run WSUS scan. Can also be caused by using dual scan without an internet connection. Disable dualscan in that case: HKLM\Software\Microsoft\Windows\WindowsUpdate\ - DisableDualScan REG_DWORD Value=1','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(-2145107939,'0x8024401D','WU_E_PT_HTTP_STATUS_CONFLICT','Same as HTTP status 409 - the request was not completed due to a conflict with the current state of the resource.','','')
+,(-2145107938,'0x8024401E','WU_E_PT_HTTP_STATUS_GONE','Same as HTTP status 410 - requested resource is no longer available at the server.','','')
+,(-2145107937,'0x8024401F','WU_E_PT_HTTP_STATUS_SERVER_ERROR','Same as HTTP status 500 - an error internal to the server prevented fulfilling the request.','','')
+,(-2145107936,'0x80244020','WU_E_PT_HTTP_STATUS_NOT_SUPPORTED','Same as HTTP status 500 - server does not support the functionality required to fulfill the request.','','')
+,(-2145107935,'0x80244021','WU_E_PT_HTTP_STATUS_BAD_GATEWAY','Same as HTTP status 502 - the server while acting as a gateway or a proxy received an invalid response from the upstream server it accessed in attempting to fulfill the request.','Validate client to WSUS server connection. Make sure there are no firewall rules or proxy to block download URLs. Possible actions: 1. netsh winhhtp show proxy 2. Check local system settings for proxy: [HKEY_USERS\S-1-5-18\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections]. Take a network monitor trace to analyze. Re-run WSUS scan. Can also be caused by using dual scan without an internet connection. Disable dualscan in that case: HKLM\Software\Microsoft\Windows\WindowsUpdate\ - DisableDualScan REG_DWORD Value=1','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(-2145107933,'0x80244023','WU_E_PT_HTTP_STATUS_GATEWAY_TIMEOUT','Same as HTTP status 503 - the request was timed out waiting for a gateway.','Validate client to WSUS server connection. Make sure there are no firewall rules or proxy to block download URLs. Possible actions: 1. netsh winhhtp show proxy 2. Check local system settings for proxy: [HKEY_USERS\S-1-5-18\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections]. Take a network monitor trace to analyze. Re-run WSUS scan. Can also be caused by using dual scan without an internet connection. Disable dualscan in that case: HKLM\Software\Microsoft\Windows\WindowsUpdate\ - DisableDualScan REG_DWORD Value=1','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(-2145107932,'0x80244024','WU_E_PT_HTTP_STATUS_VERSION_NOT_SUP','Same as HTTP status 505 - the server does not support the HTTP protocol version used for the request.','','')
+,(-2145107931,'0x80244025','WU_E_PT_FILE_LOCATIONS_CHANGED','Operation failed due to a changed file location; refresh internal state and resend.','','')
+,(-2145107930,'0x80244026','WU_E_PT_REGISTRATION_NOT_SUPPORTED','Operation failed because Windows Update Agent does not support registration with a non-WSUS server.','','')
+,(-2145107929,'0x80244027','WU_E_PT_NO_AUTH_PLUGINS_REQUESTED','The server returned an empty authentication information list.','','')
+,(-2145107928,'0x80244028','WU_E_PT_NO_AUTH_COOKIES_CREATED','Windows Update Agent was unable to create any valid authentication cookies.','','')
+,(-2145107927,'0x80244029','WU_E_PT_INVALID_CONFIG_PROP','A configuration property value was wrong.','','')
+,(-2145107926,'0x8024402A','WU_E_PT_CONFIG_PROP_MISSING','A configuration property value was missing.','','')
+,(-2145107925,'0x8024402B','WU_E_PT_HTTP_STATUS_NOT_MAPPED','The HTTP request could not be completed and the reason did not correspond to any of the WU_E_PT_HTTP_* error codes.','','')
+,(-2145107921,'0x8024402F','WU_E_PT_ECP_SUCCEEDED_WITH_ERRORS','External cab file processing completed with some errors.','One of the reasons we see this issue is due to the design of a software called Lightspeed Rocket for Web filtering. Add the IP addresses of devices you want to get updates to the exceptions list of Lightspeed','')
+,(-2145107920,'0x80244030','WU_E_PT_ECP_INIT_FAILED','The external cab processor initialization did not complete.','','')
+,(-2145107919,'0x80244031','WU_E_PT_ECP_INVALID_FILE_FORMAT','The format of a metadata file was invalid.','','')
+,(-2145107918,'0x80244032','WU_E_PT_ECP_INVALID_METADATA','External cab processor found invalid metadata.','','')
+,(-2145107917,'0x80244033','WU_E_PT_ECP_FAILURE_TO_EXTRACT_DIGEST','The file digest could not be extracted from an external cab file.','','')
+,(-2145107916,'0x80244034','WU_E_PT_ECP_FAILURE_TO_DECOMPRESS_CAB_FILE','An external cab file could not be decompressed.','','')
+,(-2145107915,'0x80244035','WU_E_PT_ECP_FILE_LOCATION_ERROR','External cab processor was unable to get file locations.','','')
+,(-2145103873,'0x80244FFF','WU_E_PT_UNEXPECTED','A communication error not covered by another WU_E_PT_* error code.','','')
+,(-2145103827,'0x8024502D','WU_E_PT_SAME_REDIR_ID','Windows Update Agent failed to download a redirector cabinet file with a new redirectorId value from the server during the recovery.','','')
+,(-2145103826,'0x8024502E','WU_E_PT_NO_MANAGED_RECOVER','A redirector recovery action did not complete because the server is managed.','','')
+,(-2145099775,'0x80246001','WU_E_DM_URLNOTAVAILABLE','A download manager operation could not be completed because the requested file does not have a URL.','','')
+,(-2145099774,'0x80246002','WU_E_DM_INCORRECTFILEHASH','A download manager operation could not be completed because the file digest was not recognized.','','')
+,(-2145099773,'0x80246003','WU_E_DM_UNKNOWNALGORITHM','A download manager operation could not be completed because the file metadata requested an unrecognized hash algorithm.','','')
+,(-2145099772,'0x80246004','WU_E_DM_NEEDDOWNLOADREQUEST','An operation could not be completed because a download request is required from the download handler.','','')
+,(-2145099771,'0x80246005','WU_E_DM_NONETWORK','A download manager operation could not be completed because the network connection was unavailable.','','')
+,(-2145099770,'0x80246006','WU_E_DM_WRONGBITSVERSION','A download manager operation could not be completed because the version of Background Intelligent Transfer Service (BITS) is incompatible.','','')
+,(-2145099769,'0x80246007','WU_E_DM_NOTDOWNLOADED','The update has not been downloaded.','','')
+,(-2145099768,'0x80246008','WU_E_DM_FAILTOCONNECTTOBITS','A download manager operation failed because the download manager was unable to connect the Background Intelligent Transfer Service (BITS).','Stop WSUS client service, delete C:\Windows\SoftwareDistribution folder and C:\Windows\system32\catroot2, start service again and re-run WSUS scan.','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(-2145099767,'0x80246009','WU_E_DM_BITSTRANSFERERROR','A download manager operation failed because there was an unspecified Background Intelligent Transfer Service (BITS) transfer error.','','')
+,(-2145099766,'0x8024600A','WU_E_DM_DOWNLOADLOCATIONCHANGED','A download must be restarted because the location of the source of the download has changed.','','')
+,(-2145099765,'0x8024600B','WU_E_DM_CONTENTCHANGED','A download must be restarted because the update content changed in a new revision.','','')
+,(-2145095681,'0x80246FFF','WU_E_DM_UNEXPECTED','There was a download manager error not covered by another WU_E_DM_* error code.','','')
+,(-2145116160,'0x80242000','WU_E_UH_REMOTEUNAVAILABLE','A request for a remote update handler could not be completed because no remote process is available.','','')
+,(-2145116159,'0x80242001','WU_E_UH_LOCALONLY','A request for a remote update handler could not be completed because the handler is local only.','','')
+,(-2145116158,'0x80242002','WU_E_UH_UNKNOWNHANDLER','A request for an update handler could not be completed because the handler could not be recognized.','','')
+,(-2145116157,'0x80242003','WU_E_UH_REMOTEALREADYACTIVE','A remote update handler could not be created because one already exists.','','')
+,(-2145116156,'0x80242004','WU_E_UH_DOESNOTSUPPORTACTION','A request for the handler to install (uninstall) an update could not be completed because the update does not support install (uninstall).','','')
+,(-2145116155,'0x80242005','WU_E_UH_WRONGHANDLER','An operation did not complete because the wrong handler was specified.','','')
+,(-2145116154,'0x80242006','WU_E_UH_INVALIDMETADATA','A handler operation could not be completed because the update contains invalid metadata.','Stop WSUS client service, delete C:\Windows\SoftwareDistribution folder and C:\Windows\system32\catroot2, start service again and re-run WSUS scan.','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-errors')
+,(-2145116153,'0x80242007','WU_E_UH_INSTALLERHUNG','An operation could not be completed because the installer exceeded the time limit.','','')
+,(-2145116152,'0x80242008','WU_E_UH_OPERATIONCANCELLED','An operation being done by the update handler was canceled.','','')
+,(-2145116151,'0x80242009','WU_E_UH_BADHANDLERXML','An operation could not be completed because the handler-specific metadata is invalid.','','')
+,(-2145116150,'0x8024200A','WU_E_UH_CANREQUIREINPUT','A request to the handler to install an update could not be completed because the update requires user input.','','')
+,(-2145116149,'0x8024200B','WU_E_UH_INSTALLERFAILURE','The installer failed to install (uninstall) one or more updates.','','')
+,(-2145116148,'0x8024200C','WU_E_UH_FALLBACKTOSELFCONTAINED','The update handler should download self-contained content rather than delta-compressed content for the update.','','')
+,(-2145116147,'0x8024200D','WU_E_UH_NEEDANOTHERDOWNLOAD','The update handler did not install the update because it needs to be downloaded again.','','')
+,(-2145116146,'0x8024200E','WU_E_UH_NOTIFYFAILURE','The update handler failed to send notification of the status of the install (uninstall) operation.','','')
+,(-2145116145,'0x8024200F','WU_E_UH_INCONSISTENT_FILE_NAMES','The file names contained in the update metadata and in the update package are inconsistent.','','')
+,(-2145116144,'0x80242010','WU_E_UH_FALLBACKERROR','The update handler failed to fall back to the self-contained content.','','')
+,(-2145116143,'0x80242011','WU_E_UH_TOOMANYDOWNLOADREQUESTS','The update handler has exceeded the maximum number of download requests.','','')
+,(-2145116142,'0x80242012','WU_E_UH_UNEXPECTEDCBSRESPONSE','The update handler has received an unexpected response from CBS.','','')
+,(-2145116141,'0x80242013','WU_E_UH_BADCBSPACKAGEID','The update metadata contains an invalid CBS package identifier.','','')
+,(-2145116140,'0x80242014','WU_E_UH_POSTREBOOTSTILLPENDING','The post-reboot operation for the update is still in progress.','Some Windows Updates require the device to be restarted. Restart the device to complete update installation.','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-errors')
+,(-2145116139,'0x80242015','WU_E_UH_POSTREBOOTRESULTUNKNOWN','The result of the post-reboot operation for the update could not be determined.','','')
+,(-2145116138,'0x80242016','WU_E_UH_POSTREBOOTUNEXPECTEDSTATE','The state of the update after its post-reboot operation has completed is unexpected.','','')
+,(-2145112065,'0x80242FFF','WU_E_UH_UNEXPECTED','An update handler error not covered by another WU_E_UH_* code.','','')
+,(-2145091584,'0x80248000','WU_E_DS_SHUTDOWN','An operation failed because Windows Update Agent is shutting down.','','')
+,(-2145091583,'0x80248001','WU_E_DS_INUSE','An operation failed because the data store was in use.','','')
+,(-2145091582,'0x80248002','WU_E_DS_INVALID','The current and expected states of the data store do not match.','','')
+,(-2145091581,'0x80248003','WU_E_DS_TABLEMISSING','The data store is missing a table.','','')
+,(-2145091580,'0x80248004','WU_E_DS_TABLEINCORRECT','The data store contains a table with unexpected columns.','','')
+,(-2145091579,'0x80248005','WU_E_DS_INVALIDTABLENAME','A table could not be opened because the table is not in the data store.','','')
+,(-2145091578,'0x80248006','WU_E_DS_BADVERSION','The current and expected versions of the data store do not match.','','')
+,(-2145091576,'0x80248008','WU_E_DS_MISSINGDATA','The data store is missing required information or has a NULL in a table column that requires a non-null value.','','')
+,(-2145091574,'0x8024800A','WU_E_DS_UNKNOWNHANDLER','The update was not processed because its update handler could not be recognized.','','')
+,(-2145091573,'0x8024800B','WU_E_DS_CANTDELETE','The update was not deleted because it is still referenced by one or more services.','','')
+,(-2145091572,'0x8024800C','WU_E_DS_LOCKTIMEOUTEXPIRED','The data store section could not be locked within the allotted time.','','')
+,(-2145091571,'0x8024800D','WU_E_DS_NOCATEGORIES','The category was not added because it contains no parent categories and is not a top-level category itself.','','')
+,(-2145091570,'0x8024800E','WU_E_DS_ROWEXISTS','The row was not added because an existing row has the same primary key.','','')
+,(-2145091569,'0x8024800F','WU_E_DS_STOREFILELOCKED','The data store could not be initialized because it was locked by another process.','','')
+,(-2145091568,'0x80248010','WU_E_DS_CANNOTREGISTER','The data store is not allowed to be registered with COM in the current process.','','')
+,(-2145091564,'0x80248014','WU_E_DS_UNKNOWNSERVICE','An operation did not complete because the service is not in the data store.','','')
+,(-2145091563,'0x80248015','WU_E_DS_SERVICEEXPIRED','An operation did not complete because the registration of the service has expired.','','')
+,(-2145091562,'0x80248016','WU_E_DS_DECLINENOTALLOWED','A request to hide an update was declined because it is a mandatory update or because it was deployed with a deadline.','','')
+,(-2145091561,'0x80248017','WU_E_DS_TABLESESSIONMISMATCH','A table was not closed because it is not associated with the session.','','')
+,(-2145091560,'0x80248018','WU_E_DS_SESSIONLOCKMISMATCH','A table was not closed because it is not associated with the session.','','')
+,(-2145091559,'0x80248019','WU_E_DS_NEEDWINDOWSSERVICE','A request to remove the Windows Update service or to unregister it with Automatic Updates was declined because it is a built-in service and/or Automatic Updates cannot fall back to another service.','','')
+,(-2145091558,'0x8024801A','WU_E_DS_INVALIDOPERATION','A request was declined because the operation is not allowed.','','')
+,(-2145091557,'0x8024801B','WU_E_DS_SCHEMAMISMATCH','The schema of the current data store and the schema of a table in a backup XML document do not match.','','')
+,(-2145091556,'0x8024801C','WU_E_DS_RESETREQUIRED','The data store requires a session reset; release the session and retry with a new session.','','')
+,(-2145091555,'0x8024801D','WU_E_DS_IMPERSONATED','A data store operation did not complete because it was requested with an impersonated identity.','','')
+,(-2145087489,'0x80248FFF','WU_E_DS_UNEXPECTED','A data store error not covered by another WU_E_DS_* code.','','')
+,(-2145075199,'0x8024C001','WU_E_DRV_PRUNED','A driver was skipped.','','')
+,(-2145075198,'0x8024C002','WU_E_DRV_NOPROP_OR_LEGACY','A property for the driver could not be found. It may not conform with required specifications.','','')
+,(-2145075197,'0x8024C003','WU_E_DRV_REG_MISMATCH','The registry type read for the driver does not match the expected type.','','')
+,(-2145075196,'0x8024C004','WU_E_DRV_NO_METADATA','The driver update is missing metadata.','','')
+,(-2145075195,'0x8024C005','WU_E_DRV_MISSING_ATTRIBUTE','The driver update is missing a required attribute.','','')
+,(-2145075193,'0x8024C007','WU_E_DRV_NO_PRINTER_CONTENT','Information required for the synchronization of applicable printers is missing.','','')
+,(-2145071105,'0x8024CFFF','WU_E_DRV_UNEXPECTED','A driver error not covered by another WU_E_DRV_* code.','','')
+,(-2145124351,'0x80240001','WU_E_NO_SERVICE','Windows Update Agent was unable to provide the service.','','https://docs.microsoft.com/en-us/previous-versions/windows/desktop/hh968413(v=vs.85)')
+,(-2145124350,'0x80240002','WU_E_MAX_CAPACITY_REACHED','The maximum capacity of the service was exceeded.','','https://docs.microsoft.com/en-us/previous-versions/windows/desktop/hh968413(v=vs.85)')
+,(-2145124349,'0x80240003','WU_E_UNKNOWN_ID','An ID cannot be found.','','https://docs.microsoft.com/en-us/previous-versions/windows/desktop/hh968413(v=vs.85)')
+,(-2145124348,'0x80240004','WU_E_NOT_INITIALIZED','The object could not be initialized.','Restart Windows Update service and try again','https://docs.microsoft.com/en-us/previous-versions/windows/desktop/hh968413(v=vs.85)')
+,(-2145124347,'0x80240005','WU_E_RANGEOVERLAP','The update handler requested a byte range overlapping a previously requested range.','','https://docs.microsoft.com/en-us/previous-versions/windows/desktop/hh968413(v=vs.85)')
+,(-2145124346,'0x80240006','WU_E_TOOMANYRANGES','The requested number of byte ranges exceeds the maximum number (2^31 - 1).','','https://docs.microsoft.com/en-us/previous-versions/windows/desktop/hh968413(v=vs.85)')
+,(-2145124345,'0x80240007','WU_E_INVALIDINDEX','The index to a collection was invalid.','','https://docs.microsoft.com/en-us/previous-versions/windows/desktop/hh968413(v=vs.85)')
+,(-2145124344,'0x80240008','WU_E_ITEMNOTFOUND','The key for the item queried could not be found.','','https://docs.microsoft.com/en-us/previous-versions/windows/desktop/hh968413(v=vs.85)')
+,(-2145124343,'0x80240009','WU_E_OPERATIONINPROGRESS','Another conflicting operation was in progress. Some operations such as installation cannot be performed twice simultaneously.','','https://docs.microsoft.com/en-us/previous-versions/windows/desktop/hh968413(v=vs.85)')
+,(-2145124342,'0x8024000A','WU_E_COULDNOTCANCEL','Cancellation of the operation was not allowed.','','')
+,(-2145124340,'0x8024000C','WU_E_NOOP','No operation was required.','','')
+,(-2145124339,'0x8024000D','WU_E_XML_MISSINGDATA','Windows Update Agent could not find required information in the updates XML data.','','')
+,(-2145124337,'0x8024000F','WU_E_CYCLE_DETECTED','Circular update relationships were detected in the metadata.','','')
+,(-2145124336,'0x80240010','WU_E_TOO_DEEP_RELATION','Update relationships too deep to evaluate were evaluated.','','')
+,(-2145124335,'0x80240011','WU_E_INVALID_RELATIONSHIP','An invalid update relationship was detected.','','')
+,(-2145124334,'0x80240012','WU_E_REG_VALUE_INVALID','An invalid registry value was read.','','')
+,(-2145124333,'0x80240013','WU_E_DUPLICATE_ITEM','Operation tried to add a duplicate item to a list.','','')
+,(-2145124330,'0x80240016','WU_E_INSTALL_NOT_ALLOWED','Operation tried to install while another installation was in progress or the system was pending a mandatory restart.','','')
+,(-2145124328,'0x80240018','WU_E_NO_USERTOKEN','Operation failed because a required user token is missing.','','')
+,(-2145124327,'0x80240019','WU_E_EXCLUSIVE_INSTALL_CONFLICT','An exclusive update cannot be installed with other updates at the same time.','','')
+,(-2145124325,'0x8024001B','WU_E_SELFUPDATE_IN_PROGRESS','The operation could not be performed because the Windows Update Agent is self-updating.','','')
+,(-2145124323,'0x8024001D','WU_E_INVALID_UPDATE','An update contains invalid metadata.','','')
+,(-2145124320,'0x80240020','WU_E_NO_INTERACTIVE_USER','Operation did not complete because there is no logged-on interactive user.','Sign in to the device to start the installation and allow the device to restart.','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-errors')
+,(-2145124319,'0x80240021','WU_E_TIME_OUT','Operation did not complete because it timed out.','','')
+,(-2145124318,'0x80240022','WU_E_ALL_UPDATES_FAILED','Operation failed for all the updates.','','')
+,(-2145124317,'0x80240023','WU_E_EULAS_DECLINED','The license terms for all updates were declined.','','')
+,(-2145124316,'0x80240024','WU_E_NO_UPDATE','There are no updates.','','')
+,(-2145124315,'0x80240025','WU_E_USER_ACCESS_DISABLED','Group Policy settings prevented access to Windows Update.','','')
+,(-2145124314,'0x80240026','WU_E_INVALID_UPDATE_TYPE','The type of update is invalid.','','')
+,(-2145124313,'0x80240027','WU_E_URL_TOO_LONG','The URL exceeded the maximum length.','','https://docs.microsoft.com/en-us/previous-versions/windows/desktop/hh968413(v=vs.85)')
+,(-2145124312,'0x80240028','WU_E_UNINSTALL_NOT_ALLOWED','The update could not be uninstalled because the request did not originate from a WSUS server.','','')
+,(-2145124311,'0x80240029','WU_E_INVALID_PRODUCT_LICENSE','Search may have missed some updates before there is an unlicensed application on the system.','','')
+,(-2145124310,'0x8024002A','WU_E_MISSING_HANDLER','A component required to detect applicable updates was missing.','','')
+,(-2145124309,'0x8024002B','WU_E_LEGACYSERVER','An operation did not complete because it requires a newer version of server.','','')
+,(-2145124308,'0x8024002C','WU_E_BIN_SOURCE_ABSENT','A delta-compressed update could not be installed because it required the source.','','')
+,(-2145124306,'0x8024002E','WU_E_WU_DISABLED','Access to an unmanaged server is not allowed.','','')
+,(-2145124305,'0x8024002F','WU_E_CALL_CANCELLED_BY_POLICY','Operation did not complete because the DisableWindowsUpdateAccess policy was set.','','')
+,(-2145124304,'0x80240030','WU_E_INVALID_PROXY_SERVER','The format of the proxy list was invalid.','Validate client to WSUS server connection. Make sure there are no firewall rules or proxy to block download URLs. Possible actions: 1. netsh winhhtp show proxy 2. Check local system settings for proxy: [HKEY_USERS\S-1-5-18\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections]. Take a network monitor trace to analyze. Re-run WSUS scan.','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(-2145124303,'0x80240031','WU_E_INVALID_FILE','The file is in the wrong format.','','')
+,(-2145124302,'0x80240032','WU_E_INVALID_CRITERIA','The search criteria string was invalid.','','')
+,(-2145124301,'0x80240033','WU_E_EULA_UNAVAILABLE','License terms could not be downloaded.','Validate WSUS content existence and accessibility. Office Updates might also fail if not all required languages are available.','')
+,(-2145124300,'0x80240034','WU_E_DOWNLOAD_FAILED','Update failed to download.','','')
+,(-2145124299,'0x80240035','WU_E_UPDATE_NOT_PROCESSED','The update was not processed.','','')
+,(-2145124298,'0x80240036','WU_E_INVALID_OPERATION','The objects current state did not allow the operation.','','')
+,(-2145124297,'0x80240037','WU_E_NOT_SUPPORTED','The functionality for the operation is not supported.','','')
+,(-2145124296,'0x80240038','WU_E_WINHTTP_INVALID_FILE','The downloaded file has an unexpected content type.','','')
+,(-2145124288,'0x80240040','WU_E_NO_SERVER_CORE_SUPPORT','WUA API method does not run on Server Core installation.','','')
+,(-2145124287,'0x80240041','WU_E_SYSPREP_IN_PROGRESS','Service is not available while sysprep is running.','','')
+,(-2145124286,'0x80240042','WU_E_UNKNOWN_SERVICE','The update service is no longer registered with AU.','','')
+,(-2145124285,'0x80240043','WU_E_NO_UI_SUPPORT','There is no support for WUA UI.','','')
+,(-2145120257,'0x80240FFF','WU_E_UNEXPECTED','An operation failed due to reasons not covered by another error code.','','')
+,(2359297,'0x00240001','WU_S_SERVICE_STOP','Windows Update Agent was stopped successfully.','','')
+,(2359298,'0x00240002','WU_S_SELFUPDATE','Windows Update Agent updated itself.','','')
+,(2359299,'0x00240003','WU_S_UPDATE_ERROR','Operation completed successfully but there were errors applying the updates.','','')
+,(2359300,'0x00240004','WU_S_MARKED_FOR_DISCONNECT','A callback was marked to be disconnected later because the request to disconnect the operation came while a callback was executing.','','')
+,(2359301,'0x00240005','WU_S_REBOOT_REQUIRED','The system must be restarted to complete installation of the update.','','')
+,(2359302,'0x00240006','WU_S_ALREADY_INSTALLED','The update to be installed is already installed on the system.','','')
+,(2359303,'0x00240007','WU_S_ALREADY_UNINSTALLED','The update to be removed is not installed on the system.','','')
+,(2359304,'0x00240008','WU_S_ALREADY_DOWNLOADED','The update to be downloaded has already been downloaded.','','')
+,(-2145120255,'0x80241001','WU_E_MSI_WRONG_VERSION','Search may have missed some updates because the Windows Installer is less than version 3.1.','','')
+,(-2145120254,'0x80241002','WU_E_MSI_NOT_CONFIGURED','Search may have missed some updates because the Windows Installer is not configured.','','')
+,(-2145120252,'0x80241004','WU_E_MSI_WRONG_APP_CONTEXT','An update could not be applied because the application is installed per-user.','','')
+,(-2145116161,'0x80241FFF','WU_E_MSP_UNEXPECTED','Search may have missed some updates because there was a failure of the Windows Installer.','','')
+,(-2145071103,'0x8024D001','WU_E_SETUP_INVALID_INFDATA','Windows Update Agent could not be updated because an INF file contains invalid information.','','')
+,(-2145071102,'0x8024D002','WU_E_SETUP_INVALID_IDENTDATA','Windows Update Agent could not be updated because the wuident.cab file contains invalid information.','','')
+,(-2145071101,'0x8024D003','WU_E_SETUP_ALREADY_INITIALIZED','Windows Update Agent could not be updated because of an internal error that caused setup initialization to be performed twice.','','')
+,(-2145071100,'0x8024D004','WU_E_SETUP_NOT_INITIALIZED','Windows Update Agent could not be updated because setup initialization never completed successfully.','','')
+,(-2145071099,'0x8024D005','WU_E_SETUP_SOURCE_VERSION_MISMATCH','Windows Update Agent could not be updated because the versions specified in the INF do not match the actual source file versions.','','')
+,(-2145071098,'0x8024D006','WU_E_SETUP_TARGET_VERSION_GREATER','Windows Update Agent could not be updated because a WUA file on the target system is newer than the corresponding source file.','','')
+,(-2145071097,'0x8024D007','WU_E_SETUP_REGISTRATION_FAILED','Windows Update Agent could not be updated because regsvr32.exe returned an error.','','')
+,(-2145071095,'0x8024D009','WU_E_SETUP_SKIP_UPDATE','An update to the Windows Update Agent was skipped due to a directive in the wuident.cab file.','WSUS might not sending the Self-update to the clients.','https://docs.microsoft.com/en-US/troubleshoot/windows-server/deployment/wsus-selfupdate-not-send-automatic-updates')
+,(-2145071094,'0x8024D00A','WU_E_SETUP_UNSUPPORTED_CONFIGURATION','Windows Update Agent could not be updated because the current system configuration is not supported.','','')
+,(-2145071093,'0x8024D00B','WU_E_SETUP_BLOCKED_CONFIGURATION','Windows Update Agent could not be updated because the system is configured to block the update.','','')
+,(-2145071092,'0x8024D00C','WU_E_SETUP_REBOOT_TO_FIX','Windows Update Agent could not be updated because a restart of the system is required.','','')
+,(-2145071091,'0x8024D00D','WU_E_SETUP_ALREADYRUNNING','Windows Update Agent setup is already running.','','')
+,(-2145071090,'0x8024D00E','WU_E_SETUP_REBOOTREQUIRED','Windows Update Agent setup package requires a reboot to complete installation.','','')
+,(-2145071089,'0x8024D00F','WU_E_SETUP_HANDLER_EXEC_FAILURE','Windows Update Agent could not be updated because the setup handler failed during execution.','','')
+,(-2145071088,'0x8024D010','WU_E_SETUP_INVALID_REGISTRY_DATA','Windows Update Agent could not be updated because the registry contains invalid information.','','')
+,(-2145071085,'0x8024D013','WU_E_SETUP_WRONG_SERVER_VERSION','Windows Update Agent could not be updated because the server does not contain update information for this version.','','')
+,(-2145067009,'0x8024DFFF','WU_E_SETUP_UNEXPECTED','Windows Update Agent could not be updated because of an error not covered by another WU_E_SETUP_* error code.','','')
+,(-2016407040,'0x87d01200','CCM','No content request found with the given handle.','System might not be able to locate update content. Validate boundary settings for specific system. ','')
+,(-2146498173,'0x800f0983','PSFX_E_MATCHING_COMPONENT_DIRECTORY_MISSING','Matching component directory missing','Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2147023504,'0x80070570','ERROR_FILE_CORRUPT','The file or directory is corrupted and unreadable.','Retry the installation. Possible other actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2147418113,'0x8000ffff','E_UNEXPECTED','Catastrophic failure','Retry the installation. Possible other actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-1906441913,'0x8e5e0147','ERROR_OFFSET_ALIGNMENT_VIOLATION','The command specified a data offset that does not align to the device granularity/alignment.','','')
+,(-1906441218,'0x8e5e03fe','ERROR_NOTIFY_ENUM_DIR','A notify change request is being completed and the information is not being returned in the caller buffer. The caller now needs to enumerate the files to find the changes.','','')
+,(-2146498304,'0x800f0900','CBS_E_XML_PARSER_FAILURE','unexpected internal XML parser error.','Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2146498168,'0x800f0988','PSFX_E_INVALID_DELTA_COMBINATION','Package delta combination is invalid','Try installing the full update and not just the delta file. Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2147024120,'0x80070308','ERROR_REQUEST_OUT_OF_SEQUENCE','The client of a component requested an operation which is not valid given the state of the component instance.','','')
+,(-2147010815,'0x80073701','ERROR_SXS_ASSEMBLY_MISSING','The referenced assembly could not be found.','Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2146498167,'0x800f0989','PSFX_E_REVERSE_DELTA_MISSING','Package reverse delta is missing','Try installing the full update and not just the delta file. Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2146889721,'0x80091007','CRYPT_E_HASH_VALUE','The hash value is not correct.','Try re-downloading the update and validate AntiVirus exclusions.','https://techcommunity.microsoft.com/t5/core-infrastructure-and-security/configuration-manager-current-branch-antivirus-exclusions/ba-p/884831')
+,(-2147024629,'0x8007010b','ERROR_DIRECTORY','The directory name is invalid.','','')
+,(-2146498299,'0x800f0905','CBS_E_NO_ACTIVE_EDITION','No active edition will be available.','','')
+,(-2147018095,'0x80071A91','ERROR_RM_NOT_ACTIVE','Transaction support within the specified resource manager is not started or was shut down due to an error.','','')
+,(-2147467260,'0x80004004','E_ABORT','Operation aborted','Validate update maximum run time in ConfigMgr console.','')
+,(-2147010893,'0x800736B3','ERROR_SXS_ASSEMBLY_NOT_FOUND','The referenced assembly is not installed on your system.','Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2147023880,'0x800703F8','ERROR_REGISTRY_IO_FAILED','An I/O operation initiated by the registry failed unrecoverably. The registry could not read in, or write out, or flush, one of the files that contain the system image of the registry.','','')
+,(-2016407039,'0x87d01201','CCM','The content download cannot be performed because there is not enough available space in cache or the disk is full.','Free up space.','')
+,(-2147021879,'0x80070BC9','ERROR_FAIL_REBOOT_REQUIRED','The requested operation failed. A system reboot is required to roll back changes made.','Ensure that you dont have any policies that control the start behavior for the Windows Module Installer. This service should be managed by the operating system.','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-errors')
+,(-2145386413,'0x80200053','BG_E_VALIDATION_FAILED','Bits validation failed. ','Validate client to WSUS and Distribution Point connection. Make sure there are no firewall rules or proxy to block download URLs. Possible actions: 1. netsh winhhtp show proxy 2. Check local system settings for proxy: [HKEY_USERS\S-1-5-18\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections]. Take a network monitor trace to analyze.','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-errors')
+,(-2133843966,'0x80D02002','DO_E_DOWNLOAD_NO_PROGRESS','Delivery Optimization Download of a file saw no progress within the defined period','Validate client to WSUS and Distribution Point connection. Make sure there are no firewall rules or proxy to block download URLs. Possible actions: 1. netsh winhhtp show proxy 2. Check local system settings for proxy: [HKEY_USERS\S-1-5-18\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections]. Take a network monitor trace to analyze.','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-errors')
+,(-2145083126,'0x8024A10A','USO_E_SERVICE_SHUTTING_DOWN','Indicates that the Windows Update Service is shutting down.','This can occur after a very long period of time of inactivity, the system failing to respond leading to the service being idle and causing the service to shut down. Ensure that the system remains active and the connections remain established to complete the upgrade.','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-errors')
+,(-2145099753,'0x80246017','WU_E_DM_UNAUTHORIZED_LOCAL_USER','The download failed because the local user was denied authorization to download the content.','Ensure that the user attempting to download and install updates has been provided with sufficient privileges to install updates (Local Administrator).','https://docs.microsoft.com/en-us/windows/deployment/update/windows-update-errors')
+,(-2145123271,'0x80240439','WU_E_PT_INVALID_FORMAT','The data received does not meet the data contract expectations.','Possible actions: 1: SFC.exe /scannow 2: Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase 3: DISM.exe /Online /Cleanup-image /Restorehealth 4: DISM.exe /Online /Cleanup-Image /RestoreHealth /Source:[MOUNTED-IMAGEPATH]\Windows /LimitAccess','')
+,(-2146885630,'0x80092002','CRYPT_E_BAD_ENCODE','An error occurred during encode or decode operation.','Can be caused by using dual scan without an internet connection. Disable dualscan in that case: HKLM\Software\Microsoft\Windows\WindowsUpdate\ - DisableDualScan REG_DWORD Value=1','')
+,(-2016411115,'0x87d00215','CCM_E_ITEMNOTFOUND','Item not found','Update might not be deployed anymore. Otherwise try re-installing the ConfigMgr client. ','')
+,(1300,'0x80070514','ERROR_NOT_ALL_ASSIGNED','Not all privileges or groups referenced are assigned to the caller.','Stop WSUS client service, delete C:\Windows\SoftwareDistribution folder and C:\Windows\system32\catroot2, start service again and re-run WSUS scan.','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(24,'0x8DDD0018','ERROR_BAD_LENGTH','The program issued a command but the command length is incorrect.','Stop WSUS client service, delete C:\Windows\SoftwareDistribution folder and C:\Windows\system32\catroot2, start service again and re-run WSUS scan.','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(-2145386477,'0x80200013','BG_E_INSUFFICIENT_RANGE_SUPPORT','Bits related error. Insufficient range support. ','Stop WSUS client service, delete C:\Windows\SoftwareDistribution folder and C:\Windows\system32\catroot2, start service again and re-run WSUS scan.','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(-2147467243,'0x80004015','CO_E_WRONG_SERVER_IDENTITY','The class is configured to run as a security id different from the caller','Stop WSUS client service, delete C:\Windows\SoftwareDistribution folder and C:\Windows\system32\catroot2, start service again and re-run WSUS scan.','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(-2146828218,'0x800A0046','ERROR_SHARING_PAUSED','The remote server has been paused or is in the process of being started.','Stop WSUS client service, delete C:\Windows\SoftwareDistribution folder and C:\Windows\system32\catroot2, start service again and re-run WSUS scan.','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(-2146827859,'0x800A01AD','ERROR_NOT_SUPPORTED_WITH_BTT','This operation is not supported with BTT enabled.','Stop WSUS client service, delete C:\Windows\SoftwareDistribution folder and C:\Windows\system32\catroot2, start service again and re-run WSUS scan.','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(-2147012852,'0x80072f0c','WININET_E_CLIENT_AUTH_CERT_NEEDED','A certificate is required to complete client authentication','This error should occur only if the WSUS computer is configured to use SSL. As part of the SSL configuration, WSUS virtual directories must be configured to use SSL, and they must be set to ignore client certificates. ','https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshoot-software-update-scan-failures')
+,(-2145124278,'0x8024004A','WU_E_SETUP_IN_PROGRESS','Windows Update agent operations are not available while OS setup is running.','','https://docs.microsoft.com/en-us/previous-versions/windows/desktop/hh968413(v=vs.85)')
+,(-2145124279,'0x80240049','WU_E_OUTOFRANGE','The data is out of range','','https://docs.microsoft.com/en-us/previous-versions/windows/desktop/hh968413(v=vs.85)')
+,(-2145124280,'0x80240048','WU_E_INVALID_NOTIFICATION_INFO','The featured update notification info returned by the server is invalid','','https://docs.microsoft.com/en-us/previous-versions/windows/desktop/hh968413(v=vs.85)')
+,(-2145124281,'0x80240047','WU_E_NOTSUPPORTED','The featured update notification info returned by the server is invalid','','https://docs.microsoft.com/en-us/previous-versions/windows/desktop/hh968413(v=vs.85)')
+,(-2145124282,'0x80240046','WU_E_BAD_FILE_URL','The URL does not point to a file.','','https://docs.microsoft.com/en-us/previous-versions/windows/desktop/hh968413(v=vs.85)')
+,(-2145124283,'0x80240045','WU_E_UNSUPPORTED_SEARCHSCOPE','A search was attempted with a scope that is not currently supported for this type of search.','','https://docs.microsoft.com/en-us/previous-versions/windows/desktop/hh968413(v=vs.85)')
+,(-2145124284,'0x80240044','WU_E_PER_MACHINE_UPDATE_ACCESS_DENIED','Only administrators can perform this operation on per-machine updates','','https://docs.microsoft.com/en-us/previous-versions/windows/desktop/hh968413(v=vs.85)')
+,(-2145124332,'0x80240014','WU_E_INVALID_INSTALL_REQUESTED','Updates requested for install are not installable by caller.','','https://docs.microsoft.com/en-us/previous-versions/windows/desktop/hh968413(v=vs.85)')
+,(2367509,'0x00242015','WU_S_UH_INSTALLSTILLPENDING','The installation operation for the update is still in progress.','','https://docs.microsoft.com/en-us/previous-versions/windows/desktop/hh968413(v=vs.85)')
+
+END
+
+-----------------------------------------------------------------------------
+------ show all updates
+IF @FilterUpdates = 0
+BEGIN
+    select  
+            Vendor=vnd.CategoryInstanceName, 
+            UpdateClassification=cls.CategoryInstanceName,
+            ui.Title,             
+            ui.BulletinID, 
+            ui.ArticleID, 
+            Targeted=(case when ctm.ResourceID is not null then '*' else '' end), 
+            Installed=(case when css.Status=3 then '*' else '' end), 
+            IsRequired=(case when css.Status=2 then '*' else '' end), 
+			ui.DatePosted,
+            ui.InfoURL as InformationURL,
+			css.LastEnforcementMessageTime,
+			css.LastErrorCode,
+			IE.ErrorDescription,
+			IE.Action,
+			IE.InfoURL,
+			DeadlineData.MinDeadline
+          from v_UpdateComplianceStatus  css 
+          join v_UpdateInfo ui on ui.CI_ID=css.CI_ID 
+          join v_CICategoryInfo_All vnd on vnd.CI_ID=ui.CI_ID and vnd.CategoryTypeName='Company'
+          join v_CICategoryInfo_All cls on cls.CI_ID=ui.CI_ID and cls.CategoryTypeName='UpdateClassification'
+          left join v_CITargetedMachines  ctm on ctm.CI_ID=css.CI_ID and ctm.ResourceID = css.ResourceID
+		  left join #tmpInstallErrors IE on IE.ErrorCode = css.LastErrorCode
+		  left join (
+				-- adding min deadline per update for individual machine 
+				select min(CIA.EnforcementDeadline) as MinDeadline
+					,CIATC.CI_ID
+				from v_CIAssignment CIA
+				inner join v_CIAssignmentToCI CIATC on CIATC.AssignmentID = CIA.AssignmentID
+				inner join v_FullCollectionMembership FCM on FCM.CollectionID = CIA.CollectionID and FCM.ResourceID = @ResourceID
+				where CIA.AssignmentEnabled = 1 -- if not enabled, deadline is not valid
+				and CIA.AssignmentType in (1,5) -- 5 = update group / 1 = single update
+				and CIA.EnforcementDeadline is not null
+				group by CIATC.CI_ID
+		  ) as DeadlineData on DeadlineData.CI_ID = CSS.CI_ID
+          where css.ResourceID = @ResourceID
+          order by ui.Title
+		---- fix for SQL compat level problem 
+		---- https://support.microsoft.com/en-us/help/3196320/sql-query-times-out-or-console-slow-on-certain-configuration-manager-d
+		---- Force legacy cardinality for SQL server versions before 2016 SP1 (SQL version less than 13.0.4001.0)
+		--OPTION (QUERYTRACEON 9481)
+		---- Force legacy cardinality for SQL server versions 2016 SP1 and higher (SQL version equal or greater than 13.0.4001.0)
+		--OPTION (USE HINT ('FORCE_LEGACY_CARDINALITY_ESTIMATION'))
+
+END
+-----------------------------------------------------------------------
+------- deployed and missing updates 
+IF @FilterUpdates = 1
+BEGIN
+
+    select  
+            Vendor=vnd.CategoryInstanceName, 
+            UpdateClassification=cls.CategoryInstanceName,
+            ui.Title,             
+            ui.BulletinID, 
+            ui.ArticleID, 
+            Targeted=(case when ctm.ResourceID is not null then '*' else '' end), 
+            Installed=(case when css.Status=3 then '*' else '' end), 
+            IsRequired=(case when css.Status=2 then '*' else '' end), 
+			ui.DatePosted,
+            ui.InfoURL as InformationURL,
+			css.LastEnforcementMessageTime,
+			css.LastErrorCode,
+			IE.ErrorDescription,
+			IE.Action,
+			IE.InfoURL,
+			DeadlineData.MinDeadline
+          from v_UpdateComplianceStatus  css 
+          join v_UpdateInfo ui on ui.CI_ID=css.CI_ID 
+          join v_CICategoryInfo_All vnd on vnd.CI_ID=ui.CI_ID and vnd.CategoryTypeName='Company'
+          join v_CICategoryInfo_All cls on cls.CI_ID=ui.CI_ID and cls.CategoryTypeName='UpdateClassification'
+          left join v_CITargetedMachines ctm on ctm.CI_ID=css.CI_ID and ctm.ResourceID = css.ResourceID
+		  left join #tmpInstallErrors IE on IE.ErrorCode = css.LastErrorCode
+		  left join (
+				-- adding min deadline per update for individual machine 
+				select min(CIA.EnforcementDeadline) as MinDeadline
+					,CIATC.CI_ID
+				from v_CIAssignment CIA
+				inner join v_CIAssignmentToCI CIATC on CIATC.AssignmentID = CIA.AssignmentID
+				inner join v_FullCollectionMembership FCM on FCM.CollectionID = CIA.CollectionID and FCM.ResourceID = @ResourceID
+				where CIA.AssignmentEnabled = 1 -- if not enabled, deadline is not valid
+				and CIA.AssignmentType in (1,5) -- 5 = update group / 1 = single update
+				and CIA.EnforcementDeadline is not null
+				group by CIATC.CI_ID
+		  ) as DeadlineData on DeadlineData.CI_ID = CSS.CI_ID
+          where css.ResourceID = @ResourceID
+		 and ctm.ResourceID is not null
+		 and css.Status=2
+		 order by ui.Title
+		---- fix for SQL compat level problem 
+		---- https://support.microsoft.com/en-us/help/3196320/sql-query-times-out-or-console-slow-on-certain-configuration-manager-d
+		---- Force legacy cardinality for SQL server versions before 2016 SP1 (SQL version less than 13.0.4001.0)
+		--OPTION (QUERYTRACEON 9481)
+		---- Force legacy cardinality for SQL server versions 2016 SP1 and higher (SQL version equal or greater than 13.0.4001.0)
+		--OPTION (USE HINT ('FORCE_LEGACY_CARDINALITY_ESTIMATION'))
+END
+--------------------------------------------------------------------------
+------ missing updates which are not deployed
+IF @FilterUpdates = 2
+BEGIN
+    select  
+            Vendor=vnd.CategoryInstanceName, 
+            UpdateClassification=cls.CategoryInstanceName,
+            ui.Title,             
+            ui.BulletinID, 
+            ui.ArticleID, 
+            Targeted=(case when ctm.ResourceID is not null then '*' else '' end), 
+            Installed=(case when css.Status=3 then '*' else '' end), 
+            IsRequired=(case when css.Status=2 then '*' else '' end), 
+			ui.DatePosted,
+            ui.InfoURL as InformationURL,
+			css.LastEnforcementMessageTime,
+			css.LastErrorCode,
+			IE.ErrorDescription,
+			IE.Action,
+			IE.InfoURL,
+			MinDeadline = null
+          from v_UpdateComplianceStatus  css 
+          join v_UpdateInfo ui on ui.CI_ID=css.CI_ID 
+          join v_CICategoryInfo_All vnd on vnd.CI_ID=ui.CI_ID and vnd.CategoryTypeName='Company'
+          join v_CICategoryInfo_All cls on cls.CI_ID=ui.CI_ID and cls.CategoryTypeName='UpdateClassification'
+          left join v_CITargetedMachines  ctm on ctm.CI_ID=css.CI_ID and ctm.ResourceID = css.ResourceID
+		  left join #tmpInstallErrors IE on IE.ErrorCode = css.LastErrorCode
+          where css.ResourceID = @ResourceID
+		 and ctm.ResourceID is null
+	     and css.Status=2
+         order by ui.Title
+		---- fix for SQL compat level problem 
+		---- https://support.microsoft.com/en-us/help/3196320/sql-query-times-out-or-console-slow-on-certain-configuration-manager-d
+		---- Force legacy cardinality for SQL server versions before 2016 SP1 (SQL version less than 13.0.4001.0)
+		--OPTION (QUERYTRACEON 9481)
+		---- Force legacy cardinality for SQL server versions 2016 SP1 and higher (SQL version equal or greater than 13.0.4001.0)
+		--OPTION (USE HINT ('FORCE_LEGACY_CARDINALITY_ESTIMATION'))
+END
+-----------------------------------------------------------------------
+------- All missing updates with errors 
+IF @FilterUpdates = 3
+BEGIN
+
+    select  
+            Vendor=vnd.CategoryInstanceName, 
+            UpdateClassification=cls.CategoryInstanceName,
+            ui.Title,             
+            ui.BulletinID, 
+            ui.ArticleID, 
+            Targeted=(case when ctm.ResourceID is not null then '*' else '' end), 
+            Installed=(case when css.Status=3 then '*' else '' end), 
+            IsRequired=(case when css.Status=2 then '*' else '' end), 
+			ui.DatePosted,
+            ui.InfoURL as InformationURL,
+			css.LastEnforcementMessageTime,
+			css.LastErrorCode,
+			IE.ErrorDescription,
+			IE.Action,
+			IE.InfoURL,
+			DeadlineData.MinDeadline
+          from v_UpdateComplianceStatus  css 
+          join v_UpdateInfo ui on ui.CI_ID=css.CI_ID 
+          join v_CICategoryInfo_All vnd on vnd.CI_ID=ui.CI_ID and vnd.CategoryTypeName='Company'
+          join v_CICategoryInfo_All cls on cls.CI_ID=ui.CI_ID and cls.CategoryTypeName='UpdateClassification'
+          left join v_CITargetedMachines ctm on ctm.CI_ID=css.CI_ID and ctm.ResourceID = css.ResourceID
+		  left join #tmpInstallErrors IE on IE.ErrorCode = css.LastErrorCode
+		  left join (
+				-- adding min deadline per update for individual machine 
+				select min(CIA.EnforcementDeadline) as MinDeadline
+					,CIATC.CI_ID
+				from v_CIAssignment CIA
+				inner join v_CIAssignmentToCI CIATC on CIATC.AssignmentID = CIA.AssignmentID
+				inner join v_FullCollectionMembership FCM on FCM.CollectionID = CIA.CollectionID and FCM.ResourceID = @ResourceID
+				where CIA.AssignmentEnabled = 1 -- if not enabled, deadline is not valid
+				and CIA.AssignmentType in (1,5) -- 5 = update group / 1 = single update
+				and CIA.EnforcementDeadline is not null
+				group by CIATC.CI_ID
+		  ) as DeadlineData on DeadlineData.CI_ID = CSS.CI_ID
+          where css.ResourceID = @ResourceID
+		 and css.Status=2
+		 and css.LastErrorCode !=0
+		 order by ui.Title
+		---- fix for SQL compat level problem 
+		---- https://support.microsoft.com/en-us/help/3196320/sql-query-times-out-or-console-slow-on-certain-configuration-manager-d
+		---- Force legacy cardinality for SQL server versions before 2016 SP1 (SQL version less than 13.0.4001.0)
+		--OPTION (QUERYTRACEON 9481)
+		---- Force legacy cardinality for SQL server versions 2016 SP1 and higher (SQL version equal or greater than 13.0.4001.0)
+		--OPTION (USE HINT ('FORCE_LEGACY_CARDINALITY_ESTIMATION'))
+END
+--------------------------------------------------------------------------
+------- All missing updates no matter if deployed or not or in error state
+IF @FilterUpdates = 4
+BEGIN
+
+    select  
+            Vendor=vnd.CategoryInstanceName, 
+            UpdateClassification=cls.CategoryInstanceName,
+            ui.Title,             
+            ui.BulletinID, 
+            ui.ArticleID, 
+            Targeted=(case when ctm.ResourceID is not null then '*' else '' end), 
+            Installed=(case when css.Status=3 then '*' else '' end), 
+            IsRequired=(case when css.Status=2 then '*' else '' end), 
+			ui.DatePosted,
+            ui.InfoURL as InformationURL,
+			css.LastEnforcementMessageTime,
+			css.LastErrorCode,
+			IE.ErrorDescription,
+			IE.Action,
+			IE.InfoURL,
+			DeadlineData.MinDeadline
+          from v_UpdateComplianceStatus  css 
+          join v_UpdateInfo ui on ui.CI_ID=css.CI_ID 
+          join v_CICategoryInfo_All vnd on vnd.CI_ID=ui.CI_ID and vnd.CategoryTypeName='Company'
+          join v_CICategoryInfo_All cls on cls.CI_ID=ui.CI_ID and cls.CategoryTypeName='UpdateClassification'
+          left join v_CITargetedMachines ctm on ctm.CI_ID=css.CI_ID and ctm.ResourceID = css.ResourceID
+		  left join #tmpInstallErrors IE on IE.ErrorCode = css.LastErrorCode
+		  left join (
+				-- adding min deadline per update for individual machine 
+				select min(CIA.EnforcementDeadline) as MinDeadline
+					,CIATC.CI_ID
+				from v_CIAssignment CIA
+				inner join v_CIAssignmentToCI CIATC on CIATC.AssignmentID = CIA.AssignmentID
+				inner join v_FullCollectionMembership FCM on FCM.CollectionID = CIA.CollectionID and FCM.ResourceID = @ResourceID
+				where CIA.AssignmentEnabled = 1 -- if not enabled, deadline is not valid
+				and CIA.AssignmentType in (1,5) -- 5 = update group / 1 = single update
+				and CIA.EnforcementDeadline is not null
+				group by CIATC.CI_ID
+		  ) as DeadlineData on DeadlineData.CI_ID = CSS.CI_ID
+          where css.ResourceID = @ResourceID
+		 and css.Status=2
+		 order by ui.Title
+		---- fix for SQL compat level problem 
+		---- https://support.microsoft.com/en-us/help/3196320/sql-query-times-out-or-console-slow-on-certain-configuration-manager-d
+		---- Force legacy cardinality for SQL server versions before 2016 SP1 (SQL version less than 13.0.4001.0)
+		--OPTION (QUERYTRACEON 9481)
+		---- Force legacy cardinality for SQL server versions 2016 SP1 and higher (SQL version equal or greater than 13.0.4001.0)
+		--OPTION (USE HINT ('FORCE_LEGACY_CARDINALITY_ESTIMATION'))
+END
+--------------------------------------------------------------------------</CommandText>
+      <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+    </Query>
+    <Fields>
+      <Field Name="Vendor">
+        <DataField>Vendor</DataField>
+        <rd:UserDefined>true</rd:UserDefined>
+      </Field>
+      <Field Name="UpdateClassification">
+        <DataField>UpdateClassification</DataField>
+        <rd:UserDefined>true</rd:UserDefined>
+      </Field>
+      <Field Name="Title">
+        <DataField>Title</DataField>
+        <rd:UserDefined>true</rd:UserDefined>
+      </Field>
+      <Field Name="BulletinID">
+        <DataField>BulletinID</DataField>
+        <rd:UserDefined>true</rd:UserDefined>
+      </Field>
+      <Field Name="ArticleID">
+        <DataField>ArticleID</DataField>
+        <rd:UserDefined>true</rd:UserDefined>
+      </Field>
+      <Field Name="Targeted">
+        <DataField>Targeted</DataField>
+        <rd:UserDefined>true</rd:UserDefined>
+      </Field>
+      <Field Name="Installed">
+        <DataField>Installed</DataField>
+        <rd:UserDefined>true</rd:UserDefined>
+      </Field>
+      <Field Name="IsRequired">
+        <DataField>IsRequired</DataField>
+        <rd:UserDefined>true</rd:UserDefined>
+      </Field>
+      <Field Name="DatePosted">
+        <DataField>DatePosted</DataField>
+        <rd:UserDefined>true</rd:UserDefined>
+      </Field>
+      <Field Name="InformationURL">
+        <DataField>InformationURL</DataField>
+        <rd:UserDefined>true</rd:UserDefined>
+      </Field>
+      <Field Name="LastEnforcementMessageTime">
+        <DataField>LastEnforcementMessageTime</DataField>
+        <rd:UserDefined>true</rd:UserDefined>
+      </Field>
+      <Field Name="LastErrorCode">
+        <DataField>LastErrorCode</DataField>
+        <rd:UserDefined>true</rd:UserDefined>
+      </Field>
+      <Field Name="ErrorDescription">
+        <DataField>ErrorDescription</DataField>
+        <rd:UserDefined>true</rd:UserDefined>
+      </Field>
+      <Field Name="Action">
+        <DataField>Action</DataField>
+        <rd:UserDefined>true</rd:UserDefined>
+      </Field>
+      <Field Name="InfoURL">
+        <DataField>InfoURL</DataField>
+        <rd:UserDefined>true</rd:UserDefined>
+      </Field>
+      <Field Name="MinDeadline">
+        <DataField>MinDeadline</DataField>
+        <rd:UserDefined>true</rd:UserDefined>
+      </Field>
+    </Fields>
+  </DataSet>
+  <rd:ReportServerUrl>http://reportserver.domain.local/ReportServer</rd:ReportServerUrl>
+</SharedDataSet>

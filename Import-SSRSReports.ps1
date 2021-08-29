@@ -18,17 +18,17 @@ pecuniary loss) arising out of the use of or inability to use this sample script
 if Microsoft has been advised of the possibility of such damages.
 
 .PARAMETER ReportServerURI
-The URL of the SQL Reporting Services Server. Like this for example: http://reportserver.domain.local/reportserver
+The URL of the SQL Reporting Services Server. For example: http://reportserver.domain.local/reportserver
 
 .PARAMETER TargetFolderPath
 The folder were the reports should be placed in. I created a folder called "Custom_UpdateReporting" below the default MECM reporting folder. My sitecode is P11, so the default folder is called "ConfigMgr_P11".
-Like this for example: "ConfigMgr_P11/Custom_UpdateReporting"
+For example: "ConfigMgr_P11/Custom_UpdateReporting"
 Use "/"" instead of "\"" because it's a website
 
 .PARAMETER TargetDataSourcePath
 The path should point to the default ConfigMgr/MECM data source. 
 In my case the Sitecode is P11 and the default data source is therefore in the folder "ConfigMgr_P11" and has the ID "{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}"
-The path with the default folder is required. Like this for example: "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}""
+The path with the default folder is required. For example: "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}""
 Use "/"" instead of "\"" because it's a website
 
 .PARAMETER DefaultCollection
@@ -42,13 +42,9 @@ In my case "All%" or All Syst% or "Servers%" to get the "Servers of the environm
 .PARAMETER DoNotHideReports
 Array of reports which should not be set to hidden. You should not use the parameter unless you really want more reports to be visible.
 
-.PARAMETER Upload
-If set to $false the reports will be changed to have the correct values, but will not be uploaded. 
-That might be helpful, if you do not have the rights to upload and need to give the files to another perso, so that they can be uploaded manually
-
-.PARAMETER UseViewForDataset
-All reports can either use a dataset called "UpdatesSummary", which is the default and will execute the full sql query right from the Reporting Services Server, or a dataset called "UpdatesSummaryView" which will select from a sql view which needs to be created first. (I will not explain that process in detail)
-$false will use the default dataset and $true will use the dataset using a SQL view.
+.PARAMETER $DoNotUpload
+If used each reports will be changed to have the correct values, but will not be uploaded. 
+That might be helpful, if you do not have the rights to upload and need to give the files to another person so that they can be uploaded manually
 
 .PARAMETER ReportSourcePath
 The script will use the script root path to look for a folder called "Sourcefiles" and will copy all the report files from there. 
@@ -56,6 +52,16 @@ The script will use the script root path to look for a folder called "Sourcefile
 
 .PARAMETER ForceLegacyFormat
 The report xml definition will be changed to the older pre SSRS 2016 format. That way the reports also work with SSRS 2014 for example.
+
+.PARAMETER ForceLegacyCardinalitySQL2016SP1AndHigher
+Will add SQL query hint "OPTION (USE HINT ('FORCE_LEGACY_CARDINALITY_ESTIMATION'))" to important queries to increase performance. 
+Works only with SQL Server 2016 SP1 and higher (SQL version >= 13.0.4001.0)
+More infos can be found here: https://support.microsoft.com/en-us/help/3196320/sql-query-times-out-or-console-slow-on-certain-configuration-manager-d
+
+.PARAMETER ForceLegacyCardinalityOlderThanSQL2016SP1
+Will add SQL query trace flag "OPTION (QUERYTRACEON 9481)" to important queries to increase performance. 
+Works only with older SQL version than SQL Server 2016 SP1 (SQL version < 13.0.4001.0)
+More infos can be found here: https://support.microsoft.com/en-us/help/3196320/sql-query-times-out-or-console-slow-on-certain-configuration-manager-d
 
 .INPUTS
 None. You cannot pipe objects to Import-SSRSReports.ps1
@@ -67,16 +73,23 @@ Just normal console output. Nothing to work with.
 PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}"
 
 .EXAMPLE
-PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -ForceLegacyFormat
+PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -ForceLegacyFormat -ForceLegacyCardinalitySQL2016SP1AndHigher
 
 .EXAMPLE
-PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -Upload $false
+PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -DoNotUpload
+
+.EXAMPLE
+PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -ForceLegacyCardinalitySQL2016SP1AndHigher
 
 .EXAMPLE
 PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -DefaultCollectionID "P1100012" -DefaultCollectionFilter "All Servers of Contoso%" 
 
 .LINK
 https://github.com/jonasatgit/updatereporting
+
+.LINK
+https://techcommunity.microsoft.com/t5/core-infrastructure-and-security/mastering-configuration-manager-patch-compliance-reporting/ba-p/1415088
+
 #>
 [CmdletBinding(DefaultParametersetName='None')]
 param(
@@ -97,16 +110,22 @@ param(
     [string]$DefaultCollectionFilter = 'All%',
 
     [parameter(Mandatory=$false)]
-    [array]$DoNotHideReports = @('Software Updates Compliance - Overview','Compare Update Compliance','Software Updates Compliance - Offline Scan Results'),
+    [array]$DoNotHideReports = @('Software Updates Compliance - Overview','Software Updates Compliance - Per device','Software Updates Compliance - Per device deployments','Software Updates Compliance - Overview compliance list','Compare Update Compliance','Software Updates Compliance - Offline Scan Results'),
 
     [parameter(Mandatory=$false)]
-    [bool]$Upload = $true,
+    [Switch]$DoNotUpload,
 
-    [parameter(Mandatory=$false)]
-    [bool]$UseViewForDataset = $false,
+    #[parameter(Mandatory=$false)]
+    #[bool]$UseViewForDataset = $false,
 
     [parameter(Mandatory=$false)]
     [switch]$ForceLegacyFormat,
+
+    [parameter(Mandatory=$false)]
+    [switch]$ForceLegacyCardinalitySQL2016SP1AndHigher,
+
+    [parameter(Mandatory=$false)]
+    [switch]$ForceLegacyCardinalityOlderThanSQL2016SP1,
 
     [parameter(Mandatory=$false)]
     [string]$ReportSourcePath = $($PSScriptRoot)
@@ -118,10 +137,20 @@ param(
 $cleanFolder = "$reportSourcePath\SourceFiles"
 $workFolder = "$reportSourcePath\work"
 
-# not using validatepattern to genereate nice error messages
-if($ReportServerUri -notmatch '^[a-z0-9\./:\{\}\-_]+$')
+if ($ForceLegacyCardinalityOlderThanSQL2016SP1 -and $ForceLegacyCardinalitySQL2016SP1AndHigher)
 {
-    Write-host "Parameter `"ReportServerUri`" needs to match regex: '^[a-z0-9\./:\{\}\-_]+$'" -ForegroundColor Yellow
+    Write-host "Use either ForceLegacyCardinalityOlderThanSQL2016SP1 or ForceLegacyCardinalitySQL2016SP1AndHigher" -ForegroundColor Yellow
+    Write-Host "Run `"Get-Help .\Import-SSRSReports.ps1 -Full`" to get help" -ForegroundColor Yellow
+    Write-Host " "
+    Write-Host "Get-Help .\Import-SSRSReports.ps1 -Examples"
+    Get-Help .\Import-SSRSReports.ps1 -Examples
+    break   
+}
+
+# not using validatepattern to genereate nice error messages
+if($ReportServerUri -notmatch '^[a-z0-9\./:\{\}\-_ ]+$')
+{
+    Write-host "Parameter `"ReportServerUri`" needs to match regex: '^[a-z0-9\./:\{\}\-_ ]+$'" -ForegroundColor Yellow
     Write-host "Please use slash `"/`" instead of backslash `"\`" for parameter `"ReportServerUri`"" -ForegroundColor Yellow
     Write-Host "Run `"Get-Help .\Import-SSRSReports.ps1 -Full`" to get help" -ForegroundColor Yellow
     Write-Host " "
@@ -130,9 +159,10 @@ if($ReportServerUri -notmatch '^[a-z0-9\./:\{\}\-_]+$')
     break
 }
 
-if($TargetFolderPath -notmatch '^[a-z0-9\./:\{\}\-_]+$')
+
+if($TargetFolderPath -notmatch '^[a-z0-9\./:\{\}\-_ ]+$')
 {
-    Write-host "Parameter `"TargetFolderPath`" needs to match regex: '^[a-z0-9\./:\{\}\-_]+$'" -ForegroundColor Yellow
+    Write-host "Parameter `"TargetFolderPath`" needs to match regex: '^[a-z0-9\./:\{\}\-_ ]+$'" -ForegroundColor Yellow
     Write-host "Please use slash `"/`" instead of backslash `"\`" for parameter `"TargetFolderPath`"" -ForegroundColor Yellow
     Write-Host "Run `"Get-Help .\Import-SSRSReports.ps1 -Full`" to get help" -ForegroundColor Yellow
     Write-Host " "
@@ -141,9 +171,10 @@ if($TargetFolderPath -notmatch '^[a-z0-9\./:\{\}\-_]+$')
     break
 }
 
-if($TargetDataSourcePath -notmatch '^[a-z0-9\./:\{\}\-_]+$')
+
+if($TargetDataSourcePath -notmatch '^[a-z0-9\./:\{\}\-_ ]+$')
 {
-    Write-host "Parameter `"TargetDataSourcePath`" needs to match regex: '^[a-z0-9\./:\{\}\-_]+$'" -ForegroundColor Yellow
+    Write-host "Parameter `"TargetDataSourcePath`" needs to match regex: '^[a-z0-9\./:\{\}\-_ ]+$'" -ForegroundColor Yellow
     Write-host "Please use slash `"/`" instead of backslash `"\`" for parameter `"TargetDataSourcePath`"" -ForegroundColor Yellow
     Write-Host "Run `"Get-Help .\Import-SSRSReports.ps1 -Full`" to get help" -ForegroundColor Yellow
     Write-Host " "
@@ -162,16 +193,30 @@ if(-not (Test-Path $workFolder))
 {
     $null = New-Item -ItemType "directory" -Path $workFolder -Force
 }
+else
+{
+    Get-ChildItem $workFolder | Remove-Item -Force
+}
 Write-host "Copy `"$($cleanFolder)\*`" to `"$($workFolder)\`"" -ForegroundColor Green
 $null = Copy-Item -Path "$($cleanFolder)\*" -Destination "$($workFolder)\" -Force
 
-[array]$reportsToWorkWith = Get-ChildItem -Path "$reportSourcePath\work" | Where-Object {$_.Extension -eq '.rdl' -or $_.Extension -eq '.rsd'}
+[array]$reportsToWorkWith = Get-ChildItem -Path "$workFolder" | Where-Object {$_.Extension -eq '.rdl' -or $_.Extension -eq '.rsd'}
 Write-host "Found $($reportsToWorkWith.Count) .rdl and .rsd files in `"$reportSourcePath\work`"" -ForegroundColor Green
 if($reportsToWorkWith.Count -gt 0)
 {
     if ($ForceLegacyFormat)
     {
         Write-Host "Changing xml format to work with pre 2016 SSRS versions" -ForegroundColor Yellow
+    }
+
+    if ($ForceLegacyCardinalitySQL2016SP1AndHigher)
+    {
+        Write-Host "Will add SQL query hint: `"OPTION (USE HINT ('FORCE_LEGACY_CARDINALITY_ESTIMATION'))`" to larger queries" to important queries -ForegroundColor Yellow
+    }
+
+    if ($ForceLegacyCardinalityOlderThanSQL2016SP1)
+    {
+        Write-Host "Will add SQL query trace flag `"OPTION (QUERYTRACEON 9481)`" to larger queries" to important queries -ForegroundColor Yellow
     }
 
     $reportsToWorkWith | ForEach-Object {
@@ -183,15 +228,29 @@ if($reportsToWorkWith.Count -gt 0)
         # simply replacing the neccesary parts
         $reportContent = $reportContent.Replace("<DataSourceReference>/ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}</DataSourceReference>","<DataSourceReference>/$($targetDataSourcePath)</DataSourceReference>")
         $reportContent = $reportContent.Replace("<SharedDataSetReference>/ConfigMgr_P11/Custom_UpdateReporting","<SharedDataSetReference>/$($targetFolderPath)")
-        $reportContent = $reportContent.Replace("<rd:ReportServerUrl>http://reportserver.domain.local/reportserver</rd:ReportServerUrl>","<rd:ReportServerUrl>$($ReportServerUri)</rd:ReportServerUrl>")
+        $reportContent = $reportContent.Replace("http://reportserver.domain.local/reportserver","$($ReportServerUri)") # case sensitive
+        $reportContent = $reportContent.Replace("http://reportserver.domain.local/ReportServer","$($ReportServerUri)") # case sensitive
         $reportContent = $reportContent.Replace("<ReportName>/ConfigMgr_P11/Custom_UpdateReporting/","<ReportName>/$($targetFolderPath)/")
-        $reportContent = $reportContent.Replace("<Value>COLLECTIONNAMEFILTER</Value>","<Value>$defaultCollectionFilter</Value>")
+        $reportContent = $reportContent.Replace("<Value>All%</Value>","<Value>$defaultCollectionFilter</Value>")
         $reportContent = $reportContent.Replace('SMS00001',"$($defaultCollectionID)")
 
+        if ($ForceLegacyCardinalitySQL2016SP1AndHigher) # uncomment SQL hint
+        {
+            $reportContent = $reportContent.Replace('--OPTION (USE HINT','OPTION (USE HINT')
+        }
+
+        if ($ForceLegacyCardinalityOlderThanSQL2016SP1)
+        {
+            $reportContent = $reportContent.Replace('--OPTION (QUERYTRACEON 9481)','OPTION (QUERYTRACEON 9481)')
+        }
+
+
+       <#
         if ($UseViewForDataset)
         {
             $reportContent = $reportContent.Replace('UpdatesSummary</SharedDataSetReference>',"$($datasetUsingSQLView)</SharedDataSetReference>")
         }
+        #>
 
         if ($ForceLegacyFormat)
         {
@@ -215,7 +274,7 @@ if($reportsToWorkWith.Count -gt 0)
         }
     }
 
-    if($Upload)
+    if(-NOT ($DoNotUpload))
     {
         Write-host "Connecting to: $ReportServerUri..." -ForegroundColor Green
 

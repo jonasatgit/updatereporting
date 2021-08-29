@@ -13,8 +13,15 @@
       <SharedDataSet>
         <SharedDataSetReference>UpdatesSummary</SharedDataSetReference>
         <QueryParameters>
-          <QueryParameter Name="@CollectionIDs">
-            <Value>=Parameters!CollectionIDs.Value</Value>
+          <QueryParameter Name="@CollectionID">
+            <Value>=Join(Parameters!CollectionIDs.Value,";")</Value>
+          </QueryParameter>
+          <QueryParameter Name="@ExcludeProductList">
+            <Value>=Join(Parameters!ExcludeProductList.Value,";")</Value>
+          </QueryParameter>
+          <QueryParameter Name="@ExcludeFutureDepl">
+            <Value>=Parameters!ExcludeFutureDepl.Value</Value>
+            <rd:UserDefined>true</rd:UserDefined>
           </QueryParameter>
         </QueryParameters>
         <rd:ReportServerUrl>http://reportserver.domain.local/reportserver</rd:ReportServerUrl>
@@ -32,14 +39,18 @@
           <DataField>Counter</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
-        <Field Name="OSType">
-          <DataField>OSType</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
         <Field Name="PendingReboot">
           <DataField>PendingReboot</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
+        <Field Name="OSType">
+          <DataField>OSType</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="OSBuild">
+          <DataField>OSBuild</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>			
         <Field Name="ClientVersion">
           <DataField>ClientVersion</DataField>
           <rd:TypeName>System.String</rd:TypeName>
@@ -56,8 +67,16 @@
           <DataField>DaysSinceLastOnline</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
+        <Field Name="DefenderPatternAge">
+          <DataField>DefenderPatternAge</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
         <Field Name="DaysSinceLastAADSLogon">
           <DataField>DaysSinceLastAADSLogon</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="WSUSScanError">
+          <DataField>WSUSScanError</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
         <Field Name="DaysSinceLastBoot">
@@ -104,40 +123,32 @@
           <DataField>MonthSinceLastUpdateScan</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
-        <Field Name="UpdateAssignmentCompliance">
-          <DataField>UpdateAssignmentCompliance</DataField>
+        <Field Name="OverallComplianceState">
+          <DataField>OverallComplianceState</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
-        <Field Name="UpdateStatusCompliant">
-          <DataField>UpdateStatusCompliant</DataField>
+        <Field Name="UpdateAssignmentCompliant">
+          <DataField>UpdateAssignmentCompliant</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
         <Field Name="UpdateAssignmentSum">
           <DataField>UpdateAssignmentSum</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
-        <Field Name="UpdateStatusNonCompliant">
-          <DataField>UpdateStatusNonCompliant</DataField>
+        <Field Name="UpdateAssignmentNonCompliant">
+          <DataField>UpdateAssignmentNonCompliant</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="UpdateStatusUnknown">
-          <DataField>UpdateStatusUnknown</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="UpdateStatusFailed">
-          <DataField>UpdateStatusFailed</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="UpdateStatusPending">
-          <DataField>UpdateStatusPending</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
+        </Field>			  
         <Field Name="MissingUpdatesAll">
           <DataField>MissingUpdatesAll</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
         <Field Name="MissingUpdatesApproved">
           <DataField>MissingUpdatesApproved</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="UpdatesApprovedMissingAndError">
+          <DataField>UpdatesApprovedMissingAndError</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
         <Field Name="UpdatesApprovedAll">
@@ -193,7 +204,7 @@
             </Paragraphs>
             <rd:DefaultName>Textbox7</rd:DefaultName>
             <Top>6.05366mm</Top>
-            <Left>10.55158mm</Left>
+            <Left>6mm</Left>
             <Height>9.75783mm</Height>
             <Width>411.16249mm</Width>
             <Style>
@@ -210,49 +221,61 @@
             <TablixBody>
               <TablixColumns>
                 <TablixColumn>
-                  <Width>34.82778mm</Width>
+                  <Width>34.93589mm</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>111.82153mm</Width>
+                  <Width>111.92964mm</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>31.91736mm</Width>
+                  <Width>32.02547mm</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>31.53749mm</Width>
+                  <Width>31.38101mm</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>28.96875mm</Width>
+                  <Width>25.10811mm</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>21.03125mm</Width>
+                  <Width>29.60603mm</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>25mm</Width>
+                  <Width>20.87478mm</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>26.85208mm</Width>
+                  <Width>25.10811mm</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>25mm</Width>
+                  <Width>26.96019mm</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>27.11667mm</Width>
+                  <Width>25.10811mm</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>25mm</Width>
+                  <Width>27.22478mm</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>25mm</Width>
+                  <Width>25.10811mm</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>25mm</Width>
+                  <Width>25.10811mm</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>25mm</Width>
+                  <Width>30.26436mm</Width>			 				 
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>128.71667mm</Width>
+                  <Width>25.10811mm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>25.10811mm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>25.10811mm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>25.10811mm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>128.82478mm</Width>
                 </TablixColumn>
               </TablixColumns>
               <TablixRows>
@@ -277,10 +300,10 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox8</rd:DefaultName>
+                          <ToolTip>Name of computer</ToolTip>	
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -312,10 +335,10 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox10</rd:DefaultName>
+                          <ToolTip>OS type</ToolTip>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -347,10 +370,10 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox12</rd:DefaultName>
+                          <ToolTip>ConfigMgr client version</ToolTip>					 
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -369,23 +392,58 @@
                         <Textbox Name="Textbox14">
                           <CanGrow>true</CanGrow>
                           <UserSort>
-                            <SortExpression>=Fields!WSUSVersion.Value</SortExpression>
+                            <SortExpression>=Fields!OSBuild.Value</SortExpression>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>WSUSVersion</Value>
+                                  <Value>OS Build version</Value>
                                   <Style>
                                     <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox14</rd:DefaultName>
+                          <ToolTip>OS build version</ToolTip>				 
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox4">
+                          <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!WSUSScanError.Value</SortExpression>
+                          </UserSort>									 
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>WSUS Scan Error</Value>
+                                  <Style>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox4</rd:DefaultName>
+                          <ToolTip>WSUS scan error code in case an error happend</ToolTip>  
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -404,23 +462,23 @@
                         <Textbox Name="Textbox16">
                           <CanGrow>true</CanGrow>
                           <UserSort>
-                            <SortExpression>=Fields!DefenderPattern.Value</SortExpression>
+                            <SortExpression>=Fields!DefenderPatternAge.Value</SortExpression>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Defender Pattern</Value>
+                                  <Value>Defender Pattern age</Value>
                                   <Style>
                                     <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox16</rd:DefaultName>
+                         <ToolTip>Defender and SCEP pattern age in days. Depends on how often Defender and SCEP pattern are deployed.</ToolTip>						  														
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -436,7 +494,7 @@
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox48">
+                        <Textbox Name="Textbox1">
                           <CanGrow>true</CanGrow>
                           <UserSort>
                             <SortExpression>=Fields!PendingReboot.Value</SortExpression>
@@ -452,10 +510,10 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox48</rd:DefaultName>
+                          <rd:DefaultName>Textbox1</rd:DefaultName>
+                          <ToolTip>Indicates a pending reboot, which might prevent future installations of updates.</ToolTip>							 
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -487,10 +545,10 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox18</rd:DefaultName>
+                          <ToolTip>Days since the system was last online and requested ConfigMgr policy updates. Can help indentify problematic systems.</ToolTip>						  
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -522,10 +580,10 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox20</rd:DefaultName>
+                          <ToolTip>Days since last AADS logon based on AD system discovery and attribute LastLogonTimestamp. Can help indentify problematic systems.</ToolTip>						  
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -557,10 +615,10 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox22</rd:DefaultName>
+                          <ToolTip>Days since last system boot. Can help identify problematic systems</ToolTip>						  
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -592,10 +650,10 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox24</rd:DefaultName>
+                          <ToolTip>Month since last installation of either the last or current cumulative rollup or any security update in case no rollup was found. Based on HINV data and wmi class Win32_Quickfixengineering. Used in overall compliance evaluation. (ConfigMgr does not hold the actual installation time by default in the database)</ToolTip>						  
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -627,10 +685,112 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox26</rd:DefaultName>
+                          <ToolTip>Number of missing updates overall no matter if deployed or not</ToolTip>						  						  
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox6">
+                          <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!UpdatesApprovedMissingAndError.Value</SortExpression>
+                          </UserSort>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Updates with Install Error</Value>
+                                  <Style>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox6</rd:DefaultName>
+                          <ToolTip>Number of missing updates which are deployed and reported an installation error</ToolTip>						  
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox5">
+                          <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!UpdateAssignmentNonCompliant.Value</SortExpression>
+                          </UserSort>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Deployments Non Compliant</Value>
+                                  <Style>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox5</rd:DefaultName>
+                          <ToolTip>Number of update deployments which are not compliant. Can help idendify problems with certain deployments. Is used as basis for overall compliance state together with last update installation and state of last cumulative update. Some deployed updates might still be missing even if overall compliance is evaluated to be compliant. Can happen in case future deployments are excluded or some deployments are not set to be anabled.</ToolTip>						  
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox2">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Is system compliant</Value>
+                                  <Style>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox2</rd:DefaultName>
+                          <ToolTip>The system is marked as compliant if the following conditions are met. Each update deployment is evaluated to be compliant (Some deployments are filtered via the above parameters which can have an affect on the overall compliance state), the system installed the last or current rollup and a security update installation happened in the last month. (The last security update could also be one of the rollups)</ToolTip>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -662,10 +822,10 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox28</rd:DefaultName>
+                          <ToolTip>Number of missing updates which are deployed</ToolTip>						  
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -697,10 +857,10 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
-                           </Paragraphs>
+                          </Paragraphs>
                           <rd:DefaultName>Textbox30</rd:DefaultName>
+                          <ToolTip>Status of cumulative rollup of past month. Can help identify issues even if all deployments are evaluated to be compliant. (Will be set to Installed in case the current rollup is installed)</ToolTip>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -732,11 +892,10 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
-
                           </Paragraphs>
                           <rd:DefaultName>Textbox32</rd:DefaultName>
+                          <ToolTip>Status of cumulative rollup of current month. Can help identify issues even if all deployments are evaluated to be compliant.</ToolTip>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -768,10 +927,10 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox34</rd:DefaultName>
+                          <ToolTip>Comma seperated list of collections the system is member of and which are used for update deployments. Can help identify missing collection memberships.</ToolTip>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -800,9 +959,11 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!Name.Value</Value>
+                                  <Style>
+                                    <TextDecoration>Underline</TextDecoration>
+                                  </Style>						  
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Name</rd:DefaultName>
@@ -822,7 +983,7 @@
                                 </Drillthrough>
                               </Action>
                             </Actions>
-                          </ActionInfo>									  
+                          </ActionInfo>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -847,10 +1008,8 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!OSType.Value</Value>
-                                  
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>OSType</rd:DefaultName>
@@ -878,10 +1037,8 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!ClientVersion.Value</Value>
-                                  
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>ClientVersion</rd:DefaultName>
@@ -901,21 +1058,19 @@
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="WSUSVersion">
+                        <Textbox Name="OSBuild">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!WSUSVersion.Value</Value>
-                                  
+                                  <Value>=Fields!OSBuild.Value</Value>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>WSUSVersion</rd:DefaultName>
+                          <rd:DefaultName>OSBuild</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -932,21 +1087,78 @@
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="DefenderPattern">
+                        <Textbox Name="WSUSScanError">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!DefenderPattern.Value</Value>
-                                  
+                                  <Value>=Fields!WSUSScanError.Value</Value>
+                                  <Style>
+                                    <TextDecoration>Underline</TextDecoration>										  
+                                    <Color>=IIf(Fields!WSUSScanError.Value = "0", "Black", "Red")</Color>
+                                  </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>DefenderPattern</rd:DefaultName>
+                          <rd:DefaultName>WSUSScanError</rd:DefaultName>
+                          <ActionInfo>
+                            <Actions>
+                              <Action>
+                                <Drillthrough>
+                                  <ReportName>Software Updates Compliance - ErrorList</ReportName>
+                                  <Parameters>
+                                    <Parameter Name="CollectionIDs">
+                                      <Value>=Parameters!CollectionIDs.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="ReportType">
+                                      <Value>5</Value>
+                                    </Parameter>
+                                    <Parameter Name="CI_ID">
+                                      <Value>0</Value>
+                                    </Parameter>
+                                    <Parameter Name="LastErrorCode">
+                                      <Value>=Fields!WSUSScanError.Value</Value>
+                                    </Parameter>
+                                  </Parameters>
+                                </Drillthrough>
+                              </Action>
+                            </Actions>
+                          </ActionInfo>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>=iif(RowNumber(Nothing) Mod 2, "Transparent", "Gainsboro")</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="DefenderPatternAge">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!DefenderPatternAge.Value</Value>
+                                  <Style>
+                                    <Color>=IIf(Fields!DefenderPatternAge.Value = "0", "Black", "Red")</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>DefenderPatternAge</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -976,7 +1188,6 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>PendingReboot</rd:DefaultName>
@@ -991,7 +1202,7 @@
                             <PaddingTop>2pt</PaddingTop>
                             <PaddingBottom>2pt</PaddingBottom>
                           </Style>
-                        </Textbox>
+                        </Textbox>									   
                       </CellContents>
                     </TablixCell>
                     <TablixCell>
@@ -1004,10 +1215,8 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!DaysSinceLastOnline.Value</Value>
-                                  
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>DaysSinceLastOnline</rd:DefaultName>
@@ -1035,10 +1244,8 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!DaysSinceLastAADSLogon.Value</Value>
-                                  
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>DaysSinceLastAADSLogon</rd:DefaultName>
@@ -1066,10 +1273,8 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!DaysSinceLastBoot.Value</Value>
-                                  
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>DaysSinceLastBoot</rd:DefaultName>
@@ -1102,7 +1307,6 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>MonthSinceLastUpdateInstall</rd:DefaultName>
@@ -1130,10 +1334,11 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!MissingUpdatesAll.Value</Value>
-                                  
+                                  <Style>
+                                    <TextDecoration>Underline</TextDecoration>
+                                  </Style>											  
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>MissingUpdatesAll</rd:DefaultName>
@@ -1141,10 +1346,10 @@
                             <Actions>
                               <Action>
                                 <Drillthrough>
-                                  <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Per device</ReportName>
+                                  <ReportName>Software Updates Compliance - Per device</ReportName>
                                   <Parameters>
                                     <Parameter Name="FilterUpdates">
-                                      <Value>0</Value>
+                                      <Value>4</Value>
                                     </Parameter>
                                     <Parameter Name="ComputerName">
                                       <Value>=Fields!Name.Value</Value>
@@ -1170,6 +1375,146 @@
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
+                        <Textbox Name="UpdatesApprovedMissingAndError1">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!UpdatesApprovedMissingAndError.Value</Value>
+                                  <Style>
+                                    <TextDecoration>Underline</TextDecoration>
+                                    <Color>=IIf(Fields!UpdatesApprovedMissingAndError.Value = "0","Black","Red")</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>UpdatesApprovedMissingAndError1</rd:DefaultName>
+                          <ActionInfo>
+                            <Actions>
+                              <Action>
+                                <Drillthrough>
+                                  <ReportName>Software Updates Compliance - Per device</ReportName>
+                                  <Parameters>
+                                    <Parameter Name="ComputerName">
+                                      <Value>=Fields!Name.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="FilterUpdates">
+                                      <Value>3</Value>
+                                    </Parameter>
+                                  </Parameters>
+                                </Drillthrough>
+                              </Action>
+                            </Actions>
+                          </ActionInfo>								  
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>=iif(RowNumber(Nothing) Mod 2, "Transparent", "Gainsboro")</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="UpdateAssignmentNonCompliant1">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!UpdateAssignmentNonCompliant.Value</Value>
+                                  <Style>
+                                    <TextDecoration>Underline</TextDecoration>
+                                    <Color>=IIf(Fields!UpdateAssignmentNonCompliant.Value = "0", "Black","Red")</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>UpdateAssignmentNonCompliant1</rd:DefaultName>
+                          <ActionInfo>
+                            <Actions>
+                              <Action>
+                                <Drillthrough>
+                                  <ReportName>Software Updates Compliance - Per device deployments</ReportName>
+                                  <Parameters>
+                                    <Parameter Name="ComputerName">
+                                      <Value>=Fields!Name.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="ExcludeProductList">
+                                      <Value>=Parameters!ExcludeProductList.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="ExcludeFutureDepl">
+                                      <Value>=Parameters!ExcludeFutureDepl.Value</Value>
+                                    </Parameter>
+                                  </Parameters>
+                                </Drillthrough>
+                              </Action>
+                            </Actions>
+                          </ActionInfo>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>=iif(RowNumber(Nothing) Mod 2, "Transparent", "Gainsboro")</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                        <rd:Selected>true</rd:Selected>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="OverallComplianceState">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=IIf(Fields!OverallComplianceState.Value = 1, "Yes", "No")</Value>
+                                  <Style>
+                                    <TextDecoration>None</TextDecoration>
+                                    <Color>=IIf(Fields!OverallComplianceState.Value = "1", "Black","Red")</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>OverallComplianceState</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>=iif(RowNumber(Nothing) Mod 2, "Transparent", "Gainsboro")</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
                         <Textbox Name="MissingUpdatesApproved">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
@@ -1179,11 +1524,11 @@
                                 <TextRun>
                                   <Value>=Fields!MissingUpdatesApproved.Value</Value>
                                   <Style>
+                                    <TextDecoration>Underline</TextDecoration>
                                     <Color>=IIf(Fields!MissingUpdatesApproved.Value &gt; 0, "Red","Black")</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>MissingUpdatesApproved</rd:DefaultName>
@@ -1191,7 +1536,7 @@
                             <Actions>
                               <Action>
                                 <Drillthrough>
-                                  <ReportName>/ConfigMgr_P11/Custom_UpdateReporting/Software Updates Compliance - Per device</ReportName>
+                                  <ReportName>Software Updates Compliance - Per device</ReportName>
                                   <Parameters>
                                     <Parameter Name="FilterUpdates">
                                       <Value>1</Value>
@@ -1233,7 +1578,6 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>LastRollupStatus</rd:DefaultName>
@@ -1266,7 +1610,6 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>CurrentRollupStatus</rd:DefaultName>
@@ -1299,7 +1642,6 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>UpdateCollections</rd:DefaultName>
@@ -1338,6 +1680,10 @@
                 <TablixMember />
                 <TablixMember />
                 <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
               </TablixMembers>
             </TablixColumnHierarchy>
             <TablixRowHierarchy>
@@ -1353,41 +1699,32 @@
             <DataSetName>ClientSecurityOverview</DataSetName>
             <SortExpressions>
               <SortExpression>
-                <Value>=Fields!MissingUpdatesApproved.Value</Value>
+                <Value>=Fields!MonthSinceLastUpdateInstall.Value</Value>
                 <Direction>Descending</Direction>
               </SortExpression>
             </SortExpressions>
             <Top>21.66408mm</Top>
             <Left>10.55158mm</Left>
             <Height>22.4625mm</Height>
-            <Width>592.78958mm</Width>
+            <Width>672.94583mm</Width>
             <ZIndex>1</ZIndex>
             <Style>
               <Border>
-                <Style>None</Style>
+                <Color>LightGrey</Color>
+                <Style>Solid</Style>
               </Border>
             </Style>
           </Tablix>
         </ReportItems>
-        <Height>48.91618mm</Height>
+        <Height>48.6516mm</Height>
         <Style>
           <Border>
             <Style>None</Style>
           </Border>
         </Style>
       </Body>
-      <Width>614.58283mm</Width>
+      <Width>690.64116mm</Width>
       <Page>
-        <PageFooter>
-          <Height>14.34043mm</Height>
-          <PrintOnFirstPage>true</PrintOnFirstPage>
-          <PrintOnLastPage>true</PrintOnLastPage>
-          <Style>
-            <Border>
-              <Style>None</Style>
-            </Border>
-          </Style>
-        </PageFooter>
         <PageHeight>297mm</PageHeight>
         <PageWidth>210mm</PageWidth>
         <LeftMargin>20mm</LeftMargin>
@@ -1395,7 +1732,6 @@
         <TopMargin>20mm</TopMargin>
         <BottomMargin>20mm</BottomMargin>
         <ColumnSpacing>0.13cm</ColumnSpacing>
-        
       </Page>
     </ReportSection>
   </ReportSections>
@@ -1411,22 +1747,51 @@
       <Hidden>true</Hidden>
       <MultiValue>true</MultiValue>
     </ReportParameter>
-    <ReportParameter Name="Filter">
+    <ReportParameter Name="ExcludeProductList">
+      <DataType>String</DataType>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>ExcludeProductList</Prompt>
+      <Hidden>true</Hidden>
+      <MultiValue>true</MultiValue>
+    </ReportParameter>
+   <ReportParameter Name="Filter">
       <DataType>String</DataType>
       <Prompt>Select Filter</Prompt>
       <ValidValues>
         <ParameterValues>
           <ParameterValue>
             <Value>A</Value>
-            <Label>Gruppe A</Label>
+            <Label>Group A</Label>
           </ParameterValue>
           <ParameterValue>
             <Value>B</Value>
-            <Label>Gruppe B</Label>
+            <Label>Group B</Label>
           </ParameterValue>
           <ParameterValue>
             <Value>C</Value>
-            <Label>Gruppe C</Label>
+            <Label>Group C</Label>
+          </ParameterValue>
+        </ParameterValues>
+      </ValidValues>
+    </ReportParameter>
+    <ReportParameter Name="ExcludeFutureDepl">
+      <DataType>Integer</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>0</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Exclude future deployments</Prompt>
+      <Hidden>true</Hidden>	  
+      <ValidValues>
+        <ParameterValues>
+          <ParameterValue>	  
+            <Value>1</Value>
+            <Label>Yes</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>0</Value>
+            <Label>No</Label>
           </ParameterValue>
         </ParameterValues>
       </ValidValues>
@@ -1435,7 +1800,7 @@
   <ReportParametersLayout>
     <GridLayoutDefinition>
       <NumberOfColumns>1</NumberOfColumns>
-      <NumberOfRows>2</NumberOfRows>
+      <NumberOfRows>4</NumberOfRows>
       <CellDefinitions>
         <CellDefinition>
           <ColumnIndex>0</ColumnIndex>
@@ -1445,12 +1810,22 @@
         <CellDefinition>
           <ColumnIndex>0</ColumnIndex>
           <RowIndex>1</RowIndex>
+          <ParameterName>ExcludeProductList</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>2</RowIndex>
           <ParameterName>Filter</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>3</RowIndex>
+          <ParameterName>ExcludeFutureDepl</ParameterName>
         </CellDefinition>
       </CellDefinitions>
     </GridLayoutDefinition>
   </ReportParametersLayout>
   <rd:ReportUnitType>Mm</rd:ReportUnitType>
-  <rd:ReportServerUrl>http://reportserver.domain.local/reportserver</rd:ReportServerUrl>
+  <rd:ReportServerUrl>http://reportserver.domain.local/ReportServer</rd:ReportServerUrl>
   <rd:ReportID>8649b1b8-cc33-4ef7-998b-ae4c41462811</rd:ReportID>
 </Report>
