@@ -42,6 +42,7 @@
 ---- if Microsoft has been advised of the possibility of such damages.
 -----------------------------------------------------------------------------------------------------------------------
 ---- Changelog:
+---- 20211118: Added "Cumulative Update for Microsoft server operating system" string for server 2022 updates.
 ---- 20210801: Changed multi value parameter handling to use CTEs due to performance issues with some environments. 
 ----           Also changed overall compliance to be only compliant in case the last rollup has been installed and changed name from "UpdateAssignmentCompliance" to "OverallComplianceState"
 ----		   Changed name from "UpdateStatusCompliant" to "UpdateAssignmentCompliant" to be more accurate with the wording
@@ -158,9 +159,9 @@ ExcludedUpdates (AssignmentID,CI_ID,AssignmentType) as
 -- list of cumulative updates of the current and the past month
 CumulativeUpdates (ArticleID,CI_ID, Latest) as
 (
-            Select 'KB' + updi.ArticleID as Article, CI_ID, Latest = 0 from v_updateinfo updi where (updi.Title like @LastRollupPrefix + ' Cumulative Update for Windows%' or updi.Title like @LastRollupPrefix + ' Security Monthly Quality Rollup%')
+            Select 'KB' + updi.ArticleID as Article, CI_ID, Latest = 0 from v_updateinfo updi where (updi.Title like @LastRollupPrefix + ' Cumulative Update for Windows%' or updi.Title like @LastRollupPrefix + ' Security Monthly Quality Rollup%' or updi.Title like @LastRollupPrefix + ' Cumulative Update for Microsoft server operating system%')
             UNION ALL
-            Select 'KB' + updi.ArticleID as Article, CI_ID, Latest = 1 from v_updateinfo updi where (updi.Title like @CurrentRollupPrefix + ' Cumulative Update for Windows%' or updi.Title like @CurrentRollupPrefix + ' Security Monthly Quality Rollup%')
+            Select 'KB' + updi.ArticleID as Article, CI_ID, Latest = 1 from v_updateinfo updi where (updi.Title like @CurrentRollupPrefix + ' Cumulative Update for Windows%' or updi.Title like @CurrentRollupPrefix + ' Security Monthly Quality Rollup%' or updi.Title like @CurrentRollupPrefix + ' Cumulative Update for Microsoft server operating system%')
 )
 
 

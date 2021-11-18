@@ -4370,7 +4370,7 @@ order by [ProductName]</CommandText>
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>v3.5 LINK</Value>
+                    <Value>v3.6 LINK</Value>
                   </TextRun>
                 </TextRuns>
               </Paragraph>

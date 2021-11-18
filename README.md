@@ -15,6 +15,9 @@ and [HERE](https://techcommunity.microsoft.com/t5/core-infrastructure-and-securi
 # Changes
 (The version number can be found in the lower left corner of the dashboard. No version number means v1.0)
 
+## 2021-11-18 v3.6:
+1. Added "Cumulative Update for Microsoft server operating system" string for server 2022 updates
+
 ## 2021-07-02 v3.5:
 1. Changed the overall compliance state from "all approved and missing updates" + "a security update installation happend within one month" to "All deployments are compliant" + "either the last or the current cumulative update is installed" + "a security update installation happend within one month"
 1. Added help text to all report column headers
