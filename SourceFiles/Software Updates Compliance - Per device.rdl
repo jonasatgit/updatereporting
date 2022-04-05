@@ -2257,7 +2257,7 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
           </ParameterValue>
           <ParameterValue>
             <Value>2</Value>
-            <Label>Not deployed but missind</Label>
+            <Label>Not deployed but missing</Label>
           </ParameterValue>
           <ParameterValue>
             <Value>0</Value>
