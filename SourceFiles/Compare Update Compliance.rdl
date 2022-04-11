@@ -859,7 +859,7 @@ order by Name0</CommandText>
           <Value>%</Value>
         </Values>
       </DefaultValue>
-      <Prompt>Limit list of systems: (whildcard %):</Prompt>
+      <Prompt>Limit list of systems: (wildcard %):</Prompt>
     </ReportParameter>
     <ReportParameter Name="Systems">
       <DataType>String</DataType>
