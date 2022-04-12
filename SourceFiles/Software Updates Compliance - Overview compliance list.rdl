@@ -234,7 +234,7 @@ order by [ProductName]</CommandText>
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>=(Sum(Fields!Counter.Value, "ClientSecurityOverview")) &amp; " Systems uncompliant"</Value>
+                    <Value>=(Sum(Fields!Counter.Value, "ClientSecurityOverview")) &amp; " Systems " &amp; (IIF(Parameters!ComplianceState.Value = 1, "compliant", "uncompliant"))</Value>
                     <Style>
                       <FontSize>14pt</FontSize>
                       <FontWeight>Bold</FontWeight>
