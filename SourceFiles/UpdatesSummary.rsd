@@ -26,7 +26,7 @@
           <rd:IsMultiValued>false</rd:IsMultiValued>
         </DataSetParameter>
       </DataSetParameters>
-      <CommandText>---SCRIPTVERSION: 20210801
+      <CommandText>---SCRIPTVERSION: 20220302
 
 -----------------------------------------------------------------------------------------------------------------------
 ---- Disclaimer
@@ -56,37 +56,36 @@
 ----           QuickFixEngineering query will also use the rollups as a reference if possible, simplified the current- and last-rollup queries and removed the limitation for Server 2008
 ---- 20201103: Changed 'max(CASE WHEN (ISDATE(QFE.InstalledOn0) = 0' to 'max(CASE WHEN (LEN(QFE.InstalledOn0) &gt; 10' due to language problems
 ---- 20201103: Changed 'Windows Defender' to 'Microsoft Defender Antivirus'
+---- 20220302: Fixed @SecondTuesdayOfMonth and change logic for pulling the current and last rollups
 
 ----- just for testing in SQL directly
 --Declare @CollectionID as varchar(max) = 'SMS00001'; ---- semicolon seperated list of collectionIDs
 --Declare @ExcludeProductList as varchar(max) = N'Microsoft Defender Antivirus;System Center Endpoint Protection'; ---- semicolon seperated list of update products
---declare @ExcludeFutureDepl as int = 0 ---- 1 means deployments with a starttime in the future will be excluded. 0 means nothing will be excluded
+--Declare @ExcludeFutureDepl as int = 0 ---- 1 means deployments with a starttime in the future will be excluded. 0 means nothing will be excluded
 
 Declare @CollectionIDList as varchar(max) = @CollectionID ---- semicolon seperated list of collectionIDs
 Declare @ExcludeProducts as varchar(max) = @ExcludeProductList ---- semicolon seperated list of update products
 Declare @ExcludeFutureDeployments as int = @ExcludeFutureDepl --- 1 means deployments with a starttime in the future will be excluded. 0 means nothing will be excluded
 ---- IMPORTANT: ExcludeFutureDeployments Will not exclude updates from the statistics. It will just affect compliance state based on deployments.
 
--- using prefix like "2017-07" to filter for the security rollup of the past month
-DECLARE @LastRollupPrefix as char(7);
-SET @LastRollupPrefix = (SELECT convert(char(7),DATEADD(MONTH,-1,GETDATE()),126)); 
-
--- using prefix like "2017-08" to filter for the current security rollup
-DECLARE @CurrentRollupPrefix as char(7);
-SET @CurrentRollupPrefix = (SELECT convert(char(7),DATEADD(MONTH,0,GETDATE()),126)); 
-
 -- calculate 2nd Tuesday of month to add the correct date string in case install date is missing in v_GS_QUICK_FIX_ENGINEERING
-DECLARE @FirstDayOfMonth datetime;
 DECLARE @SecondTuesdayOfMonth datetime;
-DECLARE @UpdatePrefix as char(7);
+SET @SecondTuesdayOfMonth = (DATEADD(Month, DATEDIFF(Month, 0, GETDATE()), 0) + 6 + 7 - (DATEPART(Weekday, DATEADD(Month, DATEDIFF(Month, 0, GETDATE()), 0)) + (@@DateFirst + 3) + 7) %7)
 
-SET  @FirstDayOfMonth = DATEADD(MONTH,DATEDIFF(MONTH,0,GETDATE()),0)     
-SET @SecondTuesdayOfMonth = DATEADD(DAY,((10 - DATEPART(dw,@FirstDayOfMonth)) % 7) + 7, @FirstDayOfMonth)
+DECLARE @LastRollupPrefix as char(7);
+DECLARE @CurrentRollupPrefix as char(7);
 
+-- If current date is before second Tuesday of this month, set the current rollup to previous month and set last rollup to the two months prior
 IF GETDATE() &lt; @SecondTuesdayOfMonth
-              SET @UpdatePrefix = @LastRollupPrefix
+	BEGIN
+		SET @LastRollupPrefix = (SELECT convert(char(7),DATEADD(MONTH,-2,GETDATE()),126))
+		SET @CurrentRollupPrefix = (SELECT convert(char(7),DATEADD(MONTH,-1,GETDATE()),126)) 
+	END
 ELSE
-              SET @UpdatePrefix = @CurrentRollupPrefix;
+    BEGIN
+			SET @LastRollupPrefix = (SELECT convert(char(7),DATEADD(MONTH,-1,GETDATE()),126))
+			SET @CurrentRollupPrefix = (SELECT convert(char(7),DATEADD(MONTH,0,GETDATE()),126))
+	END;
 
 -- PRE QUERIES
 -- Create table for collection IDs. Converting string based list into CTE to avoid any parameter performance issues with certain SQL configurations.
@@ -163,6 +162,7 @@ CumulativeUpdates (ArticleID,CI_ID, Latest) as
             UNION ALL
             Select 'KB' + updi.ArticleID as Article, CI_ID, Latest = 1 from v_updateinfo updi where (updi.Title like @CurrentRollupPrefix + ' Cumulative Update for Windows%' or updi.Title like @CurrentRollupPrefix + ' Security Monthly Quality Rollup%' or updi.Title like @CurrentRollupPrefix + ' Cumulative Update for Microsoft server operating system%')
 )
+
 
 
 --MAIN QUERY
@@ -303,7 +303,7 @@ left join (
                             (
                                          --- the current rollup is installed, but do we have a valid install date? In some cases the installdate seems to be mising. For some Win10 1803 systems for example.
                                          --- "-05" impossible date, since the update could not be released the 5th day of the month (normally). That should indicate the missing date info and give us enough info about the state of the system
-                                         CASE WHEN qfe.InstalledOn0 = '' THEN @UpdatePrefix + '-05 00:00:00' ELSE TRY_CONVERT(datetime,qfe.InstalledOn0,101) END      
+                                         CASE WHEN qfe.InstalledOn0 = '' THEN @CurrentRollupPrefix + '-05 00:00:00' ELSE TRY_CONVERT(datetime,qfe.InstalledOn0,101) END      
                             )
                             else --CUU.CI_ID IS null
                             (
