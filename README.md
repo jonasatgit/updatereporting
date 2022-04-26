@@ -15,6 +15,24 @@ and [HERE](https://techcommunity.microsoft.com/t5/core-infrastructure-and-securi
 # Changes
 (The version number can be found in the lower left corner of the dashboard. No version number means v1.0)
 
+## 2022-04-04 v3.7:
+1. Changed the way compliance for update rollups are shown between first day of month and second Tuesday based on: https://github.com/jonasatgit/updatereporting/pull/11
+1. Changed the "exclude future deployments" parameter to be able to filter out deployments in one of the following states: Deployed as available, deployment disabled, start time or deadline in the future
+1. Changed the column "Missing updated approved" to only show missing updates if the corresponding deployment has not been filtered out via the new exclude parameter. The "per device" report still shows all updates no matter the deployment selection
+1. Added the new deployment exclude parameter also to the "Per device deployments" report. The report will now exclude deployments based on the parameter.
+1. Added cumulative update prefix like "2022-04" to the dashboard for each rollup bar graph
+1. Added systems domain name column to each list report
+1. Added switch "TryOverwrite" to import script. If set, the script will try to overwrite existing report items. Might not work in every case. If successful subscriptions will also be kept. 
+1. Added new filter to the "Per device" report called: "All missing Security and Critical updates deployed or not"
+1. Removed Security Update requirement in QFE query to improve QFE detection accuracy
+1. Fixed typo in "Per device" report based on: https://github.com/jonasatgit/updatereporting/issues/9
+1. Fixes typo in import script
+1. Fixed sorting issue in "per device" report
+1. Fixed sorting issue in "per device deployments" report
+1. Fixed "uncompliant" typo in "compliance list" report via: https://github.com/jonasatgit/updatereporting/pull/15
+1. Fixed typo in "compare update compliance" via: https://github.com/jonasatgit/updatereporting/pull/14
+1. Fixed an issue with parameters not correctly handled between the dashboard and most of the sub-reports
+
 ## 2021-11-18 v3.6:
 1. Added "Cumulative Update for Microsoft server operating system" string for server 2022 updates
 
