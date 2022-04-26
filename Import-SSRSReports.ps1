@@ -63,6 +63,9 @@ Will add SQL query trace flag "OPTION (QUERYTRACEON 9481)" to important queries 
 Works only with older SQL version than SQL Server 2016 SP1 (SQL version < 13.0.4001.0)
 More infos can be found here: https://support.microsoft.com/en-us/help/3196320/sql-query-times-out-or-console-slow-on-certain-configuration-manager-d
 
+.PARAMETER TryOverwrite
+If set, the script will try to overwrite existing reports. In some cases not all settings are overwritten unfortunately, hence the name TRY-Overwrite
+
 .INPUTS
 None. You cannot pipe objects to Import-SSRSReports.ps1
 
@@ -71,6 +74,9 @@ Just normal console output. Nothing to work with.
 
 .EXAMPLE
 PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}"
+
+.EXAMPLE
+PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -TryOverwrite
 
 .EXAMPLE
 PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/reportserver" -TargetFolderPath  "ConfigMgr_P11/Custom_UpdateReporting" -TargetDataSourcePath "ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}" -ForceLegacyFormat -ForceLegacyCardinalitySQL2016SP1AndHigher
@@ -128,68 +134,90 @@ param(
     [switch]$ForceLegacyCardinalityOlderThanSQL2016SP1,
 
     [parameter(Mandatory=$false)]
-    [string]$ReportSourcePath = $($PSScriptRoot)
+    [string]$ReportSourcePath = $($PSScriptRoot),
+
+    [parameter(Mandatory=$false)]
+    [switch]$TryOverwrite
 
 )
 
-[string]$datasetUsingSQLView = 'UpdatesSummaryView'
+#[string]$datasetUsingSQLView = 'UpdatesSummaryView'
 
 $cleanFolder = "$reportSourcePath\SourceFiles"
 $workFolder = "$reportSourcePath\work"
 
+$overwriteReportItem = $false
+if ($TryOverwrite)
+{
+    $overwriteReportItem = $true
+    Write-Host "Will try to overwrite existing reports..." -ForegroundColor Yellow
+}
+
 if ($ForceLegacyCardinalityOlderThanSQL2016SP1 -and $ForceLegacyCardinalitySQL2016SP1AndHigher)
 {
-    Write-host "Use either ForceLegacyCardinalityOlderThanSQL2016SP1 or ForceLegacyCardinalitySQL2016SP1AndHigher" -ForegroundColor Yellow
-    Write-Host "Run `"Get-Help .\Import-SSRSReports.ps1 -Full`" to get help" -ForegroundColor Yellow
-    Write-Host " "
     Write-Host "Get-Help .\Import-SSRSReports.ps1 -Examples"
     Get-Help .\Import-SSRSReports.ps1 -Examples
+    Write-Host " "
+    Write-host "Use either ForceLegacyCardinalityOlderThanSQL2016SP1 or ForceLegacyCardinalitySQL2016SP1AndHigher" -ForegroundColor Yellow
+    Write-Host "Run `"Get-Help .\Import-SSRSReports.ps1 -Full`" to get help" -ForegroundColor Yellow
     break   
 }
 
 # not using validatepattern to genereate nice error messages
-if($ReportServerUri -notmatch '^[a-z0-9\./:\{\}\-_ ]+$')
+if ($ReportServerUri -notmatch '^[a-z0-9\./:\{\}\-_ ]+$')
 {
+    Write-Host "Get-Help .\Import-SSRSReports.ps1 -Examples"
+    Get-Help .\Import-SSRSReports.ps1 -Examples
+    Write-Host " "
     Write-host "Parameter `"ReportServerUri`" needs to match regex: '^[a-z0-9\./:\{\}\-_ ]+$'" -ForegroundColor Yellow
     Write-host "Please use slash `"/`" instead of backslash `"\`" for parameter `"ReportServerUri`"" -ForegroundColor Yellow
     Write-Host "Run `"Get-Help .\Import-SSRSReports.ps1 -Full`" to get help" -ForegroundColor Yellow
-    Write-Host " "
-    Write-Host "Get-Help .\Import-SSRSReports.ps1 -Examples"
-    Get-Help .\Import-SSRSReports.ps1 -Examples
     break
 }
 
 
-if($TargetFolderPath -notmatch '^[a-z0-9\./:\{\}\-_ ]+$')
+if ($TargetFolderPath -notmatch '^[a-z0-9\./:\{\}\-_ ]+$')
 {
+    Write-Host "Get-Help .\Import-SSRSReports.ps1 -Examples"
+    Get-Help .\Import-SSRSReports.ps1 -Examples
+    Write-Host " "
     Write-host "Parameter `"TargetFolderPath`" needs to match regex: '^[a-z0-9\./:\{\}\-_ ]+$'" -ForegroundColor Yellow
     Write-host "Please use slash `"/`" instead of backslash `"\`" for parameter `"TargetFolderPath`"" -ForegroundColor Yellow
     Write-Host "Run `"Get-Help .\Import-SSRSReports.ps1 -Full`" to get help" -ForegroundColor Yellow
-    Write-Host " "
-    Write-Host "Get-Help .\Import-SSRSReports.ps1 -Examples"
-    Get-Help .\Import-SSRSReports.ps1 -Examples
     break
 }
 
 
-if($TargetDataSourcePath -notmatch '^[a-z0-9\./:\{\}\-_ ]+$')
+if ($TargetDataSourcePath -notmatch '^[a-z0-9\./:\{\}\-_ ]+$')
 {
+    Write-Host "Get-Help .\Import-SSRSReports.ps1 -Examples"
+    Get-Help .\Import-SSRSReports.ps1 -Examples
+    Write-Host " "
     Write-host "Parameter `"TargetDataSourcePath`" needs to match regex: '^[a-z0-9\./:\{\}\-_ ]+$'" -ForegroundColor Yellow
     Write-host "Please use slash `"/`" instead of backslash `"\`" for parameter `"TargetDataSourcePath`"" -ForegroundColor Yellow
     Write-Host "Run `"Get-Help .\Import-SSRSReports.ps1 -Full`" to get help" -ForegroundColor Yellow
-    Write-Host " "
-    Write-Host "Get-Help .\Import-SSRSReports.ps1 -Examples"
-    Get-Help .\Import-SSRSReports.ps1 -Examples
     break
 }
 
-if(-not (Test-Path $cleanFolder))
+
+if ($DefaultCollectionFilter -match '&')
+{
+    Write-Host "Get-Help .\Import-SSRSReports.ps1 -Examples"
+    Get-Help .\Import-SSRSReports.ps1 -Examples
+    Write-Host " "
+    Write-host "Parameter `"DefaultCollectionFilter`" should not contain the ampersand sign `"&`"" -ForegroundColor Yellow
+    Write-Host "Run `"Get-Help .\Import-SSRSReports.ps1 -Full`" to get help" -ForegroundColor Yellow
+    break    
+}
+
+
+if (-not (Test-Path $cleanFolder))
 {
     Write-Host "Folder `"$($cleanFolder)`" not found!"  -ForegroundColor Yellow
     break
 }
 
-if(-not (Test-Path $workFolder))
+if (-not (Test-Path $workFolder))
 {
     $null = New-Item -ItemType "directory" -Path $workFolder -Force
 }
@@ -202,7 +230,7 @@ $null = Copy-Item -Path "$($cleanFolder)\*" -Destination "$($workFolder)\" -Forc
 
 [array]$reportsToWorkWith = Get-ChildItem -Path "$workFolder" | Where-Object {$_.Extension -eq '.rdl' -or $_.Extension -eq '.rsd'}
 Write-host "Found $($reportsToWorkWith.Count) .rdl and .rsd files in `"$reportSourcePath\work`"" -ForegroundColor Green
-if($reportsToWorkWith.Count -gt 0)
+if ($reportsToWorkWith.Count -gt 0)
 {
     if ($ForceLegacyFormat)
     {
@@ -211,12 +239,12 @@ if($reportsToWorkWith.Count -gt 0)
 
     if ($ForceLegacyCardinalitySQL2016SP1AndHigher)
     {
-        Write-Host "Will add SQL query hint: `"OPTION (USE HINT ('FORCE_LEGACY_CARDINALITY_ESTIMATION'))`" to larger queries" to important queries -ForegroundColor Yellow
+        Write-Host "Will add SQL query hint: `"OPTION (USE HINT ('FORCE_LEGACY_CARDINALITY_ESTIMATION'))`" to larger queries" -ForegroundColor Yellow
     }
 
     if ($ForceLegacyCardinalityOlderThanSQL2016SP1)
     {
-        Write-Host "Will add SQL query trace flag `"OPTION (QUERYTRACEON 9481)`" to larger queries" to important queries -ForegroundColor Yellow
+        Write-Host "Will add SQL query trace flag `"OPTION (QUERYTRACEON 9481)`" to larger queries" -ForegroundColor Yellow
     }
 
     $reportsToWorkWith | ForEach-Object {
@@ -274,7 +302,7 @@ if($reportsToWorkWith.Count -gt 0)
         }
     }
 
-    if(-NOT ($DoNotUpload))
+    if (-NOT ($DoNotUpload))
     {
         Write-host "Connecting to: $ReportServerUri..." -ForegroundColor Green
 
@@ -306,7 +334,7 @@ if($reportsToWorkWith.Count -gt 0)
                     $itemType,        # Catalog item type: Report, Model, Dataset, Component, Resource, and DataSource
                     $reportName,      # Name of the item
                     $targetPath,      # Destination folder
-                    $false,           # Overwrite report if it exists, not all settings are overwritten, therefore set to false. Delete items manually.
+                    $overwriteReportItem, # Overwrite report if it exists, not all settings are overwritten, therefore set to false. Delete items manually or use TryOverwrite parameter
                     $reportBytes,     # Bytes of item
                     $null,            # Item properties
                     [ref]$warnings)   # Warnings during upload
