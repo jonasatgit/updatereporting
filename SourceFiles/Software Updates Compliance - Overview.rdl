@@ -107,8 +107,11 @@ order by [ProductName]</CommandText>
           <QueryParameter Name="@ExcludeProductList">
             <Value>=Join(Parameters!ExcludeProductList.Value,";")</Value>
           </QueryParameter>
-          <QueryParameter Name="@ExcludeFutureDepl">
-            <Value>=Parameters!ExcludeFutureDepl.Value</Value>
+          <QueryParameter Name="@MonthIndex">
+            <Value>=Parameters!MonthIndex.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@ExcludeDeplBitMask">
+            <Value>=Join(Parameters!ExcludeDeplBitMask.Value,";")</Value>
             <rd:UserDefined>true</rd:UserDefined>
           </QueryParameter>
         </QueryParameters>
@@ -126,6 +129,10 @@ order by [ProductName]</CommandText>
         <Field Name="Counter">
           <DataField>Counter</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="Domain">
+          <DataField>Domain</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
         </Field>
         <Field Name="PendingReboot">
           <DataField>PendingReboot</DataField>
@@ -257,6 +264,52 @@ order by [ProductName]</CommandText>
         </Field>
       </Fields>
     </DataSet>
+    <DataSet Name="UpdatePrefix">
+      <Query>
+        <DataSourceName>DataSource1</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@MonthIndex">
+            <Value>=Parameters!MonthIndex.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandText>---- This query serves two purposes
+---- Be able to show rollup prefix in dashboard
+---- Populate datestring into month selection parameter
+DECLARE @LastRollupPrefix as char(7);
+DECLARE @CurrentRollupPrefix as char(7);
+DECLARE @SecondTuesdayOfMonth datetime;
+--Declare @MonthIndex as int = 0; -- 0 = current month, 1 = previous month
+
+-- Calculate 2nd Tuesday of month to add the correct date string in case install date is missing in v_GS_QUICK_FIX_ENGINEERING
+-- Also used to fill the gap between the first day of a month and the next time a rollup will be released
+SET @SecondTuesdayOfMonth = (DATEADD(Month, DATEDIFF(Month, 0, GETDATE()), 0) + 6 + 7 - (DATEPART(Weekday, DATEADD(Month, DATEDIFF(Month, 0, GETDATE()), 0)) + (@@DateFirst + 3) + 7) %7)
+
+IF GETDATE() &lt; @SecondTuesdayOfMonth
+	BEGIN
+		SET @LastRollupPrefix = (SELECT convert(char(7),DATEADD(MONTH,-2-@MonthIndex,GETDATE()),126))
+		SET @CurrentRollupPrefix = (SELECT convert(char(7),DATEADD(MONTH,-1-@MonthIndex,GETDATE()),126)) 
+	END
+ELSE
+    BEGIN
+		SET @LastRollupPrefix = (SELECT convert(char(7),DATEADD(MONTH,-1-@MonthIndex,GETDATE()),126))
+		SET @CurrentRollupPrefix = (SELECT convert(char(7),DATEADD(MONTH,0-@MonthIndex,GETDATE()),126))
+	END;
+
+Select @LastRollupPrefix as [LastRollupPrefix]
+	  ,@CurrentRollupPrefix as [CurrentRollupPrefix]</CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+      </Query>
+      <Fields>
+        <Field Name="LastRollupPrefix">
+          <DataField>LastRollupPrefix</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="CurrentRollupPrefix">
+          <DataField>CurrentRollupPrefix</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
   </DataSets>
   <ReportSections>
     <ReportSection>
@@ -316,8 +369,11 @@ order by [ProductName]</CommandText>
                                 <Parameter Name="CollectionFilter">
                                   <Value>=Parameters!CollectionFilter.Value</Value>
                                 </Parameter>
-                                <Parameter Name="ExcludeFutureDepl">
-                                  <Value>=Parameters!ExcludeFutureDepl.Value</Value>
+                                <Parameter Name="ExcludeDeplBitMask">
+                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
+                                </Parameter>
+                                <Parameter Name="MonthIndex">
+                                  <Value>=Parameters!MonthIndex.Value</Value>
                                 </Parameter>
                               </Parameters>
                             </Drillthrough>
@@ -376,11 +432,14 @@ order by [ProductName]</CommandText>
                                 <Parameter Name="CollectionFilter">
                                   <Value>=Parameters!CollectionFilter.Value</Value>
                                 </Parameter>
-                                <Parameter Name="ExcludeFutureDepl">
-                                  <Value>=Parameters!ExcludeFutureDepl.Value</Value>
-                                </Parameter>
                                 <Parameter Name="ComplianceState">
                                   <Value>0</Value>
+                                </Parameter>
+                                <Parameter Name="ExcludeDeplBitMask">
+                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
+                                </Parameter>
+                                <Parameter Name="MonthIndex">
+                                  <Value>=Parameters!MonthIndex.Value</Value>
                                 </Parameter>
                               </Parameters>
                             </Drillthrough>
@@ -683,6 +742,12 @@ order by [ProductName]</CommandText>
                                 <Parameter Name="ExcludeProductList">
                                   <Value>=Parameters!ExcludeProductList.Value</Value>
                                 </Parameter>
+                                <Parameter Name="ExcludeDeplBitMask">
+                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
+                                </Parameter>
+                                <Parameter Name="MonthIndex">
+                                  <Value>=Parameters!MonthIndex.Value</Value>
+                                </Parameter>
                               </Parameters>
                             </Drillthrough>
                           </Action>
@@ -737,6 +802,12 @@ order by [ProductName]</CommandText>
                                 <Parameter Name="ExcludeProductList">
                                   <Value>=Parameters!ExcludeProductList.Value</Value>
                                 </Parameter>
+                                <Parameter Name="ExcludeDeplBitMask">
+                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
+                                </Parameter>
+                                <Parameter Name="MonthIndex">
+                                  <Value>=Parameters!MonthIndex.Value</Value>
+                                </Parameter>
                               </Parameters>
                             </Drillthrough>
                           </Action>
@@ -790,6 +861,12 @@ order by [ProductName]</CommandText>
                                 </Parameter>
                                 <Parameter Name="ExcludeProductList">
                                   <Value>=Parameters!ExcludeProductList.Value</Value>
+                                </Parameter>
+                                <Parameter Name="ExcludeDeplBitMask">
+                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
+                                </Parameter>
+                                <Parameter Name="MonthIndex">
+                                  <Value>=Parameters!MonthIndex.Value</Value>
                                 </Parameter>
                               </Parameters>
                             </Drillthrough>
@@ -1068,6 +1145,12 @@ order by [ProductName]</CommandText>
                                 <Parameter Name="ExcludeProductList">
                                   <Value>=Parameters!ExcludeProductList.Value</Value>
                                 </Parameter>
+                                <Parameter Name="ExcludeDeplBitMask">
+                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
+                                </Parameter>
+                                <Parameter Name="MonthIndex">
+                                  <Value>=Parameters!MonthIndex.Value</Value>
+                                </Parameter>
                               </Parameters>
                             </Drillthrough>
                           </Action>
@@ -1125,6 +1208,12 @@ order by [ProductName]</CommandText>
                                 <Parameter Name="ExcludeProductList">
                                   <Value>=Parameters!ExcludeProductList.Value</Value>
                                 </Parameter>
+                                <Parameter Name="ExcludeDeplBitMask">
+                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
+                                </Parameter>
+                                <Parameter Name="MonthIndex">
+                                  <Value>=Parameters!MonthIndex.Value</Value>
+                                </Parameter>
                               </Parameters>
                             </Drillthrough>
                           </Action>
@@ -1181,6 +1270,12 @@ order by [ProductName]</CommandText>
                                 </Parameter>
                                 <Parameter Name="ExcludeProductList">
                                   <Value>=Parameters!ExcludeProductList.Value</Value>
+                                </Parameter>
+                                <Parameter Name="ExcludeDeplBitMask">
+                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
+                                </Parameter>
+                                <Parameter Name="MonthIndex">
+                                  <Value>=Parameters!MonthIndex.Value</Value>
                                 </Parameter>
                               </Parameters>
                             </Drillthrough>
@@ -1462,6 +1557,12 @@ order by [ProductName]</CommandText>
                                 <Parameter Name="ExcludeProductList">
                                   <Value>=Parameters!ExcludeProductList.Value</Value>
                                 </Parameter>
+                                <Parameter Name="ExcludeDeplBitMask">
+                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
+                                </Parameter>
+                                <Parameter Name="MonthIndex">
+                                  <Value>=Parameters!MonthIndex.Value</Value>
+                                </Parameter>
                               </Parameters>
                             </Drillthrough>
                           </Action>
@@ -1519,6 +1620,12 @@ order by [ProductName]</CommandText>
                                 <Parameter Name="ExcludeProductList">
                                   <Value>=Parameters!ExcludeProductList.Value</Value>
                                 </Parameter>
+                                <Parameter Name="ExcludeDeplBitMask">
+                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
+                                </Parameter>
+                                <Parameter Name="MonthIndex">
+                                  <Value>=Parameters!MonthIndex.Value</Value>
+                                </Parameter>
                               </Parameters>
                             </Drillthrough>
                           </Action>
@@ -1575,6 +1682,12 @@ order by [ProductName]</CommandText>
                                 </Parameter>
                                 <Parameter Name="ExcludeProductList">
                                   <Value>=Parameters!ExcludeProductList.Value</Value>
+                                </Parameter>
+                                <Parameter Name="ExcludeDeplBitMask">
+                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
+                                </Parameter>
+                                <Parameter Name="MonthIndex">
+                                  <Value>=Parameters!MonthIndex.Value</Value>
                                 </Parameter>
                               </Parameters>
                             </Drillthrough>
@@ -1856,6 +1969,12 @@ order by [ProductName]</CommandText>
                                 <Parameter Name="ExcludeProductList">
                                   <Value>=Parameters!ExcludeProductList.Value</Value>
                                 </Parameter>
+                                <Parameter Name="ExcludeDeplBitMask">
+                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
+                                </Parameter>
+                                <Parameter Name="MonthIndex">
+                                  <Value>=Parameters!MonthIndex.Value</Value>
+                                </Parameter>
                               </Parameters>
                             </Drillthrough>
                           </Action>
@@ -1913,6 +2032,12 @@ order by [ProductName]</CommandText>
                                 <Parameter Name="ExcludeProductList">
                                   <Value>=Parameters!ExcludeProductList.Value</Value>
                                 </Parameter>
+                                <Parameter Name="ExcludeDeplBitMask">
+                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
+                                </Parameter>
+                                <Parameter Name="MonthIndex">
+                                  <Value>=Parameters!MonthIndex.Value</Value>
+                                </Parameter>
                               </Parameters>
                             </Drillthrough>
                           </Action>
@@ -1969,6 +2094,12 @@ order by [ProductName]</CommandText>
                                 </Parameter>
                                 <Parameter Name="ExcludeProductList">
                                   <Value>=Parameters!ExcludeProductList.Value</Value>
+                                </Parameter>
+                                <Parameter Name="ExcludeDeplBitMask">
+                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
+                                </Parameter>
+                                <Parameter Name="MonthIndex">
+                                  <Value>=Parameters!MonthIndex.Value</Value>
                                 </Parameter>
                               </Parameters>
                             </Drillthrough>
@@ -2977,6 +3108,12 @@ order by [ProductName]</CommandText>
                                 <Parameter Name="RollupStatus">
                                   <Value>3</Value>
                                 </Parameter>
+                                <Parameter Name="MonthIndex">
+                                  <Value>=Parameters!MonthIndex.Value</Value>
+                                </Parameter>
+                                <Parameter Name="ExcludeDeplBitMask">
+                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
+                                </Parameter>
                               </Parameters>
                             </Drillthrough>
                           </Action>
@@ -3033,6 +3170,12 @@ order by [ProductName]</CommandText>
                                 </Parameter>
                                 <Parameter Name="RollupStatus">
                                   <Value>2</Value>
+                                </Parameter>
+                                <Parameter Name="MonthIndex">
+                                  <Value>=Parameters!MonthIndex.Value</Value>
+                                </Parameter>
+                                <Parameter Name="ExcludeDeplBitMask">
+                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
                                 </Parameter>
                               </Parameters>
                             </Drillthrough>
@@ -3242,7 +3385,7 @@ order by [ProductName]</CommandText>
             </ChartLegends>
             <ChartTitles>
               <ChartTitle Name="Default">
-                <Caption>Last Rollup installed</Caption>
+                <Caption>="Last Rollup installed (" &amp; First(Fields!LastRollupPrefix.Value, "UpdatePrefix") &amp; ")"</Caption>
                 <Style>
                   <BackgroundGradientType>None</BackgroundGradientType>
                   <FontWeight>Bold</FontWeight>
@@ -3335,6 +3478,12 @@ order by [ProductName]</CommandText>
                                 <Parameter Name="RollupStatus">
                                   <Value>3</Value>
                                 </Parameter>
+                                <Parameter Name="MonthIndex">
+                                  <Value>=Parameters!MonthIndex.Value</Value>
+                                </Parameter>
+                                <Parameter Name="ExcludeDeplBitMask">
+                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
+                                </Parameter>
                               </Parameters>
                             </Drillthrough>
                           </Action>
@@ -3391,6 +3540,12 @@ order by [ProductName]</CommandText>
                                 </Parameter>
                                 <Parameter Name="RollupStatus">
                                   <Value>2</Value>
+                                </Parameter>
+                                <Parameter Name="MonthIndex">
+                                  <Value>=Parameters!MonthIndex.Value</Value>
+                                </Parameter>
+                                <Parameter Name="ExcludeDeplBitMask">
+                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
                                 </Parameter>
                               </Parameters>
                             </Drillthrough>
@@ -3598,7 +3753,7 @@ order by [ProductName]</CommandText>
             </ChartLegends>
             <ChartTitles>
               <ChartTitle Name="Default">
-                <Caption>Current Rollup installed</Caption>
+                <Caption>="Current Rollup installed (" &amp; First(Fields!CurrentRollupPrefix.Value, "UpdatePrefix") &amp; ")"</Caption>
                 <Style>
                   <BackgroundGradientType>None</BackgroundGradientType>
                   <FontWeight>Bold</FontWeight>
@@ -3770,6 +3925,12 @@ order by [ProductName]</CommandText>
                                 </Parameter>
                                 <Parameter Name="ExcludeProductList">
                                   <Value>=Parameters!ExcludeProductList.Value</Value>
+                                </Parameter>
+                                <Parameter Name="ExcludeDeplBitMask">
+                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
+                                </Parameter>
+                                <Parameter Name="MonthIndex">
+                                  <Value>=Parameters!MonthIndex.Value</Value>
                                 </Parameter>
                               </Parameters>
                             </Drillthrough>
@@ -4115,6 +4276,12 @@ order by [ProductName]</CommandText>
                                 <Parameter Name="LastErrorCode">
                                   <Value>0</Value>
                                 </Parameter>
+                                <Parameter Name="ExcludeDeplBitMask">
+                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
+                                </Parameter>
+                                <Parameter Name="MonthIndex">
+                                  <Value>=Parameters!MonthIndex.Value</Value>
+                                </Parameter>
                               </Parameters>
                             </Drillthrough>
                           </Action>
@@ -4370,7 +4537,7 @@ order by [ProductName]</CommandText>
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>v3.6 LINK</Value>
+                    <Value>v3.7 LINK</Value>
                   </TextRun>
                 </TextRuns>
               </Paragraph>
@@ -4489,6 +4656,12 @@ order by [ProductName]</CommandText>
                                 </Parameter>
                                 <Parameter Name="LastErrorCode">
                                   <Value>0</Value>
+                                </Parameter>
+                                <Parameter Name="ExcludeDeplBitMask">
+                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
+                                </Parameter>
+                                <Parameter Name="MonthIndex">
+                                  <Value>=Parameters!MonthIndex.Value</Value>
                                 </Parameter>
                               </Parameters>
                             </Drillthrough>
@@ -5351,7 +5524,7 @@ order by [ProductName]</CommandText>
                                   <Value>=Fields!MissingUpdatesApproved.Value</Value>
                                   <Style>
                                     <TextDecoration>Underline</TextDecoration>
-                                  </Style>								  
+                                  </Style>
                                 </TextRun>
                               </TextRuns>
                             </Paragraph>
@@ -5373,7 +5546,7 @@ order by [ProductName]</CommandText>
                                 </Drillthrough>
                               </Action>
                             </Actions>
-                          </ActionInfo>							  
+                          </ActionInfo>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -5386,6 +5559,7 @@ order by [ProductName]</CommandText>
                             <PaddingBottom>2pt</PaddingBottom>
                           </Style>
                         </Textbox>
+                        <rd:Selected>true</rd:Selected>
                       </CellContents>
                     </TablixCell>
                     <TablixCell>
@@ -5579,23 +5753,58 @@ order by [ProductName]</CommandText>
       </ValidValues>
       <MultiValue>true</MultiValue>
     </ReportParameter>
-    <ReportParameter Name="ExcludeFutureDepl">
+    <ReportParameter Name="ExcludeDeplBitMask">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>8</Value>
+          <Value>16</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Exclude deployments:</Prompt>
+      <ValidValues>
+        <ParameterValues>
+          <ParameterValue>
+            <Value>2</Value>
+            <Label>With starttime in the future</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>4</Value>
+            <Label>With deadline in the future</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>8</Value>
+            <Label>Deployed as available</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>16</Value>
+            <Label>That are disabled</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>0</Value>
+            <Label>Nothing excluded</Label>
+          </ParameterValue>
+        </ParameterValues>
+      </ValidValues>
+      <MultiValue>true</MultiValue>
+    </ReportParameter>
+    <ReportParameter Name="MonthIndex">
       <DataType>Integer</DataType>
       <DefaultValue>
         <Values>
           <Value>0</Value>
         </Values>
       </DefaultValue>
-      <Prompt>Exclude future deployments</Prompt>
+      <Prompt>Show data based on: </Prompt>
       <ValidValues>
         <ParameterValues>
           <ParameterValue>
-            <Value>1</Value>
-            <Label>Yes</Label>
+            <Value>0</Value>
+            <Label>Current month</Label>
           </ParameterValue>
           <ParameterValue>
-            <Value>0</Value>
-            <Label>No</Label>
+            <Value>1</Value>
+            <Label>Previous month (only valid with delayed update rollout)</Label>
           </ParameterValue>
         </ParameterValues>
       </ValidValues>
@@ -5604,7 +5813,7 @@ order by [ProductName]</CommandText>
   <ReportParametersLayout>
     <GridLayoutDefinition>
       <NumberOfColumns>2</NumberOfColumns>
-      <NumberOfRows>2</NumberOfRows>
+      <NumberOfRows>3</NumberOfRows>
       <CellDefinitions>
         <CellDefinition>
           <ColumnIndex>0</ColumnIndex>
@@ -5624,7 +5833,12 @@ order by [ProductName]</CommandText>
         <CellDefinition>
           <ColumnIndex>1</ColumnIndex>
           <RowIndex>1</RowIndex>
-          <ParameterName>ExcludeFutureDepl</ParameterName>
+          <ParameterName>ExcludeDeplBitMask</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>2</RowIndex>
+          <ParameterName>MonthIndex</ParameterName>
         </CellDefinition>
       </CellDefinitions>
     </GridLayoutDefinition>

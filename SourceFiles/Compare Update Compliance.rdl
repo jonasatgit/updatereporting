@@ -146,19 +146,15 @@ order by Name0</CommandText>
                             <TextRuns>
                               <TextRun>
                                 <Value>Choose systems that are equal related to their operating system and installed roles.</Value>
-                                
                               </TextRun>
                             </TextRuns>
-                            
                           </Paragraph>
                           <Paragraph>
                             <TextRuns>
                               <TextRun>
                                 <Value>The report will only show applicable updates to the specific system and not a list of all updates available.</Value>
-                                
                               </TextRun>
                             </TextRuns>
-                            
                           </Paragraph>
                         </Paragraphs>
                         <rd:DefaultName>Textbox13</rd:DefaultName>
@@ -210,7 +206,6 @@ order by Name0</CommandText>
                                 </Style>
                               </TextRun>
                             </TextRuns>
-                            
                           </Paragraph>
                         </Paragraphs>
                         <rd:DefaultName>Textbox18</rd:DefaultName>
@@ -400,7 +395,6 @@ order by Name0</CommandText>
                                 </Style>
                               </TextRun>
                             </TextRuns>
-                            
                           </Paragraph>
                         </Paragraphs>
                         <rd:DefaultName>Name0</rd:DefaultName>
@@ -445,7 +439,6 @@ order by Name0</CommandText>
                                     </Style>
                                   </TextRun>
                                 </TextRuns>
-                                
                               </Paragraph>
                             </Paragraphs>
                             <rd:DefaultName>OSystem</rd:DefaultName>
@@ -492,7 +485,6 @@ order by Name0</CommandText>
                                         </Style>
                                       </TextRun>
                                     </TextRuns>
-                                    
                                   </Paragraph>
                                 </Paragraphs>
                                 <rd:DefaultName>Textbox5</rd:DefaultName>
@@ -584,11 +576,10 @@ order by Name0</CommandText>
                                         </Style>
                                       </TextRun>
                                     </TextRuns>
-                                    
                                   </Paragraph>
                                 </Paragraphs>
                                 <rd:DefaultName>Textbox8</rd:DefaultName>
-                                <ToolTip>X to indicate a deployed / targeted update</ToolTip>		 
+                                <ToolTip>X to indicate a deployed / targeted update</ToolTip>
                                 <Style>
                                   <Border>
                                     <Color>#7292cc</Color>
@@ -629,7 +620,7 @@ order by Name0</CommandText>
                                       </Paragraph>
                                     </Paragraphs>
                                     <rd:DefaultName>Textbox22</rd:DefaultName>
-                                    <ToolTip>Count of deployed / targeted updates</ToolTip>	   
+                                    <ToolTip>Count of deployed / targeted updates</ToolTip>
                                     <Style>
                                       <Border>
                                         <Color>#7292cc</Color>
@@ -668,11 +659,10 @@ order by Name0</CommandText>
                                         </Style>
                                       </TextRun>
                                     </TextRuns>
-                                    
                                   </Paragraph>
                                 </Paragraphs>
                                 <rd:DefaultName>Textbox11</rd:DefaultName>
-                                <ToolTip>X to indicate a required / missing update</ToolTip>		
+                                <ToolTip>X to indicate a required / missing update</ToolTip>
                                 <Style>
                                   <Border>
                                     <Color>#7292cc</Color>
@@ -716,7 +706,7 @@ order by Name0</CommandText>
                                       </Paragraph>
                                     </Paragraphs>
                                     <rd:DefaultName>Textbox21</rd:DefaultName>
-                                    <ToolTip>Count of required / missing updates</ToolTip>		  
+                                    <ToolTip>Count of required / missing updates</ToolTip>
                                     <Style>
                                       <Border>
                                         <Color>#7292cc</Color>
@@ -774,7 +764,6 @@ order by Name0</CommandText>
                                 </Style>
                               </TextRun>
                             </TextRuns>
-                            
                           </Paragraph>
                         </Paragraphs>
                         <rd:DefaultName>Title</rd:DefaultName>
@@ -810,7 +799,6 @@ order by Name0</CommandText>
           </Tablix>
         </ReportItems>
         <Height>4.51736in</Height>
-        
       </Body>
       <Width>19.82292in</Width>
       <Page>
@@ -838,7 +826,6 @@ order by Name0</CommandText>
         <RightMargin>1in</RightMargin>
         <TopMargin>1in</TopMargin>
         <BottomMargin>1in</BottomMargin>
-        
       </Page>
     </ReportSection>
   </ReportSections>
@@ -929,6 +916,6 @@ order by Name0</CommandText>
   </CodeModules>
   <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
   <rd:ReportUnitType>Inch</rd:ReportUnitType>
-  <rd:ReportServerUrl>http://reportserver.domain.local/reportserver</rd:ReportServerUrl>
+  <rd:ReportServerUrl>http://reportserver.domain.local/ReportServer</rd:ReportServerUrl>
   <rd:ReportID>f3e5ae98-66c5-4863-b1e2-69153dbb97e3</rd:ReportID>
 </Report>

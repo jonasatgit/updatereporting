@@ -17,22 +17,29 @@
           <QueryParameter Name="@ExcludeProductList">
             <Value>=Join(Parameters!ExcludeProductList.Value,";")</Value>
           </QueryParameter>
-          <QueryParameter Name="@ExcludeFutureDepl">
-            <Value>=Parameters!ExcludeFutureDepl.Value</Value>
+          <QueryParameter Name="@ExcludeDeplBitMask">
+            <Value>=Join(Parameters!ExcludeDeplBitMask.Value,";")</Value>
           </QueryParameter>
           <QueryParameter Name="@ComputerName">
             <Value>=Parameters!ComputerName.Value</Value>
           </QueryParameter>
         </QueryParameters>
-        <CommandText>---- For tests in SQL mgmt studio only
+        <CommandText>----- START just for testing in SQL directly
 --Declare @ComputerName as varchar(15) = 'server1';
 --Declare @ExcludeProductList as varchar(max) = N'Microsoft Defender Antivirus;System Center Endpoint Protection'; ---- semicolon seperated list of update products
---declare @ExcludeFutureDepl as int = 0 ---- 1 means deployments with a starttime in the future will be excluded. 0 means nothing will be excluded
 
+---- Using a bitmask like parameter. Makes it possible to use a multivalue parameter instead of multiple parameters to filter out some deployments
+---- Using the same CTE function to convert parameter arraylist to CTE as with other multi value parameters due to perf issues on some SQL systems
+--Declare @ExcludeDeplBitMask as varchar(20) = '0'---'2;4;8;16';
+---- 2 = Deployments with starttime in the future will be excluded 
+---- 4 = Deployments with deadline in the future will be excluded
+---- 8 = Available deployments will be excluded
+---- 16 = Disabled deployments will be excluded
+----- END just for testing in SQL directly 
 
+---- Extra variables to prevent variable performance issues in some SQL configurations
 Declare @ExcludeProducts as varchar(max) = @ExcludeProductList; ---- semicolon seperated list of update products
-Declare @ExcludeFutureDeployments as int = @ExcludeFutureDepl; --- 1 means deployments with a starttime in the future will be excluded. 0 means nothing will be excluded
----- IMPORTANT: ExcludeFutureDeployments Will not exclude updates from the statistics. It will just affect compliance state based on deployments.
+Declare @ExcludeDeplBitMaskInternal as varchar(20) = @ExcludeDeplBitMask;
 Declare @ResourceID as int = (select Distinct ResourceID from v_R_System where name0 = @ComputerName);
 
 WITH CTE_ProductPieces
@@ -57,21 +64,71 @@ AS
                 END)) AS Product
     FROM CTE_ProductPieces 
 ),
--- Defender Updates will be filtered out, because they will be updated more frequently
-ExcludedUpdates (AssignmentID,CI_ID,AssignmentType) as
-(            
-            select CIA.AssignmentID, CIATOCI.CI_ID, AssignmentType = 1
+-- Using the same CTE function to convert parameter arraylist to CTE as with other multi value parameters due to perf issues on some SQL systems
+CTE_ExcludePieces
+AS 
+(
+    SELECT 1 AS ID
+        ,1 AS [StartString]
+        ,Cast(CHARINDEX(';', @ExcludeDeplBitMaskInternal,0) as int) AS StopString
+    UNION ALL
+    SELECT ID + 1
+                    ,StopString + 1
+                    ,Cast(CHARINDEX(';', @ExcludeDeplBitMaskInternal, StopString + 1) as int)
+    FROM CTE_ExcludePieces
+    WHERE StopString &gt; 0
+)
+,CTE_ExcludeIDs
+AS
+(
+    SELECT (SUBSTRING(@ExcludeDeplBitMaskInternal, StartString, 
+                                CASE WHEN StopString &gt; 0 THEN StopString - StartString
+                                ELSE LEN(@ExcludeDeplBitMaskInternal)
+                END)) AS ExcludeID
+    FROM CTE_ExcludePieces 
+),
+-- List of deployments we might need to exclude
+ExcludedDeploymentsBaseList (AssignmentID, AssignmentType) as
+(
+			--- Getting a list of deployments/assignments based on different criteria to further limit the output later on
+			-- parameter to be able to toggle to ex or include future deployments
+			-- deployments with STARTTIME in the future
+			select CIA.AssignmentID, AssignmentType = 2 
+			from v_CIAssignment cia 
+			where cia.AssignmentType in (1,5) -- 1 = updates, 5 = update groups
+			and cia.StartTime &gt; GETDATE() 
+			-- deployments with DEADLINE in the future
+			UNION ALL
+			select CIA.AssignmentID, AssignmentType = 4
+			from v_CIAssignment cia 			
+			where cia.AssignmentType in (1,5) -- 1 = updates, 5 = update groups
+			and cia.EnforcementDeadline &gt; GETDATE() 
+			-- availabe deployments
+			UNION ALL
+			select CIA.AssignmentID, AssignmentType = 8
+			from v_CIAssignment cia 			
+			where cia.AssignmentType in (1,5) -- 1 = updates, 5 = update groups
+			and cia.EnforcementDeadline is null
+			-- disabled deployments
+			UNION ALL
+			select CIA.AssignmentID, AssignmentType = 16
+			from v_CIAssignment cia 
+			where cia.AssignmentType in (1,5) -- 1 = updates, 5 = update groups
+			and cia.AssignmentEnabled = 0 
+),
+ExcludedDeployments (AssignmentID,AssignmentType, CI_ID) as
+(
+			-- Select just the deployments we need to exclude
+			Select AssignmentID, AssignmentType, CI_ID = 0 from ExcludedDeploymentsBaseList 
+			where AssignmentType in (Select ExcludeID from CTE_ExcludeIDs)
+			UNION ALL
+			-- Defender Updates will be filtered out, because they will be updated more frequently
+			-- Other producst can be filtered as well via @ExcludeProductList
+            select CIA.AssignmentID, AssignmentType = 1, CIATOCI.CI_ID 
             from v_CIAssignment CIA 
-			inner join v_UpdateAssignmentStatus uas on uas.AssignmentID = CIA.AssignmentID 
             inner join v_CIAssignmentToCI CIATOCI on CIATOCI.AssignmentID = CIA.AssignmentID 
             inner join v_CICategoryInfo CICI on CICI.Ci_ID = CIATOCI.CI_ID
 			inner join CTE_Products PR on PR.Product = CICI.CategoryInstanceName
-			where uas.ResourceID = @ResourceID
-			UNION ALL
-			select CIA.AssignmentID, CI_ID = 0, AssignmentType = @ExcludeFutureDeployments 
-			from v_CIAssignment cia 
-			inner join v_UpdateAssignmentStatus uas on uas.AssignmentID = CIA.AssignmentID 
-			where uas.ResourceID = @ResourceID and cia.StartTime &gt; GETDATE() -- deployments with starttime in the future, to be able to filter them out if we want to
 )
 
 SELECT CIA.AssignmentName
@@ -90,7 +147,7 @@ SELECT CIA.AssignmentName
 FROM v_UpdateAssignmentStatus uas
 inner join v_CIAssignment CIA on cia.AssignmentID = uas.AssignmentID 
 where uas.ResourceID = @ResourceID
-and CIA.AssignmentID not in (select AssignmentID from ExcludedUpdates where AssignmentType = 1)
+and CIA.AssignmentID not in (select AssignmentID from ExcludedDeployments)
 order by CIA.CollectionName, CIA.AssignmentName</CommandText>
         <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
       </Query>
@@ -213,7 +270,7 @@ order by [ProductName]</CommandText>
                   <Width>2.27083in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>2.40625in</Width>
+                  <Width>1.61458in</Width>
                 </TablixColumn>
                 <TablixColumn>
                   <Width>2.17708in</Width>
@@ -222,10 +279,10 @@ order by [ProductName]</CommandText>
                   <Width>2.26042in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>2.1875in</Width>
+                  <Width>1.47917in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>2.65625in</Width>
+                  <Width>1.44792in</Width>
                 </TablixColumn>
               </TablixColumns>
               <TablixRows>
@@ -457,7 +514,7 @@ order by [ProductName]</CommandText>
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox17</rd:DefaultName>
-                          <ToolTip>Last time the compliance state changed. Can be older in case no state has changed.</ToolTip>																	 
+                          <ToolTip>Last time the compliance state changed. Can be older in case no state has changed.</ToolTip>
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -485,6 +542,9 @@ order by [ProductName]</CommandText>
                       <CellContents>
                         <Textbox Name="Textbox29">
                           <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!LastComplianceMessageAge.Value</SortExpression>
+                          </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
@@ -1184,7 +1244,7 @@ order by [ProductName]</CommandText>
             <DataSetName>DeploymentState</DataSetName>
             <Top>0.43055in</Top>
             <Height>0.5in</Height>
-            <Width>27.80792in</Width>
+            <Width>25.09959in</Width>
             <ZIndex>1</ZIndex>
             <Style>
               <Border>
@@ -1213,7 +1273,7 @@ order by [ProductName]</CommandText>
         </ReportItems>
         <Height>1.06528in</Height>
       </Body>
-      <Width>27.80792in</Width>
+      <Width>25.485in</Width>
       <Page>
         <PageHeader>
           <Height>0.01042in</Height>
@@ -1254,8 +1314,8 @@ order by [ProductName]</CommandText>
           <Value>Microsoft Defender Antivirus</Value>
           <Value>System Center Endpoint Protection</Value>
         </Values>
-      </DefaultValue>	  
-      <Prompt>Exclude Product List</Prompt>
+      </DefaultValue>
+      <Prompt>Exclude deployments containing the following products:</Prompt>
       <ValidValues>
         <DataSetReference>
           <DataSetName>ExcludeProductListQuery</DataSetName>
@@ -1265,26 +1325,39 @@ order by [ProductName]</CommandText>
       </ValidValues>
       <MultiValue>true</MultiValue>
     </ReportParameter>
-    <ReportParameter Name="ExcludeFutureDepl">
+    <ReportParameter Name="ExcludeDeplBitMask">
       <DataType>String</DataType>
       <DefaultValue>
         <Values>
           <Value>0</Value>
         </Values>
       </DefaultValue>
-      <Prompt>Exclude Future Depl</Prompt>
+      <Prompt>Exclude deployments:</Prompt>
       <ValidValues>
         <ParameterValues>
           <ParameterValue>
-            <Value>1</Value>
-            <Label>Yes</Label>
+            <Value>2</Value>
+            <Label>With starttime in the future</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>4</Value>
+            <Label>With deadline in the future</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>8</Value>
+            <Label>Deployed as available</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>16</Value>
+            <Label>That are disabled</Label>
           </ParameterValue>
           <ParameterValue>
             <Value>0</Value>
-            <Label>No</Label>
+            <Label>Nothing excluded</Label>
           </ParameterValue>
         </ParameterValues>
       </ValidValues>
+      <MultiValue>true</MultiValue>
     </ReportParameter>
   </ReportParameters>
   <ReportParametersLayout>
@@ -1303,9 +1376,9 @@ order by [ProductName]</CommandText>
           <ParameterName>ExcludeProductList</ParameterName>
         </CellDefinition>
         <CellDefinition>
-          <ColumnIndex>0</ColumnIndex>
+          <ColumnIndex>1</ColumnIndex>
           <RowIndex>1</RowIndex>
-          <ParameterName>ExcludeFutureDepl</ParameterName>
+          <ParameterName>ExcludeDeplBitMask</ParameterName>
         </CellDefinition>
       </CellDefinitions>
     </GridLayoutDefinition>

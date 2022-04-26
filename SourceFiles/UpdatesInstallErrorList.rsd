@@ -587,5 +587,5 @@ END</CommandText>
       </Field>
     </Fields>
   </DataSet>
-  <rd:ReportServerUrl>http://reportserver.domain.local/ReportServer</rd:ReportServerUrl>
+  <rd:ReportServerUrl>http://reportserver.domain.local/reportserver</rd:ReportServerUrl>
 </SharedDataSet>

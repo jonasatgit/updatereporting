@@ -26,6 +26,7 @@ from v_FullCollectionMembership FCM
 inner join v_CIAssignment CIA on CIA.CollectionID = FCM.CollectionID
 where CIA.AssignmentType in (1,5) and FCM.ResourceID = (select distinct ResourceID from v_R_System where Name0 = @ComputerName)
 group by CIA.CollectionName</CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
       </Query>
       <Fields>
         <Field Name="CollectionName">
@@ -45,7 +46,7 @@ group by CIA.CollectionName</CommandText>
             <Value>=Parameters!ComputerName.Value</Value>
           </QueryParameter>
         </QueryParameters>
-        <rd:ReportServerUrl>http://reportserver.domain.local/ReportServer</rd:ReportServerUrl>
+        <rd:ReportServerUrl>http://reportserver.domain.local/reportserver</rd:ReportServerUrl>
       </SharedDataSet>
       <Fields>
         <Field Name="Vendor">
@@ -134,7 +135,7 @@ Select SW.Description
                         else 'Unknown' end 
 from v_FullCollectionMembership FCM 
 inner join v_ServiceWindow SW on FCM.CollectionID = SW.CollectionID
-where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @ComputerName)</CommandText>
+where FCM.ResourceID = (Select Distinct ResourceID from v_R_System where Name0 = @ComputerName)</CommandText>
         <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
       </Query>
       <Fields>
@@ -195,13 +196,13 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
                   <Width>1.27083in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1.1875in</Width>
+                  <Width>1.38542in</Width>
                 </TablixColumn>
                 <TablixColumn>
                   <Width>2.28125in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>2.05208in</Width>
+                  <Width>3.69791in</Width>
                 </TablixColumn>
               </TablixColumns>
               <TablixRows>
@@ -233,7 +234,7 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <ToolTip>Update title</ToolTip>			 
+                          <ToolTip>Update title</ToolTip>
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -282,7 +283,7 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <ToolTip>Update classification</ToolTip>	  
+                          <ToolTip>Update classification</ToolTip>
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -429,7 +430,7 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <ToolTip>Star as indicator if the update is deployed to the system. No star means update is not deployed. Might help to identify missing updates in deployments. </ToolTip>					 
+                          <ToolTip>Star as indicator if the update is deployed to the system. No star means update is not deployed. Might help to identify missing updates in deployments. </ToolTip>
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -478,7 +479,7 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <ToolTip>Star to indicate an installed update. No star means the update is not detected as installed.</ToolTip>													
+                          <ToolTip>Star to indicate an installed update. No star means the update is not detected as installed.</ToolTip>
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -527,7 +528,7 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <ToolTip>Star to indicate a missing update. No star means the update is not evaluated to be missing or installed already. </ToolTip>						   
+                          <ToolTip>Star to indicate a missing update. No star means the update is not evaluated to be missing or installed already. </ToolTip>
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -576,7 +577,7 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <ToolTip>Date the update was posted to Microsoft Update</ToolTip>	   
+                          <ToolTip>Date the update was posted to Microsoft Update</ToolTip>
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -623,7 +624,7 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox8</rd:DefaultName>
-                          <ToolTip>Deadline of the update. If the update is a member of multiple deployments the earliest date will be shown. </ToolTip>							
+                          <ToolTip>Deadline of the update. If the update is a member of multiple deployments the earliest date will be shown. </ToolTip>
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -651,6 +652,9 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
                       <CellContents>
                         <Textbox Name="Textbox2">
                           <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!LastEnforcementMessageTime.Value</SortExpression>
+                          </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
@@ -670,7 +674,7 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox2</rd:DefaultName>
-                          <ToolTip>Time a possible installation error was detected</ToolTip>			
+                          <ToolTip>Time a possible installation error was detected</ToolTip>
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -698,6 +702,9 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
                       <CellContents>
                         <Textbox Name="Textbox4">
                           <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!LastErrorCode.Value</SortExpression>
+                          </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
@@ -717,7 +724,7 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox4</rd:DefaultName>
-                          <ToolTip>Last installation attempt error code</ToolTip>		 
+                          <ToolTip>Last installation attempt error code</ToolTip>
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -745,6 +752,9 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
                       <CellContents>
                         <Textbox Name="Textbox5">
                           <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!ErrorDescription.Value</SortExpression>
+                          </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
@@ -792,6 +802,9 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
                       <CellContents>
                         <Textbox Name="Textbox7">
                           <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!Action.Value</SortExpression>
+                          </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
@@ -811,7 +824,7 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox7</rd:DefaultName>
-                          <ToolTip>A possible action to fix the error based on different Microsoft docs articles or Customer Engineer experience. The possible solution might not help in every case, but should give you a starting point to fix the underlaying issue.</ToolTip>					  
+                          <ToolTip>A possible action to fix the error based on different Microsoft docs articles or Customer Engineer experience. The possible solution might not help in every case, but should give you a starting point to fix the underlaying issue.</ToolTip>
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -1477,9 +1490,9 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
               </TablixMembers>
             </TablixRowHierarchy>
             <DataSetName>UpdatesPerDevice</DataSetName>
-            <Top>1.5in</Top>
+            <Top>1.75in</Top>
             <Height>0.5in</Height>
-            <Width>25.98583in</Width>
+            <Width>27.82958in</Width>
             <Style>
               <Border>
                 <Style>Solid</Style>
@@ -1544,7 +1557,7 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>="Update filter is set to: '" &amp; Parameters!FilterUpdates.Label &amp; "'.         This report does not exclude any updates even if set via the dashboard or sub-report!"</Value>
+                    <Value>="Update filter is set to: '" &amp; Parameters!FilterUpdates.Label &amp; "'"</Value>
                   </TextRun>
                 </TextRuns>
                 <Style>
@@ -1553,9 +1566,9 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox1</rd:DefaultName>
-            <Top>0.38889in</Top>
+            <Top>0.37722in</Top>
             <Height>0.24778in</Height>
-            <Width>12.32875in</Width>
+            <Width>16.86in</Width>
             <ZIndex>2</ZIndex>
             <Style>
               <Border>
@@ -1587,7 +1600,7 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox1</rd:DefaultName>
-            <Top>0.63667in</Top>
+            <Top>0.88667in</Top>
             <Height>0.24778in</Height>
             <Width>7.71417in</Width>
             <ZIndex>3</ZIndex>
@@ -1736,7 +1749,7 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
               </TablixMembers>
             </TablixRowHierarchy>
             <DataSetName>DeviceUpdateCollections</DataSetName>
-            <Top>0.88445in</Top>
+            <Top>1.13445in</Top>
             <Height>0.5in</Height>
             <Width>7.71417in</Width>
             <ZIndex>4</ZIndex>
@@ -1809,7 +1822,7 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                         <ToolTip>List of maintenance windows applied to the system</ToolTip>
+                          <ToolTip>List of maintenance windows applied to the system</ToolTip>
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -1852,14 +1865,14 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
                                     <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
-                             </TextRuns>
+                              </TextRuns>
                               <Style>
                                 <TextAlign>Left</TextAlign>
                               </Style>
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox11</rd:DefaultName>
-                          <ToolTip>Starttime of a maintenance window</ToolTip>	  
+                          <ToolTip>Starttime of a maintenance window</ToolTip>
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -1909,7 +1922,7 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox13</rd:DefaultName>
-                          <ToolTip>Lengh or duration of a maintenance window</ToolTip>			  
+                          <ToolTip>Lengh or duration of a maintenance window</ToolTip>
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -1959,7 +1972,7 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox15</rd:DefaultName>
-                          <ToolTip>Type of deployments the maintenance window applies to</ToolTip>					   
+                          <ToolTip>Type of deployments the maintenance window applies to</ToolTip>
                           <Style>
                             <Border>
                               <Color>#557eb9</Color>
@@ -2184,7 +2197,7 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
               </TablixMembers>
             </TablixRowHierarchy>
             <DataSetName>DeviceMaintenanceWindows</DataSetName>
-            <Top>0.88445in</Top>
+            <Top>1.13445in</Top>
             <Left>20.10938cm</Left>
             <Height>0.5in</Height>
             <Width>11.00626in</Width>
@@ -2203,7 +2216,7 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
                 <Style>None</Style>
               </LeftBorder>
               <RightBorder>
-               <Style>None</Style>
+                <Style>None</Style>
               </RightBorder>
               <FontFamily>Tahoma</FontFamily>
               <FontSize>8pt</FontSize>
@@ -2212,11 +2225,41 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
               <TextAlign>General</TextAlign>
               <VerticalAlign>Top</VerticalAlign>
             </Style>
-          </Tablix>		   
+          </Tablix>
+          <Textbox Name="Textbox9">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value EvaluationMode="Constant">NOTE: The report does not exclude any updates even if set via the dashboard or sub-report. It might show missing updates even though the first report showed no missing deployed updates based on the -Exclude deployments parameter-!</Value>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Left</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox1</rd:DefaultName>
+            <Top>0.63889in</Top>
+            <Height>0.24778in</Height>
+            <Width>16.86in</Width>
+            <ZIndex>6</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
         </ReportItems>
-        <Height>2.77361in</Height>
+        <Height>3.76319in</Height>
       </Body>
-      <Width>25.98583in</Width>
+      <Width>27.99625in</Width>
       <Page>
         <PageHeader>
           <Height>0.01042in</Height>
@@ -2270,7 +2313,11 @@ where FCM.ResourceID = (Select ResourceID from v_R_System where Name0 = @Compute
           <ParameterValue>
             <Value>4</Value>
             <Label>All missing updates deployed or not</Label>
-          </ParameterValue>		  
+          </ParameterValue>
+          <ParameterValue>
+            <Value>5</Value>
+            <Label>All missing Security and Critical updates deployed or not</Label>
+          </ParameterValue>
         </ParameterValues>
       </ValidValues>
     </ReportParameter>

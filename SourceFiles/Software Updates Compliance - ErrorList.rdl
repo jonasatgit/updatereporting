@@ -26,7 +26,7 @@
             <Value>=Parameters!LastErrorCode.Value</Value>
           </QueryParameter>
         </QueryParameters>
-        <rd:ReportServerUrl>http://reportserver.domain.local/ReportServer</rd:ReportServerUrl>
+        <rd:ReportServerUrl>http://reportserver.domain.local/reportserver</rd:ReportServerUrl>
       </SharedDataSet>
       <Fields>
         <Field Name="Title">
@@ -840,6 +840,6 @@
   </CodeModules>
   <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
   <rd:ReportUnitType>Inch</rd:ReportUnitType>
-  <rd:ReportServerUrl>http://reportserver.domain.local/ReportServer</rd:ReportServerUrl>
+  <rd:ReportServerUrl>http://reportserver.domain.local/reportserver</rd:ReportServerUrl>
   <rd:ReportID>f3e5ae98-66c5-4863-b1e2-69153dbb97e3</rd:ReportID>
 </Report>

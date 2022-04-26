@@ -1,4 +1,4 @@
----SCRIPTVERSION: 20210801
+---SCRIPTVERSION: 20220404
 
 -----------------------------------------------------------------------------------------------------------------------
 ---- Disclaimer
@@ -14,51 +14,66 @@
 ---- if Microsoft has been advised of the possibility of such damages.
 -----------------------------------------------------------------------------------------------------------------------
 ---- Changelog:
----- 20211118: Added "Cumulative Update for Microsoft server operating system" string for server 2022 updates.
----- 20210801: Changed multi value parameter handling to use CTEs due to performance issues with some environments. 
-----           Also changed overall compliance to be only compliant in case the last rollup has been installed and changed name from "UpdateAssignmentCompliance" to "OverallComplianceState"
-----		   Changed name from "UpdateStatusCompliant" to "UpdateAssignmentCompliant" to be more accurate with the wording
-----           Removed condition "UPDATESTATES.UpdatesApprovedAndMissing = 0" of overall compliance state since it does not really work with the way we exclude deployments
-----		   Added option to exclude deployments with starttime in the future
-----		   Disabled update deployments will now be excluded from overall compliance state
----- 20210614: Simplified RollupStatus and CurrentRollupStatus case when clauses				
----- 20210610: Added update install errors and changed query logic due to performance problems starting with 35k systems
----- 20201130: Added "System Center Endpoint Protection" back to the exclusion list
----- 20201124: Changed some descriptions, the QuickFixEngineering query due to missing date entries and the language problem from 20201103, 
-----           QuickFixEngineering query will also use the rollups as a reference if possible, simplified the current- and last-rollup queries and removed the limitation for Server 2008
----- 20201103: Changed 'max(CASE WHEN (ISDATE(QFE.InstalledOn0) = 0' to 'max(CASE WHEN (LEN(QFE.InstalledOn0) > 10' due to language problems
----- 20201103: Changed 'Windows Defender' to 'Microsoft Defender Antivirus'
+---- 2022-04-04: Changed the way deployed updates are shown. "MissingUpdatesApproved" will not show updates for excluded deployments anymore. Makes it more consistant with the rest of the report
+----			 Added systems domain name to the list
+----			 Removed unnecessary where clause: "where (QFE.Description0 = 'Security Update' or QFE.Description0 is null)"
+----			 Added Parameter @MonthIndex to be able to set the report one month back. Only possible if updates are delayed for one month and not deployed within the month of their release date
+----			 Added Paremeter to be able exclude future deployments based on starttime or deadline, exclude available and diabled deployments 
+---- 2022-03-02: Fixed @SecondTuesdayOfMonth and change logic for pulling the current and last rollups. Based on pull request 11
+---- 2021-11-18: Added "Cumulative Update for Microsoft server operating system" string for server 2022 updates.
+---- 2021-08-01: Changed multi value parameter handling to use CTEs due to performance issues with some environments. 
+----             Also changed overall compliance to be only compliant in case the last rollup has been installed and changed name from "UpdateAssignmentCompliance" to "OverallComplianceState"
+----		     Changed name from "UpdateStatusCompliant" to "UpdateAssignmentCompliant" to be more accurate with the wording
+----             Removed condition "UPDATESTATES.UpdatesApprovedAndMissing = 0" of overall compliance state since it does not really work with the way we exclude deployments
+----		     Added option to exclude deployments with starttime in the future
+----		     Disabled update deployments will now be excluded from overall compliance state
+---- 2021-06-14: Simplified RollupStatus and CurrentRollupStatus case when clauses				
+---- 2021-06-10: Added update install errors and changed query logic due to performance problems starting with 35k systems
+---- 2020-11-30: Added "System Center Endpoint Protection" back to the exclusion list
+---- 2020-11-24: Changed some descriptions, the QuickFixEngineering query due to missing date entries and the language problem from 20201103, 
+----             QuickFixEngineering query will also use the rollups as a reference if possible, simplified the current- and last-rollup queries and removed the limitation for Server 2008
+---- 2020-11-03: Changed 'max(CASE WHEN (ISDATE(QFE.InstalledOn0) = 0' to 'max(CASE WHEN (LEN(QFE.InstalledOn0) > 10' due to language problems
+---- 2020-11-03: Changed 'Windows Defender' to 'Microsoft Defender Antivirus'
 
------ just for testing in SQL directly
-Declare @CollectionID as varchar(max) = 'SMS00001'; ---- semicolon seperated list of collectionIDs
+--- START just for testing in SQL directly
+Declare @CollectionID as varchar(max) = 'SMS00001' ---- semicolon seperated list of collectionIDs
 Declare @ExcludeProductList as varchar(max) = N'Microsoft Defender Antivirus;System Center Endpoint Protection'; ---- semicolon seperated list of update products
-declare @ExcludeFutureDepl as int = 0 ---- 1 means deployments with a starttime in the future will be excluded. 0 means nothing will be excluded
+Declare @MonthIndex as int = 0; -- 0 = current month, 1 = previous month
 
+-- Using a bitmask like parameter. Makes it possible to use a multivalue parameter instead of multiple parameters to filter out some deployments
+-- Using the same CTE function to convert parameter arraylist to CTE as with other multi value parameters due to perf issues on some SQL systems
+Declare @ExcludeDeplBitMask as varchar(20) = '8;16'---'2;4;8;16';
+-- 2 = Deployments with starttime in the future will be excluded 
+-- 4 = Deployments with deadline in the future will be excluded
+-- 8 = Available deployments will be excluded
+-- 16 = Disabled deployments will be excluded
+--- END just for testing in SQL directly 
+
+---- Extra variables to prevent variable performance issues in some SQL configurations
 Declare @CollectionIDList as varchar(max) = @CollectionID ---- semicolon seperated list of collectionIDs
 Declare @ExcludeProducts as varchar(max) = @ExcludeProductList ---- semicolon seperated list of update products
-Declare @ExcludeFutureDeployments as int = @ExcludeFutureDepl --- 1 means deployments with a starttime in the future will be excluded. 0 means nothing will be excluded
----- IMPORTANT: ExcludeFutureDeployments Will not exclude updates from the statistics. It will just affect compliance state based on deployments.
+Declare @MonthIndexInternal as int = @MonthIndex
+Declare @ExcludeDeplBitMaskInternal as varchar(20) = @ExcludeDeplBitMask
 
 -- using prefix like "2017-07" to filter for the security rollup of the past month
 DECLARE @LastRollupPrefix as char(7);
-SET @LastRollupPrefix = (SELECT convert(char(7),DATEADD(MONTH,-1,GETDATE()),126)); 
-
--- using prefix like "2017-08" to filter for the current security rollup
 DECLARE @CurrentRollupPrefix as char(7);
-SET @CurrentRollupPrefix = (SELECT convert(char(7),DATEADD(MONTH,0,GETDATE()),126)); 
-
--- calculate 2nd Tuesday of month to add the correct date string in case install date is missing in v_GS_QUICK_FIX_ENGINEERING
-DECLARE @FirstDayOfMonth datetime;
 DECLARE @SecondTuesdayOfMonth datetime;
-DECLARE @UpdatePrefix as char(7);
 
-SET  @FirstDayOfMonth = DATEADD(MONTH,DATEDIFF(MONTH,0,GETDATE()),0)     
-SET @SecondTuesdayOfMonth = DATEADD(DAY,((10 - DATEPART(dw,@FirstDayOfMonth)) % 7) + 7, @FirstDayOfMonth)
+-- Calculate 2nd Tuesday of month to add the correct date string in case install date is missing in v_GS_QUICK_FIX_ENGINEERING
+-- Also used to fill the gap between the first day of a month and the next time a rollup will be released
+SET @SecondTuesdayOfMonth = (DATEADD(Month, DATEDIFF(Month, 0, GETDATE()), 0) + 6 + 7 - (DATEPART(Weekday, DATEADD(Month, DATEDIFF(Month, 0, GETDATE()), 0)) + (@@DateFirst + 3) + 7) %7)
 
 IF GETDATE() < @SecondTuesdayOfMonth
-              SET @UpdatePrefix = @LastRollupPrefix
+	BEGIN
+		SET @LastRollupPrefix = (SELECT convert(char(7),DATEADD(MONTH,-2-@MonthIndexInternal,GETDATE()),126))
+		SET @CurrentRollupPrefix = (SELECT convert(char(7),DATEADD(MONTH,-1-@MonthIndexInternal,GETDATE()),126)) 
+	END
 ELSE
-              SET @UpdatePrefix = @CurrentRollupPrefix;
+    BEGIN
+		SET @LastRollupPrefix = (SELECT convert(char(7),DATEADD(MONTH,-1-@MonthIndexInternal,GETDATE()),126))
+		SET @CurrentRollupPrefix = (SELECT convert(char(7),DATEADD(MONTH,0-@MonthIndexInternal,GETDATE()),126))
+	END;
 
 -- PRE QUERIES
 -- Create table for collection IDs. Converting string based list into CTE to avoid any parameter performance issues with certain SQL configurations.
@@ -84,7 +99,7 @@ AS
                 END)) AS CollectionID
     FROM CTE_CollIDPieces 
 )
--- Create table for excluded products. Converting string based list into CTE to avoid any parameter performance issues with certain SQL configurations.
+-- Create CTE for excluded products. Converting string based list into CTE to avoid any parameter performance issues with certain SQL configurations.
 ,CTE_ProductPieces
 AS 
 (
@@ -107,26 +122,77 @@ AS
                 END)) AS Product
     FROM CTE_ProductPieces 
 ),
+-- Using the same CTE function to convert parameter arraylist to CTE as with other multi value parameters due to perf issues on some SQL systems
+CTE_ExcludePieces
+AS 
+(
+    SELECT 1 AS ID
+        ,1 AS [StartString]
+        ,Cast(CHARINDEX(';', @ExcludeDeplBitMaskInternal,0) as int) AS StopString
+    UNION ALL
+    SELECT ID + 1
+                    ,StopString + 1
+                    ,Cast(CHARINDEX(';', @ExcludeDeplBitMaskInternal, StopString + 1) as int)
+    FROM CTE_ExcludePieces
+    WHERE StopString > 0
+)
+,CTE_ExcludeIDs
+AS
+(
+    SELECT (SUBSTRING(@ExcludeDeplBitMaskInternal, StartString, 
+                                CASE WHEN StopString > 0 THEN StopString - StartString
+                                ELSE LEN(@ExcludeDeplBitMaskInternal)
+                END)) AS ExcludeID
+    FROM CTE_ExcludePieces 
+),
 -- generate list of systems we are insterested in
 ResourceList (ResourceID) as
 (
 			Select Distinct ResourceID from v_FullCollectionMembership FCM
 			inner join CTE_CollIDs on CTE_CollIDs.CollectionID = FCM.CollectionID
 ),
--- Defender Updates will be filtered out, because they will be updated more frequently
-ExcludedUpdates (AssignmentID,CI_ID,AssignmentType) as
-(            
-            select CIA.AssignmentID, CIATOCI.CI_ID, AssignmentType = 1 --- 1 means excluded, 0 means incldued
+-- List of deployments we might need to exclude
+ExcludedDeploymentsBaseList (AssignmentID, AssignmentType) as
+(
+			--- Getting a list of deployments/assignments based on different criteria to further limit the output later on
+			-- parameter to be able to toggle to ex or include future deployments
+			-- deployments with STARTTIME in the future
+			select CIA.AssignmentID, AssignmentType = 2 
+			from v_CIAssignment cia 
+			where cia.AssignmentType in (1,5) -- 1 = updates, 5 = update groups
+			and cia.StartTime > GETDATE() 
+			-- deployments with DEADLINE in the future
+			UNION ALL
+			select CIA.AssignmentID, AssignmentType = 4
+			from v_CIAssignment cia 			
+			where cia.AssignmentType in (1,5) -- 1 = updates, 5 = update groups
+			and cia.EnforcementDeadline > GETDATE() 
+			-- availabe deployments
+			UNION ALL
+			select CIA.AssignmentID, AssignmentType = 8
+			from v_CIAssignment cia 			
+			where cia.AssignmentType in (1,5) -- 1 = updates, 5 = update groups
+			and cia.EnforcementDeadline is null
+			-- disabled deployments
+			UNION ALL
+			select CIA.AssignmentID, AssignmentType = 16
+			from v_CIAssignment cia 
+			where cia.AssignmentType in (1,5) -- 1 = updates, 5 = update groups
+			and cia.AssignmentEnabled = 0 
+),
+ExcludedDeployments (AssignmentID,AssignmentType, CI_ID) as
+(
+			-- Select just the deployments we need to exclude
+			Select AssignmentID, AssignmentType, CI_ID = 0 from ExcludedDeploymentsBaseList 
+			where AssignmentType in (Select ExcludeID from CTE_ExcludeIDs)
+			UNION ALL
+			-- Defender Updates will be filtered out, because they will be updated more frequently
+			-- Other producst can be filtered as well via @ExcludeProductList
+            select CIA.AssignmentID, AssignmentType = 1, CIATOCI.CI_ID 
             from v_CIAssignment CIA 
             inner join v_CIAssignmentToCI CIATOCI on CIATOCI.AssignmentID = CIA.AssignmentID 
             inner join v_CICategoryInfo CICI on CICI.Ci_ID = CIATOCI.CI_ID
 			inner join CTE_Products PR on PR.Product = CICI.CategoryInstanceName
-			UNION ALL
-			select CIA.AssignmentID, CI_ID = 0, AssignmentType = @ExcludeFutureDeployments -- parameter to be able to toggle to ex or include future deployments
-			from v_CIAssignment cia where cia.StartTime > GETDATE() -- deployments with starttime in the future, to be able to filter them out if we want to
-			UNION ALL
-			select CIA.AssignmentID, CI_ID = 0, AssignmentType = 1
-			from v_CIAssignment cia where cia.AssignmentEnabled = 0 -- exclude disabled deployments in overall compliance state
 ),
 -- list of cumulative updates of the current and the past month
 CumulativeUpdates (ArticleID,CI_ID, Latest) as
@@ -141,6 +207,7 @@ CumulativeUpdates (ArticleID,CI_ID, Latest) as
 select [Name] = VRS.Name0
               ,[ResourceID] = VRS.ResourceID
               ,[Counter] = 1 -- a counter to make it easier to count in reporting services
+			  ,[Domain] = VRS.Resource_Domain_OR_Workgr0
               ,[PendingReboot] = BGBL.ClientState                         
               ,[OSType] = GOS.Caption0
 			  ,[OSBuild] = BGBL.DeviceOSBuild
@@ -155,7 +222,7 @@ select [Name] = VRS.Name0
               ,[DaysSinceLastUpdateInstall] = ISNULL((DateDiff(DAY,UPDINSTDATE.LastInstallTime,GETDATE())), 999)
               ,[MonthSinceLastOnline] = ISNULL((DateDiff(MONTH,BGBL.LastPolicyRequest,GETDATE())), 999)
               ,[MonthSinceLastOnlineABC] = case when ISNULL((DateDiff(MONTH,BGBL.LastPolicyRequest,GETDATE())), 999) = 0 then 'A'
-                                        when ISNULL((DateDiff(MONTH,BGBL.LastPolicyRequest,GETDATE())), 999) = 1 then 'B' else 'C' end
+                                                when ISNULL((DateDiff(MONTH,BGBL.LastPolicyRequest,GETDATE())), 999) = 1 then 'B' else 'C' end
               ,[MonthSinceLastAADSLogon] = ISNULL((DateDiff(MONTH,VRS.Last_Logon_Timestamp0,GETDATE())), 999)
               ,[MonthSinceLastAADSLogonABC] = case when ISNULL((DateDiff(MONTH,VRS.Last_Logon_Timestamp0,GETDATE())), 999) = 0 then 'A'
                                         when ISNULL((DateDiff(MONTH,VRS.Last_Logon_Timestamp0,GETDATE())), 999) = 1 then 'B' else 'C' end
@@ -164,11 +231,11 @@ select [Name] = VRS.Name0
                                         when ISNULL((DateDiff(MONTH,GOS.LastBootUpTime0,GETDATE())), 999) = 1 then 'B' else 'C' end
               ,[MonthSinceLastUpdateInstall] = ISNULL((DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE())), 999)
               ,[MonthSinceLastUpdateInstallABC] = case when ISNULL((DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE())), 999) = 0 then 'A'
-                                             when ISNULL((DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE())), 999) = 1 then 'B' else 'C' end
+                                                 when ISNULL((DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE())), 999) = 1 then 'B' else 'C' end
               ,[MonthSinceLastUpdateScan] = ISNULL((DateDiff(MONTH,USS.LastScanTime,GETDATE())), 999)
-             ---- custom compliance state based on deploymentstatus, update status, last installdate and last rollup state. Last update install needs to be at least in the past month
+              ---- custom compliance state based on deploymentstatus, update status, last installdate and last rollup state. Last update install needs to be at least in the past month
 			  ---- 20210801: Changed compliance to contain the last rollup
-              ,[OverallComplianceState] = Case when AssignmentStatus.Compliant = AssignmentStatus.AssignmentSum and (DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE()) <= 1) and (LASTROLLUPSTAT.Status = 3 or CURRROLLUPSTAT.Status = 3) then 1 else 0 end
+              ,[OverallComplianceState] = Case when AssignmentStatus.Compliant = AssignmentStatus.AssignmentSum and (DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE()) <= 1+@MonthIndexInternal) and (LASTROLLUPSTAT.Status = 3 or CURRROLLUPSTAT.Status = 3) then 1 else 0 end
 			  ---- 20210801: Original UpdateAssignmentCompliance query without last rollup state and with UPDATESTATES.UpdatesApprovedAndMissing = 0
 			  ---- Query does not work anymore because of the way we filter future and not enabled update deployments and the changed name to "OverallComplianceState"
 			  --,[UpdateAssignmentCompliance] = Case when AssignmentStatus.Compliant = AssignmentStatus.AssignmentSum and UPDATESTATES.UpdatesApprovedAndMissing = 0 and (DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE()) <= 1) then 1 else 0 end
@@ -211,18 +278,21 @@ left join (
                             ,[UpdatesMissingAll] = sum(case when ucs.Status = 2 then 1 else 0 end)
                             ,[UpdatesApprovedAndMissingAndError] = sum(case when AssignedUpdates.CI_ID is not null and ucs.Status = 2 and (ucs.LastErrorCode is not null and ucs.LastErrorCode !=0) then 1 else 0 end)
               from v_UpdateComplianceStatus ucs
-	 		  inner join v_UpdateCIs upd on upd.CI_ID = ucs.CI_ID
-                                     inner join ResourceList on ResourceList.ResourceID = ucs.ResourceID
-                                     left join (
-                                                 -- updates deployed to the system
-                                                 select ATM.ResourceID, CATC.CI_ID 
-                                                 from v_CIAssignmentTargetedMachines ATM 
-                                                 inner join v_CIAssignmentToCI CATC on CATC.AssignmentID = ATM.AssignmentID
-                                                 inner join ResourceList on ResourceList.ResourceID = ATM.ResourceID
-                                                 group by ATM.ResourceID, CATC.CI_ID
-                                     ) as AssignedUpdates on UCS.ResourceID = AssignedUpdates.ResourceID and AssignedUpdates.CI_ID = UCS.CI_ID
+	 		  inner join v_UpdateCIs upd on upd.CI_ID = ucs.CI_ID			  
+              inner join ResourceList on ResourceList.ResourceID = ucs.ResourceID
+              left join (
+							 -- updates deployed to the system
+							 select ATM.ResourceID, CATC.CI_ID 
+							 from v_CIAssignmentTargetedMachines ATM 
+							 inner join v_CIAssignmentToCI CATC on CATC.AssignmentID = ATM.AssignmentID
+							 inner join ResourceList on ResourceList.ResourceID = ATM.ResourceID
+							 inner join v_CIAssignment CIA on CIA.AssignmentID = CATC.AssignmentID
+							 where CIA.AssignmentType in (1,5) -- 1 = updates, 5 = update groups
+							 and CIA.AssignmentID not in (Select AssignmentID from ExcludedDeployments) -- Exclude some deployments based on parameter settings
+							 group by ATM.ResourceID, CATC.CI_ID
+              ) as AssignedUpdates on UCS.ResourceID = AssignedUpdates.ResourceID and AssignedUpdates.CI_ID = UCS.CI_ID
               where upd.IsHidden = 0 and upd.CIType_ID in (1,8) --- 1 = update, 8 = update bundle, 9 = update group
-			  and ucs.CI_ID not in (Select CI_ID from ExcludedUpdates) -- exclude Defender and SCEP from statistic
+			  and ucs.CI_ID not in (Select CI_ID from ExcludedDeployments) -- exclude Defender and SCEP from statistic
               group by ucs.ResourceID
 ) UPDATESTATES on UPDATESTATES.ResourceID = VRS.ResourceID
 --- join last Rollup as reference
@@ -263,7 +333,7 @@ left join (
                             --sum(CASE WHEN (IsCompliant = 0) AND LastEnforcementMessageID not in (0,6,9) THEN 1 ELSE 0 END) AS Pending
               FROM v_UpdateAssignmentStatus uas
               inner join ResourceList on ResourceList.ResourceID = uas.ResourceID
-              where UAS.AssignmentID not in (Select AssignmentID from ExcludedUpdates where AssignmentType = 1) -- exclude defender and scep deployments from compliants as well as future deployments if selected
+              where UAS.AssignmentID not in (Select AssignmentID from ExcludedDeployments) -- exclude defender and scep deployments from compliants as well as other deployments if selected
               group by uas.ResourceID
 ) as AssignmentStatus on AssignmentStatus.ResourceID = VRS.ResourceID
 ---- join last update installdate for security updates just as a reference to find problematic clients not installing security updates at all
@@ -275,7 +345,8 @@ left join (
                             (
                                          --- the current rollup is installed, but do we have a valid install date? In some cases the installdate seems to be mising. For some Win10 1803 systems for example.
                                          --- "-05" impossible date, since the update could not be released the 5th day of the month (normally). That should indicate the missing date info and give us enough info about the state of the system
-                                         CASE WHEN qfe.InstalledOn0 = '' THEN @UpdatePrefix + '-05 00:00:00' ELSE TRY_CONVERT(datetime,qfe.InstalledOn0,101) END      
+                                         --CASE WHEN qfe.InstalledOn0 = '' THEN @UpdatePrefix + '-05 00:00:00' ELSE TRY_CONVERT(datetime,qfe.InstalledOn0,101) END
+										 CASE WHEN qfe.InstalledOn0 = '' THEN @CurrentRollupPrefix + '-05 00:00:00' ELSE TRY_CONVERT(datetime,qfe.InstalledOn0,101) END      
                             )
                             else --CUU.CI_ID IS null
                             (
@@ -289,11 +360,11 @@ left join (
               from v_GS_QUICK_FIX_ENGINEERING QFE
               inner join ResourceList on ResourceList.ResourceID = QFE.ResourceID
               left join CumulativeUpdates CUU on CUU.ArticleID = QFE.HotFixID0
-              where (QFE.Description0 = 'Security Update' or QFE.Description0 is null)
+              --where (QFE.Description0 = 'Security Update' or QFE.Description0 is null)
               group by qfe.ResourceID
 ) UPDINSTDATE on UPDINSTDATE.ResourceID = VRS.ResourceID
 ---- join Pending Reboot Info
----- left join BGB_LiveData BGBL on BGBL.ResourceID = VRS.ResourceID ---- <- no direct rights assigned and no other view available, using v_CombinedDeviceResources instead
+--left join BGB_LiveData BGBL on BGBL.ResourceID = VRS.ResourceID ---- <- no direct rights assigned and no other view available, using v_CombinedDeviceResources instead
 left join v_CombinedDeviceResources BGBL on BGBL.MachineID = VRS.ResourceID
 
 ---- fix for SQL compat level problem 
@@ -302,4 +373,3 @@ left join v_CombinedDeviceResources BGBL on BGBL.MachineID = VRS.ResourceID
 --OPTION (QUERYTRACEON 9481)
 ---- Force legacy cardinality for SQL server versions 2016 SP1 and higher (SQL version equal or greater than 13.0.4001.0)
 --OPTION (USE HINT ('FORCE_LEGACY_CARDINALITY_ESTIMATION'))
-

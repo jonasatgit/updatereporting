@@ -9,14 +9,12 @@
           <Nullable>false</Nullable>
           <OmitFromQuery>false</OmitFromQuery>
           <rd:DbType>String</rd:DbType>
-          <rd:IsMultiValued>false</rd:IsMultiValued>
         </DataSetParameter>
         <DataSetParameter Name="@FilterUpdates">
           <ReadOnly>false</ReadOnly>
           <Nullable>false</Nullable>
           <OmitFromQuery>false</OmitFromQuery>
           <rd:DbType>Int32</rd:DbType>
-          <rd:IsMultiValued>false</rd:IsMultiValued>
         </DataSetParameter>
       </DataSetParameters>
       <CommandText>---- For tests in SQL mgmt studio only
@@ -28,7 +26,7 @@
 --	DROP TABLE #tmpInstallErrors
 --END
 
-Declare @ResourceID as int = (select distinct ResourceID from v_R_System where Name0 = @ComputerName);
+Declare @ResourceID as int = (select ResourceID from v_R_System where Name0 = @ComputerName);
 
 IF OBJECT_ID('tempdb..#tmpInstallErrors') IS NULL 
 BEGIN
@@ -643,6 +641,56 @@ BEGIN
           join v_UpdateInfo ui on ui.CI_ID=css.CI_ID 
           join v_CICategoryInfo_All vnd on vnd.CI_ID=ui.CI_ID and vnd.CategoryTypeName='Company'
           join v_CICategoryInfo_All cls on cls.CI_ID=ui.CI_ID and cls.CategoryTypeName='UpdateClassification'
+          left join v_CITargetedMachines ctm on ctm.CI_ID=css.CI_ID and ctm.ResourceID = css.ResourceID
+		  left join #tmpInstallErrors IE on IE.ErrorCode = css.LastErrorCode
+		  left join (
+				-- adding min deadline per update for individual machine 
+				select min(CIA.EnforcementDeadline) as MinDeadline
+					,CIATC.CI_ID
+				from v_CIAssignment CIA
+				inner join v_CIAssignmentToCI CIATC on CIATC.AssignmentID = CIA.AssignmentID
+				inner join v_FullCollectionMembership FCM on FCM.CollectionID = CIA.CollectionID and FCM.ResourceID = @ResourceID
+				where CIA.AssignmentEnabled = 1 -- if not enabled, deadline is not valid
+				and CIA.AssignmentType in (1,5) -- 5 = update group / 1 = single update
+				and CIA.EnforcementDeadline is not null
+				group by CIATC.CI_ID
+		  ) as DeadlineData on DeadlineData.CI_ID = CSS.CI_ID
+          where css.ResourceID = @ResourceID
+		 and css.Status=2
+		 order by ui.Title
+		---- fix for SQL compat level problem 
+		---- https://support.microsoft.com/en-us/help/3196320/sql-query-times-out-or-console-slow-on-certain-configuration-manager-d
+		---- Force legacy cardinality for SQL server versions before 2016 SP1 (SQL version less than 13.0.4001.0)
+		--OPTION (QUERYTRACEON 9481)
+		---- Force legacy cardinality for SQL server versions 2016 SP1 and higher (SQL version equal or greater than 13.0.4001.0)
+		--OPTION (USE HINT ('FORCE_LEGACY_CARDINALITY_ESTIMATION'))
+END
+--------------------------------------------------------------------------
+------- All missing SECURITY AND CRITICAL updates no matter if deployed or not or in error state
+IF @FilterUpdates = 5
+BEGIN
+
+    select  
+            Vendor=vnd.CategoryInstanceName, 
+            UpdateClassification=cls.CategoryInstanceName,
+            ui.Title,             
+            ui.BulletinID, 
+            ui.ArticleID, 
+            Targeted=(case when ctm.ResourceID is not null then '*' else '' end), 
+            Installed=(case when css.Status=3 then '*' else '' end), 
+            IsRequired=(case when css.Status=2 then '*' else '' end), 
+			ui.DatePosted,
+            ui.InfoURL as InformationURL,
+			css.LastEnforcementMessageTime,
+			css.LastErrorCode,
+			IE.ErrorDescription,
+			IE.Action,
+			IE.InfoURL,
+			DeadlineData.MinDeadline
+          from v_UpdateComplianceStatus  css 
+          join v_UpdateInfo ui on ui.CI_ID=css.CI_ID 
+          join v_CICategoryInfo_All vnd on vnd.CI_ID=ui.CI_ID and vnd.CategoryTypeName='Company'
+          join v_CICategoryInfo_All cls on cls.CI_ID=ui.CI_ID and cls.CategoryTypeName='UpdateClassification' and (cls.CategoryInstanceName = 'Security Updates' or cls.CategoryInstanceName = 'Critical Updates')
           left join v_CITargetedMachines ctm on ctm.CI_ID=css.CI_ID and ctm.ResourceID = css.ResourceID
 		  left join #tmpInstallErrors IE on IE.ErrorCode = css.LastErrorCode
 		  left join (
