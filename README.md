@@ -15,6 +15,9 @@ and [HERE](https://techcommunity.microsoft.com/t5/core-infrastructure-and-securi
 # Changes
 (The version number can be found in the lower left corner of the dashboard. No version number means v1.0)
 
+## 2022-05-06 v3.8:
+1. Fixed a sub-report link problem for WSUS error and install error list
+
 ## 2022-04-04 v3.7:
 1. Added parameter to show data based on current or previous month. The previous month setting is only applicable if updates are deployed with a month delay and does not rely on historical data
 1. Changed the way compliance for update rollups are shown between first day of month and second Tuesday based on: https://github.com/jonasatgit/updatereporting/pull/11
