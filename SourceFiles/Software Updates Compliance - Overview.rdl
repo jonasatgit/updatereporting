@@ -4276,12 +4276,6 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                                 <Parameter Name="LastErrorCode">
                                   <Value>0</Value>
                                 </Parameter>
-                                <Parameter Name="ExcludeDeplBitMask">
-                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
-                                </Parameter>
-                                <Parameter Name="MonthIndex">
-                                  <Value>=Parameters!MonthIndex.Value</Value>
-                                </Parameter>
                               </Parameters>
                             </Drillthrough>
                           </Action>
@@ -4537,7 +4531,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>v3.7 LINK</Value>
+                    <Value>v3.8 LINK</Value>
                   </TextRun>
                 </TextRuns>
               </Paragraph>
@@ -4656,12 +4650,6 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                                 </Parameter>
                                 <Parameter Name="LastErrorCode">
                                   <Value>0</Value>
-                                </Parameter>
-                                <Parameter Name="ExcludeDeplBitMask">
-                                  <Value>=Parameters!ExcludeDeplBitMask.Value</Value>
-                                </Parameter>
-                                <Parameter Name="MonthIndex">
-                                  <Value>=Parameters!MonthIndex.Value</Value>
                                 </Parameter>
                               </Parameters>
                             </Drillthrough>
