@@ -55,7 +55,7 @@ order by Name</CommandText>
 			inner join v_CICategoryInfo_All CCI on CCI.CI_ID = UCS.CI_ID and CCI.CategoryTypeName = 'UpdateClassification' and (CCI.CategoryInstanceName = 'Security Updates' or CCI.CategoryInstanceName = 'Critical Updates')
 			inner join v_UpdateInfo UPD on UPD.CI_ID = UCS.CI_ID
 			where UCS.ResourceID IN (Select ResourceID from v_FullCollectionMembership fcm where fcm.CollectionID IN (@CollectionIDs)) 
-			and UCS.Status = 2 and CTM.ResourceID is null and UPD.IsSuperseded = 0 
+			and UCS.Status = 2 and UPD.IsDeployed = 0 and CTM.ResourceID is null and UPD.IsSuperseded = 0 
 			group by UCS.ResourceID
 	) as systems
 	---- fix for SQL compat level problem 
