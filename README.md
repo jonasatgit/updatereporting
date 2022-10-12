@@ -15,6 +15,10 @@ and [HERE](https://techcommunity.microsoft.com/t5/core-infrastructure-and-securi
 # Changes
 (The version number can be found in the lower left corner of the dashboard. No version number means v1.0)
 
+## 2022-10-12 v3.9:
+1. Added logic to hide zero values in diagrams based on feedback from original blog: [HERE](https://aka.ms/JonasOhmsenBlogs "JonasOhmsenBlogs")
+1. Fixed minor issues
+
 ## 2022-05-06 v3.8:
 1. Fixed a sub-report link problem for WSUS error and install error list
 
