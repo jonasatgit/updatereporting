@@ -348,7 +348,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(IIf(Fields!OverallComplianceState.Value = 1, 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>All valid deployments are evaluated to be compliant, at least one security update has been installed in the current month and the last rollup has been installed. Could still be wrong in case some deployments are wrongfuly evaluated to be compliant even though not all updates are installed. Always validate other KPIs as well. Like last rollup, WSUS scan error etc.</ToolTip>
                       <ActionInfo>
@@ -414,7 +414,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(IIf(Fields!OverallComplianceState.Value = 0, 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Not all deployments are evaluated to be compliant or no security update has been installed during the current month or the last rollup is missing</ToolTip>
                       <ActionInfo>
@@ -724,7 +724,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(IIf(Fields!MonthSinceLastUpdateInstallABC.Value="A",1,0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with a recent security update installation. Based on hardware inventory data from wmi class Win32_Quickfixengineering. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <ActionInfo>
@@ -784,7 +784,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(IIf(Fields!MonthSinceLastUpdateInstallABC.Value="B",1,0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with a security update installation in the past month. Based on hardware inventory data from wmi class Win32_Quickfixengineering. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <ActionInfo>
@@ -844,7 +844,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(IIf(Fields!MonthSinceLastUpdateInstallABC.Value="C",1,0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with a security update installation older than two month. Based on hardware inventory data from wmi class Win32_Quickfixengineering. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <ActionInfo>
@@ -1127,7 +1127,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(IIf(Fields!MonthSinceLastBootABC.Value = "A", 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with a recent reboot. Based on hardware inventory data from wmi class Win32_OperatingSystem. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <ActionInfo>
@@ -1163,7 +1163,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                       <ChartItemInLegend>
-                        <LegendText>Ein Monat</LegendText>
+                        <LegendText>One month</LegendText>
                       </ChartItemInLegend>
                     </ChartDataPoint>
                   </ChartDataPoints>
@@ -1190,7 +1190,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(IIf(Fields!MonthSinceLastBootABC.Value = "B", 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with a reboot in the past month. Based on hardware inventory data from wmi class Win32_OperatingSystem. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <ActionInfo>
@@ -1226,7 +1226,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                       <ChartItemInLegend>
-                        <LegendText>Zwei Monate</LegendText>
+                        <LegendText>Two months</LegendText>
                       </ChartItemInLegend>
                     </ChartDataPoint>
                   </ChartDataPoints>
@@ -1253,7 +1253,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(IIf(Fields!MonthSinceLastBootABC.Value = "C", 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with a reboot older than two month. Based on hardware inventory data from wmi class Win32_OperatingSystem. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <ActionInfo>
@@ -1289,7 +1289,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                       <ChartItemInLegend>
-                        <LegendText>Mehr als zwei Monate</LegendText>
+                        <LegendText>More than two months</LegendText>
                       </ChartItemInLegend>
                     </ChartDataPoint>
                   </ChartDataPoints>
@@ -1539,7 +1539,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(IIf(Fields!MonthSinceLastAADSLogonABC.Value = "A", 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with a recent AADS logon. Based on Active Directory System Discovery and attribute LastLogonTimestamp. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <ActionInfo>
@@ -1575,7 +1575,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                       <ChartItemInLegend>
-                        <LegendText>Ein Monat</LegendText>
+                        <LegendText>One month</LegendText>
                       </ChartItemInLegend>
                     </ChartDataPoint>
                   </ChartDataPoints>
@@ -1602,7 +1602,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(IIf(Fields!MonthSinceLastAADSLogonABC.Value = "B", 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with an AADS logon in the past month. Based on Active Directory System Discovery and attribute LastLogonTimestamp. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <ActionInfo>
@@ -1638,7 +1638,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                       <ChartItemInLegend>
-                        <LegendText>Zwei Monate</LegendText>
+                        <LegendText>Two months</LegendText>
                       </ChartItemInLegend>
                     </ChartDataPoint>
                   </ChartDataPoints>
@@ -1665,7 +1665,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(IIf(Fields!MonthSinceLastAADSLogonABC.Value = "C", 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with an AADS logon two month or older. Based on Active Directory System Discovery and attribute LastLogonTimestamp. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <ActionInfo>
@@ -1701,7 +1701,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                       <ChartItemInLegend>
-                        <LegendText>Mehr als zwei Monate</LegendText>
+                        <LegendText>More than two months</LegendText>
                       </ChartItemInLegend>
                     </ChartDataPoint>
                   </ChartDataPoints>
@@ -1951,7 +1951,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(IIf(Fields!MonthSinceLastOnlineABC.Value = "A", 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with a recent ConfigMgr client policy request. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <ActionInfo>
@@ -1987,7 +1987,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                       <ChartItemInLegend>
-                        <LegendText>Ein Monat</LegendText>
+                        <LegendText>One month</LegendText>
                       </ChartItemInLegend>
                     </ChartDataPoint>
                   </ChartDataPoints>
@@ -2014,7 +2014,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(IIf(Fields!MonthSinceLastOnlineABC.Value = "B", 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with a ConfigMgr client policy request in the past month. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <ActionInfo>
@@ -2050,7 +2050,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                       <ChartItemInLegend>
-                        <LegendText>Zwei Monate</LegendText>
+                        <LegendText>Two months</LegendText>
                       </ChartItemInLegend>
                     </ChartDataPoint>
                   </ChartDataPoints>
@@ -2077,7 +2077,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(IIf(Fields!MonthSinceLastOnlineABC.Value = "C", 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with a ConfigMgr client policy request older than two month. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <ActionInfo>
@@ -2113,7 +2113,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartMarker>
                       <DataElementOutput>Output</DataElementOutput>
                       <ChartItemInLegend>
-                        <LegendText>Mehr als zwei Monate</LegendText>
+                        <LegendText>More than two months</LegendText>
                       </ChartItemInLegend>
                     </ChartDataPoint>
                   </ChartDataPoints>
@@ -2660,7 +2660,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(Fields!AllSystems.Value - Fields!SystemsWithUpdatesMissing.Value)=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>All required security and critical updates are deployed to the systems. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <Style>
@@ -2697,7 +2697,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Fields!SystemsWithUpdatesMissing.Value = 0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Not all required security or critical updates are deployed to the systems. May be intentional or by mistake. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <ActionInfo>
@@ -3090,7 +3090,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(IIf((Fields!LastRollupStatus.Value = 3), 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with the last rollup installed. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <ActionInfo>
@@ -3153,7 +3153,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(IIf((Fields!LastRollupStatus.Value &lt;&gt; 3), 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with the last rollup missing. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <ActionInfo>
@@ -3460,7 +3460,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(IIf((Fields!CurrentRollupStatus.Value = 3), 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with the current rollup installed. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <ActionInfo>
@@ -3523,7 +3523,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(IIf((Fields!CurrentRollupStatus.Value &lt;&gt; 3), 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with the current rollup missing. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <ActionInfo>
@@ -3874,7 +3874,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(IIf(Fields!PendingReboot.Value &gt;= 1, 0, 1))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with no pending reboot. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <Style>
@@ -3911,7 +3911,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(IIf(Fields!PendingReboot.Value &gt;= 1, 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with a pending reboot which might block future update installations. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <ActionInfo>
@@ -4218,7 +4218,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(Fields!Counter.Value)=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with no WSUS clien scan error. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <Style>
@@ -4255,7 +4255,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(IIf(Fields!WSUSScanError.Value &lt;&gt; 0,1,0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with WSUS client scan error which prevents update installations. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <ActionInfo>
@@ -4531,7 +4531,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>v3.8 LINK</Value>
+                    <Value>v3.9 LINK</Value>
                   </TextRun>
                 </TextRuns>
               </Paragraph>
@@ -4593,7 +4593,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(Fields!Counter.Value)=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with no update installation errors. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <Style>
@@ -4630,7 +4630,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                       </ChartDataPointValues>
                       <ChartDataLabel>
                         <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>true</Visible>
+                        <Visible>=IIf(Sum(IIf(Fields!UpdatesApprovedMissingAndError.Value &gt; 0,1,0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with at least one update installation error for deployed updates. However the sub-report will also show errors for not deployed updates. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <ActionInfo>
