@@ -425,6 +425,7 @@ VALUES (-2147024883,'0x8007000D','ERROR_INVALID_DATA','The data is invalid','Try
 ,(2367509,'0x00242015','WU_S_UH_INSTALLSTILLPENDING','The installation operation for the update is still in progress.','','https://docs.microsoft.com/en-us/previous-versions/windows/desktop/hh968413(v=vs.85)')
 ,(-2147024882,'0x8007000E','E_OUTOFMEMORY','Not enough memory resources are available to complete this operation.','The system may have too little RAM','')
 ,(-2145078524,'0x8024B304','WU_E_TRUST_PROVIDER_UNKNOWN','Trust provider unknown','A certificate in the -WindowsServerUpdateServices- store on the WSUS server can cause such issues. There might also be an issue with root certificates, see link for more details. ','https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/valid-root-ca-certificates-untrusted')
+,(-2146762487,'0x800B0109','CERT_E_UNTRUSTEDROOT','A certificate chain processed, but terminated in a root certificate which is not trusted by the trust provider.','The system might not trust the WSUS webserver certificate. You might need to install the root certificate on the client.','')
 
 END
 
