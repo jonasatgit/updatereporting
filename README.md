@@ -15,7 +15,7 @@ and [HERE](https://techcommunity.microsoft.com/t5/core-infrastructure-and-securi
 # Changes
 (The version number can be found in the lower left corner of the dashboard. No version number means v1.0)
 
-## 2022-10-12 v4.0:
+## 2023-11-10 v4.0:
 1. Added more possible error fix actions
 
 ## 2022-10-12 v3.9:
