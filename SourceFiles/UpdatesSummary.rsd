@@ -8,28 +8,28 @@
           <ReadOnly>false</ReadOnly>
           <Nullable>false</Nullable>
           <OmitFromQuery>false</OmitFromQuery>
-          <rd:DbType>String</rd:DbType>
+          <rd:DbType>String</rd:DbType>		
         </DataSetParameter>
         <DataSetParameter Name="@ExcludeProductList">
           <ReadOnly>false</ReadOnly>
           <Nullable>false</Nullable>
           <OmitFromQuery>false</OmitFromQuery>
-          <rd:DbType>String</rd:DbType>
+          <rd:DbType>String</rd:DbType>						
         </DataSetParameter>
         <DataSetParameter Name="@MonthIndex">
           <ReadOnly>false</ReadOnly>
           <Nullable>false</Nullable>
           <OmitFromQuery>false</OmitFromQuery>
-          <rd:DbType>Int32</rd:DbType>
+          <rd:DbType>Int32</rd:DbType>			
         </DataSetParameter>
         <DataSetParameter Name="@ExcludeDeplBitMask">
           <ReadOnly>false</ReadOnly>
           <Nullable>false</Nullable>
           <OmitFromQuery>false</OmitFromQuery>
-          <rd:DbType>String</rd:DbType>
+          <rd:DbType>String</rd:DbType>				
         </DataSetParameter>
       </DataSetParameters>
-      <CommandText>---SCRIPTVERSION: 20220404
+      <CommandText>---SCRIPTVERSION: 20240506
 
 -----------------------------------------------------------------------------------------------------------------------
 ---- Disclaimer
@@ -45,6 +45,7 @@
 ---- if Microsoft has been advised of the possibility of such damages.
 -----------------------------------------------------------------------------------------------------------------------
 ---- Changelog:
+---- 2024-05-06: Changed update compliance definition and removed "and (DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE()) &lt;= 1+@MonthIndexInternal)"																																						   
 ---- 2022-04-04: Changed the way deployed updates are shown. "MissingUpdatesApproved" will not show updates for excluded deployments anymore. Makes it more consistant with the rest of the report
 ----			 Added systems domain name to the list
 ----			 Removed unnecessary where clause: "where (QFE.Description0 = 'Security Update' or QFE.Description0 is null)"
@@ -265,8 +266,10 @@ select [Name] = VRS.Name0
                                                  when ISNULL((DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE())), 999) = 1 then 'B' else 'C' end
               ,[MonthSinceLastUpdateScan] = ISNULL((DateDiff(MONTH,USS.LastScanTime,GETDATE())), 999)
               ---- custom compliance state based on deploymentstatus, update status, last installdate and last rollup state. Last update install needs to be at least in the past month
+			  ---- 20240506: Changed compliance and removed last install date. Makes no sense when we also look for the last or current rollup
+			        ,[OverallComplianceState] = Case when AssignmentStatus.Compliant = AssignmentStatus.AssignmentSum and (LASTROLLUPSTAT.Status = 3 or CURRROLLUPSTAT.Status = 3) then 1 else 0 end
 			  ---- 20210801: Changed compliance to contain the last rollup
-              ,[OverallComplianceState] = Case when AssignmentStatus.Compliant = AssignmentStatus.AssignmentSum and (DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE()) &lt;= 1+@MonthIndexInternal) and (LASTROLLUPSTAT.Status = 3 or CURRROLLUPSTAT.Status = 3) then 1 else 0 end
+              ---- ,[OverallComplianceState] = Case when AssignmentStatus.Compliant = AssignmentStatus.AssignmentSum and (DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE()) &lt;= 1+@MonthIndexInternal) and (LASTROLLUPSTAT.Status = 3 or CURRROLLUPSTAT.Status = 3) then 1 else 0 end
 			  ---- 20210801: Original UpdateAssignmentCompliance query without last rollup state and with UPDATESTATES.UpdatesApprovedAndMissing = 0
 			  ---- Query does not work anymore because of the way we filter future and not enabled update deployments and the changed name to "OverallComplianceState"
 			  --,[UpdateAssignmentCompliance] = Case when AssignmentStatus.Compliant = AssignmentStatus.AssignmentSum and UPDATESTATES.UpdatesApprovedAndMissing = 0 and (DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE()) &lt;= 1) then 1 else 0 end
