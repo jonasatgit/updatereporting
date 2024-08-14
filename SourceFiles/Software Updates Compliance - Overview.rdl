@@ -4531,7 +4531,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>v4.0 LINK</Value>
+                    <Value>v4.1 LINK</Value>
                   </TextRun>
                 </TextRuns>
               </Paragraph>
