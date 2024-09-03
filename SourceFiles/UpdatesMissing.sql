@@ -108,7 +108,7 @@ IF @ExcludeProductsFromQuery = 'Yes'
 	,count(UCS.CI_ID) over(partition by UCS.CI_ID) as [SystemsWithSameUpdate]
 	from v_UpdateComplianceStatus UCS
 	left join v_CITargetedMachines CTM on CTM.CI_ID = UCS.CI_ID and CTM.ResourceID = UCS.ResourceID
-					 inner join v_CICategoryInfo_All CCI on CCI.CI_ID = UCS.CI_ID and CCI.CategoryTypeName = 'UpdateClassification' and (CCI.CategoryInstanceName = 'Security Updates' or CCI.CategoryInstanceName = 'Critical Updates')
+	inner join v_CICategoryInfo_All CCI on CCI.CI_ID = UCS.CI_ID and CCI.CategoryTypeName = 'UpdateClassification' and (CCI.CategoryInstanceName = 'Security Updates' or CCI.CategoryInstanceName = 'Critical Updates')
 	inner join v_UpdateInfo UPD on UPD.CI_ID = UCS.CI_ID
 	inner join v_R_System VRS on VRS.ResourceID = UCS.ResourceID
 	inner join ResourceList res on res.ResourceID = UCS.ResourceID
