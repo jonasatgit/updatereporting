@@ -15,6 +15,9 @@ and [HERE](https://techcommunity.microsoft.com/t5/core-infrastructure-and-securi
 # Changes
 (The version number can be found in the lower left corner of the dashboard. No version number means v1.0)
 
+## 2024-05-06 v4.1:
+1. Changed update compliance definition and removed the dependency on "LastInstallTime"
+
 ## 2023-11-10 v4.0:
 1. Added more possible error fix actions
 
