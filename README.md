@@ -6,6 +6,13 @@ The original blog and documentation can be found [HERE](https://techcommunity.mi
 All my other blogs can be found [HERE](https://aka.ms/JonasOhmsenBlogs "JonasOhmsenBlogs")
 and [HERE](https://techcommunity.microsoft.com/t5/core-infrastructure-and-security/mastering-configuration-manager-bandwidth-limitations-for-vpn/ba-p/1280002 "Mastering Configuration Manager Bandwidth limitations for VPN connected Clients")
 
+# Unblock downloaded files
+If you download the solution as a zip-file, you might need to unblock all files to be able to use them.
+Open a PowerShell session as admin and change into the directory of the unpacked files. Typically: ".\updatereporting-master"
+Run the following to unblock all files:
+```PowerShell
+Dir -recurse | Unblock-File
+```
 
 # MEM/MECM/ConfigMgr patch compliance report solution
 ![Update dashboard](/.attachments/Dashboard-B.png)
