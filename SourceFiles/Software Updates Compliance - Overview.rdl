@@ -39,26 +39,103 @@ order by Name</CommandText>
       <Query>
         <DataSourceName>DataSource1</DataSourceName>
         <QueryParameters>
+          <QueryParameter Name="@ExcludeProductList">
+            <Value>=Parameters!ExcludeProductList.Value</Value>
+          </QueryParameter>
           <QueryParameter Name="@CollectionIDs">
             <Value>=Parameters!CollectionIDs.Value</Value>
           </QueryParameter>
         </QueryParameters>
-        <CommandText>DECLARE @AllSystems int
-	Set @AllSystems = (Select Count(ResourceID) from v_FullCollectionMembership fcm where fcm.CollectionID IN (@CollectionIDs))
-	
-	select COUNT(*) as [SystemsWithUpdatesMissing]
-		,@AllSystems as [AllSystems]
-		 from (
-			select  UCS.ResourceID
-			from v_UpdateComplianceStatus UCS
-			left join v_CITargetedMachines CTM on CTM.CI_ID = UCS.CI_ID and CTM.ResourceID = UCS.ResourceID
-			inner join v_CICategoryInfo_All CCI on CCI.CI_ID = UCS.CI_ID and CCI.CategoryTypeName = 'UpdateClassification' and (CCI.CategoryInstanceName = 'Security Updates' or CCI.CategoryInstanceName = 'Critical Updates')
-			inner join v_UpdateInfo UPD on UPD.CI_ID = UCS.CI_ID
-			where UCS.ResourceID IN (Select ResourceID from v_FullCollectionMembership fcm where fcm.CollectionID IN (@CollectionIDs)) 
-			and UCS.Status = 2 and CTM.ResourceID is null and UPD.IsSuperseded = 0 
-			group by UCS.ResourceID
-	) as systems
-	---- fix for SQL compat level problem 
+        <CommandText>--Declare @CollectionIDs as varchar(max) = 'SMS00001'
+--Declare @ExcludeProductList as varchar(max) = N'System Center Endpoint Protection;Microsoft Server operating system-21H2;Microsoft Server Operating System-22H2';
+
+Declare @ExcludeProducts as varchar(max) = @ExcludeProductList;
+Declare @CollectionIDList as varchar(max) = @CollectionIDs;
+
+With CTE_ProductPieces
+	AS
+	(
+		SELECT 1 AS ID
+		,1 AS [StartString]
+		,Cast(CHARINDEX(';', @ExcludeProducts,0) as int) AS StopString
+		UNION ALL
+		SELECT ID + 1
+		,StopString + 1
+		,Cast(CHARINDEX(';', @ExcludeProducts, StopString + 1) as int)
+		FROM CTE_ProductPieces
+		WHERE StopString &gt; 0
+	)
+	,CTE_Products
+	AS
+	(
+		SELECT (SUBSTRING(@ExcludeProducts, StartString,
+		CASE WHEN StopString &gt; 0 THEN StopString - StartString
+		ELSE LEN(@ExcludeProducts)
+		END)) AS Product
+		FROM CTE_ProductPieces
+	)
+	,CTE_ExcludedProductUpdates
+    AS
+    (
+		select ciall.CI_ID
+		from v_CICategoryInfo_All as ciall
+		inner join CTE_Products products on products.Product = ciall.CategoryInstanceName and ciall.categoryTypeName = 'Product'
+    ),
+	CTE_CollIDPieces
+	AS 
+	(
+		SELECT 1 AS ID
+			,1 AS [StartString]
+			,Cast(CHARINDEX(';', @CollectionIDList,0) as int) AS StopString
+		UNION ALL
+		SELECT ID + 1
+						,StopString + 1
+						,Cast(CHARINDEX(';', @CollectionIDList, StopString + 1) as int)
+		FROM CTE_CollIDPieces
+		WHERE StopString &gt; 0
+	),
+	CTE_CollIDs
+	AS
+	(
+		SELECT (SUBSTRING(@CollectionIDList, StartString, 
+									CASE WHEN StopString &gt; 0 THEN StopString - StartString
+									ELSE LEN(@CollectionIDList)
+					END)) AS CollectionID
+		FROM CTE_CollIDPieces 
+	),
+	CTE_AllSystems as (
+		Select Count(ResourceID) as AllSystems 
+		from v_FullCollectionMembership fcm 
+		inner join CTE_CollIDs on CTE_CollIDs.CollectionID = FCM.CollectionID
+	),
+	CTE_ResourceIDs as (
+		Select ResourceID 
+		from v_FullCollectionMembership fcm 
+		inner join CTE_CollIDs on CTE_CollIDs.CollectionID = FCM.CollectionID
+	)
+
+select 
+    COUNT(*) as [SystemsWithUpdatesMissing],
+    (select AllSystems from CTE_AllSystems) as [AllSystems]
+from (
+    select UCS.ResourceID
+    from v_UpdateComplianceStatus UCS
+    left join v_CITargetedMachines CTM on CTM.CI_ID = UCS.CI_ID and CTM.ResourceID = UCS.ResourceID
+    inner join v_CICategoryInfo_All CCI on CCI.CI_ID = UCS.CI_ID and CCI.CategoryTypeName = 'UpdateClassification' 
+        and (CCI.CategoryInstanceName = 'Security Updates' or CCI.CategoryInstanceName = 'Critical Updates')
+    inner join v_UpdateInfo UPD on UPD.CI_ID = UCS.CI_ID
+    where EXISTS (
+        Select 1 
+        from CTE_ResourceIDs 
+        where CTE_ResourceIDs.ResourceID = UCS.ResourceID
+    )
+    and UCS.Status = 2 
+    and CTM.ResourceID is null 
+    and UPD.IsSuperseded = 0
+    and UCS.CI_ID not in (Select CI_ID from CTE_ExcludedProductUpdates)
+    group by UCS.ResourceID
+) as systems
+---- fix for SQL compat level problem
 ---- https://support.microsoft.com/en-us/help/3196320/sql-query-times-out-or-console-slow-on-certain-configuration-manager-d
 ---- Force legacy cardinality for SQL server versions before 2016 SP1 (SQL version less than 13.0.4001.0)
 --OPTION (QUERYTRACEON 9481)
@@ -306,6 +383,40 @@ Select @LastRollupPrefix as [LastRollupPrefix]
         </Field>
         <Field Name="CurrentRollupPrefix">
           <DataField>CurrentRollupPrefix</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="ExcludeProductsByDefault">
+      <Query>
+        <DataSourceName>DataSource1</DataSourceName>
+        <CommandText>
+-- query to either add 'Microsoft Defender Antivirus' and 'System Center Endpoint Protection' to the default exclusion list
+-- Or the value of "..nothing excluded" in case the products have not been found
+-- Add more or different values to the list in case other products should be excluded by default
+
+WITH ProductList AS (
+    SELECT DISTINCT CICI.CategoryInstanceName AS [ProductName]
+    FROM v_CICategoryInfo CICI
+    WHERE CICI.CategoryTypeName = 'Product'
+)
+SELECT [ProductName]
+FROM ProductList
+WHERE ProductName IN ('Microsoft Defender Antivirus', 'System Center Endpoint Protection')
+
+UNION ALL
+
+SELECT '..nothing excluded'
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM ProductList
+    WHERE ProductName IN ('Microsoft Defender Antivirus', 'System Center Endpoint Protection')
+)
+ORDER BY [ProductName];</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="ProductName">
+          <DataField>ProductName</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
@@ -2709,6 +2820,9 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                                 <Parameter Name="CollectionIDs">
                                   <Value>=Parameters!CollectionIDs.Value</Value>
                                 </Parameter>
+                                <Parameter Name="ExcludeProductList">
+                                  <Value>=Parameters!ExcludeProductList.Value</Value>
+                                </Parameter>
                               </Parameters>
                             </Drillthrough>
                           </Action>
@@ -4531,7 +4645,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>v4.1 LINK</Value>
+                    <Value>v4.2 LINK</Value>
                   </TextRun>
                 </TextRuns>
               </Paragraph>
@@ -5726,10 +5840,10 @@ Select @LastRollupPrefix as [LastRollupPrefix]
     <ReportParameter Name="ExcludeProductList">
       <DataType>String</DataType>
       <DefaultValue>
-        <Values>
-          <Value>Microsoft Defender Antivirus</Value>
-          <Value>System Center Endpoint Protection</Value>
-        </Values>
+        <DataSetReference>
+          <DataSetName>ExcludeProductsByDefault</DataSetName>
+          <ValueField>ProductName</ValueField>
+        </DataSetReference>
       </DefaultValue>
       <Prompt>Exclude deployments containing the following products:</Prompt>
       <ValidValues>

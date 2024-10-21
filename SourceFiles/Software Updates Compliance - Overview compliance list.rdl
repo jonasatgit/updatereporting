@@ -227,6 +227,37 @@ order by [ProductName]</CommandText>
         </Field>
       </Fields>
     </DataSet>
+    <DataSet Name="ExcludeProductsByDefault">
+      <Query>
+        <DataSourceName>DataSource1</DataSourceName>
+        <CommandText>
+-- query to either add 'Microsoft Defender Antivirus' and 'System Center Endpoint Protection' to the default exclusion list
+-- Or the value of "..nothing excluded" in case the products have not been found
+-- Add more or different values to the list in case other products should be excluded by default
+WITH ProductList AS (
+    SELECT DISTINCT CICI.CategoryInstanceName AS [ProductName]
+    FROM v_CICategoryInfo CICI
+    WHERE CICI.CategoryTypeName = 'Product'
+)
+SELECT [ProductName]
+FROM ProductList
+WHERE ProductName IN ('Microsoft Defender Antivirus', 'System Center Endpoint Protection')
+UNION ALL
+SELECT '..nothing excluded'
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM ProductList
+    WHERE ProductName IN ('Microsoft Defender Antivirus', 'System Center Endpoint Protection')
+)
+ORDER BY [ProductName];</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="ProductName">
+          <DataField>ProductName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
   </DataSets>
   <ReportSections>
     <ReportSection>
@@ -1865,10 +1896,10 @@ order by [ProductName]</CommandText>
     <ReportParameter Name="ExcludeProductList">
       <DataType>String</DataType>
       <DefaultValue>
-        <Values>
-          <Value>Microsoft Defender Antivirus</Value>
-          <Value>System Center Endpoint Protection</Value>
-        </Values>
+        <DataSetReference>
+          <DataSetName>ExcludeProductsByDefault</DataSetName>
+          <ValueField>ProductName</ValueField>
+        </DataSetReference>
       </DefaultValue>
       <Prompt>Exclude deployments containing the following products:</Prompt>
       <ValidValues>

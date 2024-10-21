@@ -13,6 +13,9 @@
       <Query>
         <DataSourceName>DataSource1</DataSourceName>
         <QueryParameters>
+          <QueryParameter Name="@ExcludeProductList">
+            <Value>=Parameters!ExcludeProductList.Value</Value>
+          </QueryParameter>
           <QueryParameter Name="@SupersededVisible">
             <Value>=Parameters!SupersededVisible.Value</Value>
           </QueryParameter>
@@ -20,52 +23,101 @@
             <Value>=Parameters!CollectionIDs.Value</Value>
           </QueryParameter>
         </QueryParameters>
-        <CommandText>IF @SupersededVisible = 'Yes'
-	select UPD.Title
-		,VRS.Netbios_Name0
-		,VRS.ResourceID
-		,CCI.CategoryInstanceName
-		,UCS.CI_ID
-		,UPD.IsSuperseded
-		,UPD.DatePosted
-		,count(UCS.CI_ID) over(partition by UCS.CI_ID) as [SystemsWithSameUpdate]
-		from v_UpdateComplianceStatus UCS
-		left join v_CITargetedMachines CTM on CTM.CI_ID = UCS.CI_ID and CTM.ResourceID = UCS.ResourceID
-		inner join v_CICategoryInfo_All CCI on CCI.CI_ID = UCS.CI_ID and CCI.CategoryTypeName = 'UpdateClassification' and (CCI.CategoryInstanceName = 'Security Updates' or CCI.CategoryInstanceName = 'Critical Updates')
-		inner join v_UpdateInfo UPD on UPD.CI_ID = UCS.CI_ID
-		inner join v_R_System VRS on VRS.ResourceID = UCS.ResourceID 
-		where UCS.ResourceID IN (Select ResourceID from v_FullCollectionMembership fcm where fcm.CollectionID IN (@CollectionIDs))
-		and UCS.Status = 2 and CTM.ResourceID is null --and UPD.IsSuperseded = 0
-		order by SystemsWithSameUpdate desc, UPD.Title, UPD.DatePosted
-		---- fix for SQL compat level problem 
-		---- https://support.microsoft.com/en-us/help/3196320/sql-query-times-out-or-console-slow-on-certain-configuration-manager-d
-		---- Force legacy cardinality for SQL server versions before 2016 SP1 (SQL version less than 13.0.4001.0)
-		--OPTION (QUERYTRACEON 9481)
-		---- Force legacy cardinality for SQL server versions 2016 SP1 and higher (SQL version equal or greater than 13.0.4001.0)
-		--OPTION (USE HINT ('FORCE_LEGACY_CARDINALITY_ESTIMATION'))
+		<CommandText>--Declare @CollectionIDs as varchar(max) = 'SMS00001'
+--Declare @ExcludeProductList as varchar(max) = N'System Center Endpoint Protection;Microsoft Server operating system-21H2;Microsoft Server Operating System-22H2';
+--Declare @SupersededVisible as varchar(3) = 'Yes';
+Declare @ExcludeProducts as varchar(max) = @ExcludeProductList;
+Declare @CollectionIDList as varchar(max) = @CollectionIDs;
+Declare @SupersededValue as int = 0
+IF @SupersededVisible = 'Yes'
+	Set @SupersededValue = 1													 
 ELSE
-	select UPD.Title
-		,VRS.Netbios_Name0
-		,VRS.ResourceID
-		,CCI.CategoryInstanceName
-		,UCS.CI_ID
-		,UPD.IsSuperseded
-		,UPD.DatePosted
-		,count(UCS.CI_ID) over(partition by UCS.CI_ID) as [SystemsWithSameUpdate]
-		from v_UpdateComplianceStatus UCS
-		left join v_CITargetedMachines CTM on CTM.CI_ID = UCS.CI_ID and CTM.ResourceID = UCS.ResourceID
-		inner join v_CICategoryInfo_All CCI on CCI.CI_ID = UCS.CI_ID and CCI.CategoryTypeName = 'UpdateClassification' and (CCI.CategoryInstanceName = 'Security Updates' or CCI.CategoryInstanceName = 'Critical Updates')
-		inner join v_UpdateInfo UPD on UPD.CI_ID = UCS.CI_ID
-		inner join v_R_System VRS on VRS.ResourceID = UCS.ResourceID 
-		where UCS.ResourceID IN (Select ResourceID from v_FullCollectionMembership fcm where fcm.CollectionID IN (@CollectionIDs))
-		and UCS.Status = 2 and CTM.ResourceID is null and UPD.IsSuperseded = 0
-		order by SystemsWithSameUpdate desc, UPD.Title, UPD.DatePosted
-		---- fix for SQL compat level problem 
-		---- https://support.microsoft.com/en-us/help/3196320/sql-query-times-out-or-console-slow-on-certain-configuration-manager-d
-		---- Force legacy cardinality for SQL server versions before 2016 SP1 (SQL version less than 13.0.4001.0)
-		--OPTION (QUERYTRACEON 9481)
-		---- Force legacy cardinality for SQL server versions 2016 SP1 and higher (SQL version equal or greater than 13.0.4001.0)
-		--OPTION (USE HINT ('FORCE_LEGACY_CARDINALITY_ESTIMATION'))</CommandText>
+	Set @SupersededValue = 0;
+With CTE_ProductPieces
+AS
+(
+SELECT 1 AS ID
+,1 AS [StartString]
+,Cast(CHARINDEX(';', @ExcludeProducts,0) as int) AS StopString
+UNION ALL
+SELECT ID + 1
+,StopString + 1
+,Cast(CHARINDEX(';', @ExcludeProducts, StopString + 1) as int)
+FROM CTE_ProductPieces
+WHERE StopString &gt; 0
+)
+,CTE_Products
+AS
+(
+SELECT (SUBSTRING(@ExcludeProducts, StartString,
+CASE WHEN StopString &gt; 0 THEN StopString - StartString
+ELSE LEN(@ExcludeProducts)
+END)) AS Product
+FROM CTE_ProductPieces
+)
+    ,CTE_ExcludedProductUpdates
+    AS
+    (
+select ciall.CI_ID
+from v_CICategoryInfo_All as ciall
+inner join CTE_Products products on products.Product = ciall.CategoryInstanceName and ciall.categoryTypeName = 'Product'
+    ),
+	CTE_CollIDPieces
+	AS 
+	(
+		SELECT 1 AS ID
+			,1 AS [StartString]
+			,Cast(CHARINDEX(';', @CollectionIDList,0) as int) AS StopString
+		UNION ALL
+		SELECT ID + 1
+						,StopString + 1
+						,Cast(CHARINDEX(';', @CollectionIDList, StopString + 1) as int)
+		FROM CTE_CollIDPieces
+		WHERE StopString &gt; 0
+	),
+	CTE_CollIDs
+	AS
+	(
+		SELECT (SUBSTRING(@CollectionIDList, StartString, 
+									CASE WHEN StopString &gt; 0 THEN StopString - StartString
+									ELSE LEN(@CollectionIDList)
+					END)) AS CollectionID
+		FROM CTE_CollIDPieces 
+	),
+	CTE_ResourceIDs as (
+		Select ResourceID 
+		from v_FullCollectionMembership fcm 
+		inner join CTE_CollIDs on CTE_CollIDs.CollectionID = FCM.CollectionID
+	)
+select UPD.Title
+,VRS.Netbios_Name0
+,VRS.ResourceID
+,CCI.CategoryInstanceName
+,UCS.CI_ID
+,UPD.IsSuperseded
+,UPD.DatePosted
+,count(UCS.CI_ID) over(partition by UCS.CI_ID) as [SystemsWithSameUpdate]
+from v_UpdateComplianceStatus UCS
+left join v_CITargetedMachines CTM on CTM.CI_ID = UCS.CI_ID and CTM.ResourceID = UCS.ResourceID
+inner join v_CICategoryInfo_All CCI on CCI.CI_ID = UCS.CI_ID and CCI.CategoryTypeName = 'UpdateClassification' 
+				and (CCI.CategoryInstanceName = 'Security Updates' or CCI.CategoryInstanceName = 'Critical Updates')
+inner join v_UpdateInfo UPD on UPD.CI_ID = UCS.CI_ID
+inner join v_R_System VRS on VRS.ResourceID = UCS.ResourceID
+--where UCS.ResourceID IN (Select ResourceID from v_FullCollectionMembership fcm where fcm.CollectionID IN (@CollectionIDs))
+			where EXISTS (
+					Select 1 
+					from CTE_ResourceIDs 
+					where CTE_ResourceIDs.ResourceID = UCS.ResourceID
+				)
+and UCS.Status = 2 and CTM.ResourceID is null and UPD.IsSuperseded &lt;= @SupersededValue
+and UCS.CI_ID not in (Select CI_ID from CTE_ExcludedProductUpdates)
+order by SystemsWithSameUpdate desc, UPD.Title, UPD.DatePosted
+---- fix for SQL compat level problem
+---- https://support.microsoft.com/en-us/help/3196320/sql-query-times-out-or-console-slow-on-certain-configuration-manager-d
+---- Force legacy cardinality for SQL server versions before 2016 SP1 (SQL version less than 13.0.4001.0)
+--OPTION (QUERYTRACEON 9481)
+---- Force legacy cardinality for SQL server versions 2016 SP1 and higher (SQL version equal or greater than 13.0.4001.0)
+--OPTION (USE HINT ('FORCE_LEGACY_CARDINALITY_ESTIMATION'))</CommandText>
         <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
       </Query>
       <Fields>
@@ -100,6 +152,59 @@ ELSE
         <Field Name="SystemsWithSameUpdate">
           <DataField>SystemsWithSameUpdate</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="ExcludeProductListQuery">
+      <Query>
+        <DataSourceName>DataSource1</DataSourceName>
+        <CommandText>--- "..nothing excluded" to be able to select nothing. 
+--- DO NOT CHANGE since NULL or "" will break the main report query
+Select [ProductName] = '..nothing excluded'
+UNION ALL
+select distinct CICI.CategoryInstanceName as [ProductName]
+from v_CICategoryInfo CICI
+where CICI.CategoryTypeName = 'Product'
+order by [ProductName]</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="ProductName">
+          <DataField>ProductName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="ExcludeProductsByDefault">
+      <Query>
+        <DataSourceName>DataSource1</DataSourceName>
+        <CommandText>
+-- query to either add 'Microsoft Defender Antivirus' and 'System Center Endpoint Protection' to the default exclusion list
+-- Or the value of "..nothing excluded" in case the products have not been found
+-- Add more or different values to the list in case other products should be excluded by default
+
+WITH ProductList AS (
+    SELECT DISTINCT CICI.CategoryInstanceName AS [ProductName]
+    FROM v_CICategoryInfo CICI
+    WHERE CICI.CategoryTypeName = 'Product'
+)
+SELECT [ProductName]
+FROM ProductList
+WHERE ProductName IN ('Microsoft Defender Antivirus', 'System Center Endpoint Protection')
+
+UNION ALL
+
+SELECT '..nothing excluded'
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM ProductList
+    WHERE ProductName IN ('Microsoft Defender Antivirus', 'System Center Endpoint Protection')
+)
+ORDER BY [ProductName];</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="ProductName">
+          <DataField>ProductName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
     </DataSet>
@@ -142,7 +247,7 @@ ELSE
                               </TextRuns>
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox149</rd:DefaultName>						  
+                          <rd:DefaultName>Textbox149</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -171,7 +276,6 @@ ELSE
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox150</rd:DefaultName>
@@ -203,7 +307,6 @@ ELSE
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox168</rd:DefaultName>
@@ -269,7 +372,6 @@ ELSE
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox159</rd:DefaultName>
@@ -386,7 +488,6 @@ ELSE
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>DatePosted3</rd:DefaultName>
@@ -413,10 +514,8 @@ ELSE
                               <TextRuns>
                                 <TextRun>
                                   <Value>=IIf(Fields!IsSuperseded.Value = 1, "Yes", "No")</Value>
-                                  
                                 </TextRun>
                               </TextRuns>
-                              
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>IsSuperseded</rd:DefaultName>
@@ -463,7 +562,6 @@ ELSE
                                 </Style>
                               </TextRun>
                             </TextRuns>
-                            
                           </Paragraph>
                         </Paragraphs>
                         <rd:DefaultName>Textbox152</rd:DefaultName>
@@ -508,10 +606,8 @@ ELSE
                             <TextRuns>
                               <TextRun>
                                 <Value>=Fields!Title.Value</Value>
-                                
                               </TextRun>
                             </TextRuns>
-                            
                           </Paragraph>
                         </Paragraphs>
                         <rd:DefaultName>Title2</rd:DefaultName>
@@ -678,11 +774,29 @@ ELSE
         </ParameterValues>
       </ValidValues>
     </ReportParameter>
+    <ReportParameter Name="ExcludeProductList">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <DataSetReference>
+          <DataSetName>ExcludeProductsByDefault</DataSetName>
+          <ValueField>ProductName</ValueField>
+        </DataSetReference>
+      </DefaultValue>
+      <Prompt>Exclude deployments containing the following products:</Prompt>
+      <ValidValues>
+        <DataSetReference>
+          <DataSetName>ExcludeProductListQuery</DataSetName>
+          <ValueField>ProductName</ValueField>
+          <LabelField>ProductName</LabelField>
+        </DataSetReference>
+      </ValidValues>
+      <MultiValue>true</MultiValue>
+    </ReportParameter>
   </ReportParameters>
   <ReportParametersLayout>
     <GridLayoutDefinition>
       <NumberOfColumns>1</NumberOfColumns>
-      <NumberOfRows>2</NumberOfRows>
+      <NumberOfRows>3</NumberOfRows>
       <CellDefinitions>
         <CellDefinition>
           <ColumnIndex>0</ColumnIndex>
@@ -693,6 +807,11 @@ ELSE
           <ColumnIndex>0</ColumnIndex>
           <RowIndex>1</RowIndex>
           <ParameterName>SupersededVisible</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>2</RowIndex>
+          <ParameterName>ExcludeProductList</ParameterName>
         </CellDefinition>
       </CellDefinitions>
     </GridLayoutDefinition>
