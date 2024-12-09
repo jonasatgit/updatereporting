@@ -22,6 +22,9 @@ Dir -recurse | Unblock-File
 # Changes
 (The version number can be found in the lower left corner of the dashboard. No version number means v1.0)
 
+## 2024-12-09 v4.3:
+1. Fixed an issue with multiple excluded products
+
 ## 2024-10-21 v4.2:
 1. Added excluded products to the "Updates missing not deployed" graph on the dashboard and the sub-report
 1. Added new query for default exclude list in case "Microsoft Defender Antivirus" or "System Center Endpoint Protection" is not found
