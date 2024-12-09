@@ -155,59 +155,6 @@ order by SystemsWithSameUpdate desc, UPD.Title, UPD.DatePosted
         </Field>
       </Fields>
     </DataSet>
-    <DataSet Name="ExcludeProductListQuery">
-      <Query>
-        <DataSourceName>DataSource1</DataSourceName>
-        <CommandText>--- "..nothing excluded" to be able to select nothing. 
---- DO NOT CHANGE since NULL or "" will break the main report query
-Select [ProductName] = '..nothing excluded'
-UNION ALL
-select distinct CICI.CategoryInstanceName as [ProductName]
-from v_CICategoryInfo CICI
-where CICI.CategoryTypeName = 'Product'
-order by [ProductName]</CommandText>
-      </Query>
-      <Fields>
-        <Field Name="ProductName">
-          <DataField>ProductName</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-      </Fields>
-    </DataSet>
-    <DataSet Name="ExcludeProductsByDefault">
-      <Query>
-        <DataSourceName>DataSource1</DataSourceName>
-        <CommandText>
--- query to either add 'Microsoft Defender Antivirus' and 'System Center Endpoint Protection' to the default exclusion list
--- Or the value of "..nothing excluded" in case the products have not been found
--- Add more or different values to the list in case other products should be excluded by default
-
-WITH ProductList AS (
-    SELECT DISTINCT CICI.CategoryInstanceName AS [ProductName]
-    FROM v_CICategoryInfo CICI
-    WHERE CICI.CategoryTypeName = 'Product'
-)
-SELECT [ProductName]
-FROM ProductList
-WHERE ProductName IN ('Microsoft Defender Antivirus', 'System Center Endpoint Protection')
-
-UNION ALL
-
-SELECT '..nothing excluded'
-WHERE NOT EXISTS (
-    SELECT 1
-    FROM ProductList
-    WHERE ProductName IN ('Microsoft Defender Antivirus', 'System Center Endpoint Protection')
-)
-ORDER BY [ProductName];</CommandText>
-      </Query>
-      <Fields>
-        <Field Name="ProductName">
-          <DataField>ProductName</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-      </Fields>
-    </DataSet>
   </DataSets>
   <ReportSections>
     <ReportSection>
@@ -776,21 +723,8 @@ ORDER BY [ProductName];</CommandText>
     </ReportParameter>
     <ReportParameter Name="ExcludeProductList">
       <DataType>String</DataType>
-      <DefaultValue>
-        <DataSetReference>
-          <DataSetName>ExcludeProductsByDefault</DataSetName>
-          <ValueField>ProductName</ValueField>
-        </DataSetReference>
-      </DefaultValue>
       <Prompt>Exclude deployments containing the following products:</Prompt>
-      <ValidValues>
-        <DataSetReference>
-          <DataSetName>ExcludeProductListQuery</DataSetName>
-          <ValueField>ProductName</ValueField>
-          <LabelField>ProductName</LabelField>
-        </DataSetReference>
-      </ValidValues>
-      <MultiValue>true</MultiValue>
+      <Hidden>true</Hidden>
     </ReportParameter>
   </ReportParameters>
   <ReportParametersLayout>

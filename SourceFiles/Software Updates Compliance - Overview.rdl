@@ -39,18 +39,18 @@ order by Name</CommandText>
       <Query>
         <DataSourceName>DataSource1</DataSourceName>
         <QueryParameters>
-          <QueryParameter Name="@ExcludeProductList">
-            <Value>=Parameters!ExcludeProductList.Value</Value>
+          <QueryParameter Name="@ExcludeProductListC">
+            <Value>=Parameters!ExcludeProductListC.Value</Value>
           </QueryParameter>
-          <QueryParameter Name="@CollectionIDs">
-            <Value>=Parameters!CollectionIDs.Value</Value>
+          <QueryParameter Name="@CollectionIDsC">
+            <Value>=Parameters!CollectionIDsC.Value</Value>
           </QueryParameter>
         </QueryParameters>
-        <CommandText>--Declare @CollectionIDs as varchar(max) = 'SMS00001'
---Declare @ExcludeProductList as varchar(max) = N'System Center Endpoint Protection;Microsoft Server operating system-21H2;Microsoft Server Operating System-22H2';
+        <CommandText>--Declare @CollectionIDsC as varchar(max) = 'SMS00001'
+--Declare @ExcludeProductListC as varchar(max) = N'System Center Endpoint Protection;Microsoft Server operating system-21H2;Microsoft Server Operating System-22H2';
 
-Declare @ExcludeProducts as varchar(max) = @ExcludeProductList;
-Declare @CollectionIDList as varchar(max) = @CollectionIDs;
+Declare @ExcludeProducts as varchar(max) = @ExcludeProductListC;
+Declare @CollectionIDList as varchar(max) = @CollectionIDsC;
 
 With CTE_ProductPieces
 	AS
@@ -2818,10 +2818,10 @@ ORDER BY [ProductName];</CommandText>
                               <ReportName>Software Updates Compliance - Overview Updates missing not deployed</ReportName>
                               <Parameters>
                                 <Parameter Name="CollectionIDs">
-                                  <Value>=Parameters!CollectionIDs.Value</Value>
+                                  <Value>=Parameters!CollectionIDsC.Value</Value>
                                 </Parameter>
                                 <Parameter Name="ExcludeProductList">
-                                  <Value>=Parameters!ExcludeProductList.Value</Value>
+                                  <Value>=Parameters!ExcludeProductListC.Value</Value>
                                 </Parameter>
                               </Parameters>
                             </Drillthrough>
@@ -4645,7 +4645,7 @@ ORDER BY [ProductName];</CommandText>
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>v4.2 LINK</Value>
+                    <Value>v4.3 LINK</Value>
                   </TextRun>
                 </TextRuns>
               </Paragraph>
@@ -5911,11 +5911,31 @@ ORDER BY [ProductName];</CommandText>
         </ParameterValues>
       </ValidValues>
     </ReportParameter>
+    <ReportParameter Name="ExcludeProductListC">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>=Join(Parameters!ExcludeProductList.Value,";")</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>To join ExcludeProductList with delimiter for in report processing</Prompt>
+      <Hidden>true</Hidden>
+    </ReportParameter>
+    <ReportParameter Name="CollectionIDsC">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>=Join(Parameters!CollectionIDs.Value,";")</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>To join CollectionIDs with delimiter for in report processing</Prompt>
+      <Hidden>true</Hidden>
+    </ReportParameter>
   </ReportParameters>
   <ReportParametersLayout>
     <GridLayoutDefinition>
       <NumberOfColumns>2</NumberOfColumns>
-      <NumberOfRows>3</NumberOfRows>
+      <NumberOfRows>4</NumberOfRows>
       <CellDefinitions>
         <CellDefinition>
           <ColumnIndex>0</ColumnIndex>
@@ -5941,6 +5961,16 @@ ORDER BY [ProductName];</CommandText>
           <ColumnIndex>0</ColumnIndex>
           <RowIndex>2</RowIndex>
           <ParameterName>MonthIndex</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>2</RowIndex>
+          <ParameterName>ExcludeProductListC</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>3</RowIndex>
+          <ParameterName>CollectionIDsC</ParameterName>
         </CellDefinition>
       </CellDefinitions>
     </GridLayoutDefinition>
