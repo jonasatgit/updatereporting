@@ -1,4 +1,4 @@
----SCRIPTVERSION: 20220404
+---SCRIPTVERSION: 2024-12-12
 
 -----------------------------------------------------------------------------------------------------------------------
 ---- Disclaimer
@@ -14,6 +14,10 @@
 ---- if Microsoft has been advised of the possibility of such damages.
 -----------------------------------------------------------------------------------------------------------------------
 ---- Changelog:
+---- 2024-12-12: Added query runtime to be able to show dataset runtime even if the data comes from a cached result
+---- 		     Added default parameters to dataset to make caching easier
+----
+---- 2024-05-06: Changed update compliance definition and removed "and (DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE()) <= 1+@MonthIndexInternal)"											----																											   
 ---- 2022-04-04: Changed the way deployed updates are shown. "MissingUpdatesApproved" will not show updates for excluded deployments anymore. Makes it more consistant with the rest of the report
 ----			 Added systems domain name to the list
 ----			 Removed unnecessary where clause: "where (QFE.Description0 = 'Security Update' or QFE.Description0 is null)"
@@ -35,19 +39,19 @@
 ---- 2020-11-03: Changed 'max(CASE WHEN (ISDATE(QFE.InstalledOn0) = 0' to 'max(CASE WHEN (LEN(QFE.InstalledOn0) > 10' due to language problems
 ---- 2020-11-03: Changed 'Windows Defender' to 'Microsoft Defender Antivirus'
 
---- START just for testing in SQL directly
+----- START just for testing in SQL directly
 Declare @CollectionID as varchar(max) = 'SMS00001' ---- semicolon seperated list of collectionIDs
 Declare @ExcludeProductList as varchar(max) = N'Microsoft Defender Antivirus;System Center Endpoint Protection'; ---- semicolon seperated list of update products
 Declare @MonthIndex as int = 0; -- 0 = current month, 1 = previous month
 
--- Using a bitmask like parameter. Makes it possible to use a multivalue parameter instead of multiple parameters to filter out some deployments
--- Using the same CTE function to convert parameter arraylist to CTE as with other multi value parameters due to perf issues on some SQL systems
-Declare @ExcludeDeplBitMask as varchar(20) = '8;16'---'2;4;8;16';
--- 2 = Deployments with starttime in the future will be excluded 
--- 4 = Deployments with deadline in the future will be excluded
--- 8 = Available deployments will be excluded
--- 16 = Disabled deployments will be excluded
---- END just for testing in SQL directly 
+---- Using a bitmask like parameter. Makes it possible to use a multivalue parameter instead of multiple parameters to filter out some deployments
+---- Using the same CTE function to convert parameter arraylist to CTE as with other multi value parameters due to perf issues on some SQL systems
+Declare @ExcludeDeplBitMask as varchar(20) = '0'---'2;4;8;16';
+---- 2 = Deployments with starttime in the future will be excluded 
+---- 4 = Deployments with deadline in the future will be excluded
+---- 8 = Available deployments will be excluded
+---- 16 = Disabled deployments will be excluded
+----- END just for testing in SQL directly 
 
 ---- Extra variables to prevent variable performance issues in some SQL configurations
 Declare @CollectionIDList as varchar(max) = @CollectionID ---- semicolon seperated list of collectionIDs
@@ -59,6 +63,9 @@ Declare @ExcludeDeplBitMaskInternal as varchar(20) = @ExcludeDeplBitMask
 DECLARE @LastRollupPrefix as char(7);
 DECLARE @CurrentRollupPrefix as char(7);
 DECLARE @SecondTuesdayOfMonth datetime;
+
+--- Adding query runtime as datasetruntime to easily add executiontime even if the report is coming from a cached dataset
+DECLARE @DataSetRuntime as datetime = GETDATE();
 
 -- Calculate 2nd Tuesday of month to add the correct date string in case install date is missing in v_GS_QUICK_FIX_ENGINEERING
 -- Also used to fill the gap between the first day of a month and the next time a rollup will be released
@@ -207,10 +214,11 @@ CumulativeUpdates (ArticleID,CI_ID, Latest) as
 select [Name] = VRS.Name0
               ,[ResourceID] = VRS.ResourceID
               ,[Counter] = 1 -- a counter to make it easier to count in reporting services
-			  ,[Domain] = VRS.Resource_Domain_OR_Workgr0
+	      ,[DatasetRuntime] = @DataSetRuntime
+	      ,[Domain] = VRS.Resource_Domain_OR_Workgr0
               ,[PendingReboot] = BGBL.ClientState                         
               ,[OSType] = GOS.Caption0
-			  ,[OSBuild] = BGBL.DeviceOSBuild
+	      ,[OSBuild] = BGBL.DeviceOSBuild
               ,[ClientVersion] = VRS.Client_Version0
               ,[WSUSVersion] = USS.LastWUAVersion
               ,[DefenderPattern] = AHS.AntivirusSignatureVersion
@@ -234,8 +242,10 @@ select [Name] = VRS.Name0
                                                  when ISNULL((DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE())), 999) = 1 then 'B' else 'C' end
               ,[MonthSinceLastUpdateScan] = ISNULL((DateDiff(MONTH,USS.LastScanTime,GETDATE())), 999)
               ---- custom compliance state based on deploymentstatus, update status, last installdate and last rollup state. Last update install needs to be at least in the past month
+			  ---- 20240506: Changed compliance and removed last install date. Makes no sense when we also look for the last or current rollup
+			        ,[OverallComplianceState] = Case when AssignmentStatus.Compliant = AssignmentStatus.AssignmentSum and (LASTROLLUPSTAT.Status = 3 or CURRROLLUPSTAT.Status = 3) then 1 else 0 end
 			  ---- 20210801: Changed compliance to contain the last rollup
-              ,[OverallComplianceState] = Case when AssignmentStatus.Compliant = AssignmentStatus.AssignmentSum and (DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE()) <= 1+@MonthIndexInternal) and (LASTROLLUPSTAT.Status = 3 or CURRROLLUPSTAT.Status = 3) then 1 else 0 end
+              ---- ,[OverallComplianceState] = Case when AssignmentStatus.Compliant = AssignmentStatus.AssignmentSum and (DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE()) <= 1+@MonthIndexInternal) and (LASTROLLUPSTAT.Status = 3 or CURRROLLUPSTAT.Status = 3) then 1 else 0 end
 			  ---- 20210801: Original UpdateAssignmentCompliance query without last rollup state and with UPDATESTATES.UpdatesApprovedAndMissing = 0
 			  ---- Query does not work anymore because of the way we filter future and not enabled update deployments and the changed name to "OverallComplianceState"
 			  --,[UpdateAssignmentCompliance] = Case when AssignmentStatus.Compliant = AssignmentStatus.AssignmentSum and UPDATESTATES.UpdatesApprovedAndMissing = 0 and (DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE()) <= 1) then 1 else 0 end
