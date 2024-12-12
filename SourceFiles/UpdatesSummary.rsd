@@ -5,31 +5,39 @@
       <DataSourceReference>/ConfigMgr_P11/{5C6358F2-4BB6-4a1b-A16E-8D96795D8602}</DataSourceReference>
       <DataSetParameters>
         <DataSetParameter Name="@CollectionID">
+          <DefaultValue>SMS00001</DefaultValue>
           <ReadOnly>false</ReadOnly>
           <Nullable>false</Nullable>
           <OmitFromQuery>false</OmitFromQuery>
-          <rd:DbType>String</rd:DbType>		
+          <rd:DbType>String</rd:DbType>
+          <rd:IsMultiValued>false</rd:IsMultiValued>
         </DataSetParameter>
         <DataSetParameter Name="@ExcludeProductList">
+          <DefaultValue>Microsoft Defender Antivirus;System Center Endpoint Protection</DefaultValue>
           <ReadOnly>false</ReadOnly>
           <Nullable>false</Nullable>
           <OmitFromQuery>false</OmitFromQuery>
-          <rd:DbType>String</rd:DbType>						
+          <rd:DbType>String</rd:DbType>
+          <rd:IsMultiValued>false</rd:IsMultiValued>
         </DataSetParameter>
         <DataSetParameter Name="@MonthIndex">
+          <DefaultValue>0</DefaultValue>
           <ReadOnly>false</ReadOnly>
           <Nullable>false</Nullable>
           <OmitFromQuery>false</OmitFromQuery>
-          <rd:DbType>Int32</rd:DbType>			
+          <rd:DbType>Int32</rd:DbType>
+          <rd:IsMultiValued>false</rd:IsMultiValued>
         </DataSetParameter>
         <DataSetParameter Name="@ExcludeDeplBitMask">
+          <DefaultValue>8;16</DefaultValue>
           <ReadOnly>false</ReadOnly>
           <Nullable>false</Nullable>
           <OmitFromQuery>false</OmitFromQuery>
-          <rd:DbType>String</rd:DbType>				
+          <rd:DbType>String</rd:DbType>
+          <rd:IsMultiValued>false</rd:IsMultiValued>
         </DataSetParameter>
       </DataSetParameters>
-      <CommandText>---SCRIPTVERSION: 20240506
+      <CommandText>---SCRIPTVERSION: 2024-12-12
 
 -----------------------------------------------------------------------------------------------------------------------
 ---- Disclaimer
@@ -45,6 +53,8 @@
 ---- if Microsoft has been advised of the possibility of such damages.
 -----------------------------------------------------------------------------------------------------------------------
 ---- Changelog:
+---- 2024-12-12: Added query runtime to be able to show dataset runtime even if the data comes from a cached result
+---- 		     Added default parameters to dataset to make caching easier	
 ---- 2024-05-06: Changed update compliance definition and removed "and (DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE()) &lt;= 1+@MonthIndexInternal)"																																						   
 ---- 2022-04-04: Changed the way deployed updates are shown. "MissingUpdatesApproved" will not show updates for excluded deployments anymore. Makes it more consistant with the rest of the report
 ----			 Added systems domain name to the list
@@ -74,7 +84,7 @@
 
 ---- Using a bitmask like parameter. Makes it possible to use a multivalue parameter instead of multiple parameters to filter out some deployments
 ---- Using the same CTE function to convert parameter arraylist to CTE as with other multi value parameters due to perf issues on some SQL systems
---Declare @ExcludeDeplBitMask as varchar(20) = '0'---'2;4;8;16';
+--Declare @ExcludeDeplBitMask as varchar(20) = '8;16'---'2;4;8;16';
 ---- 2 = Deployments with starttime in the future will be excluded 
 ---- 4 = Deployments with deadline in the future will be excluded
 ---- 8 = Available deployments will be excluded
@@ -92,6 +102,8 @@ DECLARE @LastRollupPrefix as char(7);
 DECLARE @CurrentRollupPrefix as char(7);
 DECLARE @SecondTuesdayOfMonth datetime;
 
+--- Adding query runtime as datasetruntime to easily add executiontime even if the report is coming from a cached dataset
+DECLARE @DataSetRuntime as datetime = GETDATE();
 -- Calculate 2nd Tuesday of month to add the correct date string in case install date is missing in v_GS_QUICK_FIX_ENGINEERING
 -- Also used to fill the gap between the first day of a month and the next time a rollup will be released
 SET @SecondTuesdayOfMonth = (DATEADD(Month, DATEDIFF(Month, 0, GETDATE()), 0) + 6 + 7 - (DATEPART(Weekday, DATEADD(Month, DATEDIFF(Month, 0, GETDATE()), 0)) + (@@DateFirst + 3) + 7) %7)
@@ -239,6 +251,7 @@ CumulativeUpdates (ArticleID,CI_ID, Latest) as
 select [Name] = VRS.Name0
               ,[ResourceID] = VRS.ResourceID
               ,[Counter] = 1 -- a counter to make it easier to count in reporting services
+			  ,[DatasetRuntime] = @DataSetRuntime																								
 			  ,[Domain] = VRS.Resource_Domain_OR_Workgr0
               ,[PendingReboot] = BGBL.ClientState                         
               ,[OSType] = GOS.Caption0
@@ -422,6 +435,10 @@ left join v_CombinedDeviceResources BGBL on BGBL.MachineID = VRS.ResourceID
         <DataField>Counter</DataField>
         <rd:TypeName>System.Int32</rd:TypeName>
       </Field>
+      <Field Name="DatasetRuntime">
+        <DataField>DatasetRuntime</DataField>
+        <rd:TypeName>System.DateTime</rd:TypeName>
+      </Field>												  
       <Field Name="Domain">
         <DataField>Domain</DataField>
         <rd:TypeName>System.String</rd:TypeName>

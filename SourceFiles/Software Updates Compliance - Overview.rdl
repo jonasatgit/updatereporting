@@ -207,6 +207,10 @@ order by [ProductName]</CommandText>
           <DataField>Counter</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
+        <Field Name="DatasetRuntime">
+          <DataField>DatasetRuntime</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>	
         <Field Name="Domain">
           <DataField>Domain</DataField>
           <rd:TypeName>System.String</rd:TypeName>
@@ -4645,7 +4649,7 @@ ORDER BY [ProductName];</CommandText>
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>v4.3 LINK</Value>
+                    <Value>v4.4 LINK</Value>
                   </TextRun>
                 </TextRuns>
               </Paragraph>
@@ -5790,6 +5794,38 @@ ORDER BY [ProductName];</CommandText>
               </Border>
             </Style>
           </Tablix>
+          <Textbox Name="RefreshTime">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>="Report last refreshed on: " &amp; First(Fields!DatasetRuntime.Value, "UpdatesSummary")</Value>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <Top>304.50488mm</Top>
+            <Left>293.84007mm</Left>
+            <Height>0.49138cm</Height>
+            <Width>12.50075cm</Width>
+            <ZIndex>25</ZIndex>
+            <ToolTip>Report dataset refresh time. Either live or coming from a cached result.</ToolTip>
+            <Style>
+              <Border>
+                <Color>White</Color>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>		
         </ReportItems>
         <Height>315.44099mm</Height>
         <Style>

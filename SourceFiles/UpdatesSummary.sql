@@ -46,7 +46,7 @@ Declare @MonthIndex as int = 0; -- 0 = current month, 1 = previous month
 
 ---- Using a bitmask like parameter. Makes it possible to use a multivalue parameter instead of multiple parameters to filter out some deployments
 ---- Using the same CTE function to convert parameter arraylist to CTE as with other multi value parameters due to perf issues on some SQL systems
-Declare @ExcludeDeplBitMask as varchar(20) = '0'---'2;4;8;16';
+Declare @ExcludeDeplBitMask as varchar(20) = '8;16'---'2;4;8;16';
 ---- 2 = Deployments with starttime in the future will be excluded 
 ---- 4 = Deployments with deadline in the future will be excluded
 ---- 8 = Available deployments will be excluded
