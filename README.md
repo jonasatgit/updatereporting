@@ -15,6 +15,9 @@ and [HERE](https://techcommunity.microsoft.com/t5/core-infrastructure-and-securi
 # Changes
 (The version number can be found in the lower left corner of the dashboard. No version number means v1.0)
 
+## 2024-05-06 v4.2:
+1. Fixed issue with Windows 11 and Server 2025 cumulative updates not being detected correctly and therefore counted as compliant
+
 ## 2024-05-06 v4.1:
 1. Changed update compliance definition and removed the dependency on "LastInstallTime"
 
