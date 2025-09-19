@@ -1,4 +1,4 @@
----SCRIPTVERSION: 20250910
+---SCRIPTVERSION: 20250919
 
 -----------------------------------------------------------------------------------------------------------------------
 ---- Disclaimer
@@ -14,6 +14,9 @@
 ---- if Microsoft has been advised of the possibility of such damages.
 -----------------------------------------------------------------------------------------------------------------------
 ---- Changelog:
+---- 2025-09-19: Added is to some peroperties to avoid NULL values ISNULL()
+---- 2025-09-10: Changed the way Windows 11 and Server 2025 cumulative uodates are handled. Due to a change in cumulative update detection logic. 
+---- 2024-05-06: Changed update compliance definition and removed "and (DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE()) <= 1+@MonthIndexInternal)"
 ---- 2022-04-04: Changed the way deployed updates are shown. "MissingUpdatesApproved" will not show updates for excluded deployments anymore. Makes it more consistant with the rest of the report
 ----			 Added systems domain name to the list
 ----			 Removed unnecessary where clause: "where (QFE.Description0 = 'Security Update' or QFE.Description0 is null)"
@@ -247,7 +250,7 @@ select [Name] = VRS.Name0
               ,[WSUSVersion] = USS.LastWUAVersion
               ,[DefenderPattern] = AHS.AntivirusSignatureVersion
               ,[DefenderPatternAge] = AHS.AntivirusSignatureAge
-              ,[WSUSScanError] = USS.LastErrorCode
+              ,[WSUSScanError] = ISNULL(USS.LastErrorCode,0)
               ,[DaysSinceLastOnline] = ISNULL((DateDiff(DAY,BGBL.LastPolicyRequest,GETDATE())),999)
               ,[DaysSinceLastAADSLogon] = ISNULL((DateDiff(DAY,VRS.Last_Logon_Timestamp0,GETDATE())), 999)
               ,[DaysSinceLastBoot] = ISNULL((DateDiff(DAY,GOS.LastBootUpTime0,GETDATE())), 999)
@@ -284,7 +287,7 @@ select [Name] = VRS.Name0
               ,[MissingUpdatesAll] = UPDATESTATES.UpdatesMissingAll
               ,[MissingUpdatesApproved] = UPDATESTATES.UpdatesApprovedAndMissing
               ,[UpdatesApprovedAll] = UPDATESTATES.UpdatesApproved
-                                     ,[UpdatesApprovedMissingAndError] = UPDATESTATES.UpdatesApprovedAndMissingAndError
+               ,[UpdatesApprovedMissingAndError] = ISNULL(UPDATESTATES.UpdatesApprovedAndMissingAndError,0)
               ---- show status of reference security rollup update
               ---- if current rollup ist installed, the last one doesn't matter and will be set to installed as well
 			  ,[LastRollupStatus] = case when LASTROLLUPSTAT.Status = 3 or CURRROLLUPSTAT.Status = 3 then 3 else 2 end
@@ -390,4 +393,4 @@ left join v_CombinedDeviceResources BGBL on BGBL.MachineID = VRS.ResourceID
 ---- Force legacy cardinality for SQL server versions before 2016 SP1 (SQL version less than 13.0.4001.0)
 --OPTION (QUERYTRACEON 9481)
 ---- Force legacy cardinality for SQL server versions 2016 SP1 and higher (SQL version equal or greater than 13.0.4001.0)
---OPTION (USE HINT ('FORCE_LEGACY_CARDINALITY_ESTIMATION'))
+OPTION (USE HINT ('FORCE_LEGACY_CARDINALITY_ESTIMATION'))
