@@ -447,6 +447,10 @@ left join v_CombinedDeviceResources BGBL on BGBL.MachineID = VRS.ResourceID
         <DataField>Counter</DataField>
         <rd:TypeName>System.Int32</rd:TypeName>
       </Field>
+      <Field Name="DatasetRuntime">
+        <DataField>DatasetRuntime</DataField>
+        <rd:TypeName>System.DateTime</rd:TypeName>
+      </Field>
       <Field Name="Domain">
         <DataField>Domain</DataField>
         <rd:TypeName>System.String</rd:TypeName>

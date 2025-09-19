@@ -136,6 +136,10 @@ order by [ProductName]</CommandText>
           <DataField>Counter</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
+        <Field Name="DatasetRuntime">
+          <DataField>DatasetRuntime</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
         <Field Name="Domain">
           <DataField>Domain</DataField>
           <rd:TypeName>System.String</rd:TypeName>
@@ -5716,6 +5720,37 @@ ORDER BY [ProductName];</CommandText>
               </Border>
             </Style>
           </Tablix>
+          <Textbox Name="Textbox9">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>="Datset last refreshed on: " &amp; First(Fields!DatasetRuntime.Value, "UpdatesSummary")</Value>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox9</rd:DefaultName>
+            <Top>30.45049cm</Top>
+            <Left>28.58958cm</Left>
+            <Height>0.49138cm</Height>
+            <Width>13.29517cm</Width>
+            <ZIndex>25</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
         </ReportItems>
         <Height>315.44099mm</Height>
         <Style>

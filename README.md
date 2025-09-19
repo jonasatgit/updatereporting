@@ -28,6 +28,7 @@ Dir -recurse | Unblock-File
 1. Added default parameter values for excluded updates in case Defender updates are not deployed via ConfigMgr
 1. Fixed issue with updates error compliance not being calculated correctly
 1. Added query runtime to be able to show dataset runtime even if the report is coming from a cached dataset
+1. Set legacy cardinality hint for SQL Server 2016 SP1 and higher to avoid performance issues with certain SQL versions as default
 
 ## 2024-05-06 v4.1:
 1. Changed update compliance definition and removed the dependency on "LastInstallTime"
