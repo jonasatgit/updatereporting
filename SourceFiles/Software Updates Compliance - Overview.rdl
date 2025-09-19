@@ -43,11 +43,13 @@ order by Name</CommandText>
             <Value>=Parameters!CollectionIDs.Value</Value>
           </QueryParameter>
         </QueryParameters>
-        <CommandText>DECLARE @AllSystems int
-	Set @AllSystems = (Select Count(ResourceID) from v_FullCollectionMembership fcm where fcm.CollectionID IN (@CollectionIDs))
+        <CommandText>DECLARE @AllSystems int	
+Set @AllSystems = (Select Count(vrs.ResourceID) from v_R_System vrs
+		where vrs.ResourceID in (select fcm.ResourceID from v_FullCollectionMembership fcm where fcm.CollectionID IN (@CollectionIDs)))
 	
 	select COUNT(*) as [SystemsWithUpdatesMissing]
 		,@AllSystems as [AllSystems]
+		,@AllSystems - COUNT(*) as [SystemsWithNOUpdatesMissing]
 		 from (
 			select  UCS.ResourceID
 			from v_UpdateComplianceStatus UCS
@@ -73,6 +75,10 @@ order by Name</CommandText>
         </Field>
         <Field Name="AllSystems">
           <DataField>AllSystems</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+		<Field Name="SystemsWithNOUpdatesMissing">
+          <DataField>SystemsWithNOUpdatesMissing</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
       </Fields>
@@ -310,6 +316,40 @@ Select @LastRollupPrefix as [LastRollupPrefix]
         </Field>
       </Fields>
     </DataSet>
+    <DataSet Name="ExcludeProductsByDefault">
+      <Query>
+        <DataSourceName>DataSource1</DataSourceName>
+        <CommandText>
+-- query to either add 'Microsoft Defender Antivirus' and 'System Center Endpoint Protection' to the default exclusion list
+-- Or the value of "..nothing excluded" in case the products have not been found
+-- Add more or different values to the list in case other products should be excluded by default
+
+WITH ProductList AS (
+    SELECT DISTINCT CICI.CategoryInstanceName AS [ProductName]
+    FROM v_CICategoryInfo CICI
+    WHERE CICI.CategoryTypeName = 'Product'
+)
+SELECT [ProductName]
+FROM ProductList
+WHERE ProductName IN ('Microsoft Defender Antivirus', 'System Center Endpoint Protection')
+
+UNION ALL
+
+SELECT '..nothing excluded'
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM ProductList
+    WHERE ProductName IN ('Microsoft Defender Antivirus', 'System Center Endpoint Protection')
+)
+ORDER BY [ProductName];</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="ProductName">
+          <DataField>ProductName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
   </DataSets>
   <ReportSections>
     <ReportSection>
@@ -347,7 +387,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                         <Y>=Sum(IIf(Fields!OverallComplianceState.Value = 1, 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <UseValueAsLabel>true</UseValueAsLabel>
+                        <Label>=Sum(IIf(Fields!OverallComplianceState.Value = 1, 1, 0)) &amp; " systems (" &amp; FormatPercent(Sum(IIf(Fields!OverallComplianceState.Value = 1, 1, 0)) / Count(Fields!OverallComplianceState.Value), 2) &amp; ")"</Label>
                         <Visible>=IIf(Sum(IIf(Fields!OverallComplianceState.Value = 1, 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>All valid deployments are evaluated to be compliant, at least one security update has been installed in the current month and the last rollup has been installed. Could still be wrong in case some deployments are wrongfuly evaluated to be compliant even though not all updates are installed. Always validate other KPIs as well. Like last rollup, WSUS scan error etc.</ToolTip>
@@ -413,7 +453,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                         <Y>=Sum(IIf(Fields!OverallComplianceState.Value = 0, 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <UseValueAsLabel>true</UseValueAsLabel>
+						<Label>=Sum(IIf(Fields!OverallComplianceState.Value = 0, 1, 0)) &amp; " systems (" &amp; FormatPercent(Sum(IIf(Fields!OverallComplianceState.Value = 0, 1, 0)) / Count(Fields!OverallComplianceState.Value), 2) &amp; ")"</Label>
                         <Visible>=IIf(Sum(IIf(Fields!OverallComplianceState.Value = 0, 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Not all deployments are evaluated to be compliant or no security update has been installed during the current month or the last rollup is missing</ToolTip>
@@ -2643,7 +2683,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
             <ChartSeriesHierarchy>
               <ChartMembers>
                 <ChartMember>
-                  <Label>Systems With Updates Missing</Label>
+                  <Label>Systems With NoUpdates Missing</Label>
                 </ChartMember>
                 <ChartMember>
                   <Label>Systems With Updates Missing</Label>
@@ -2656,11 +2696,11 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                   <ChartDataPoints>
                     <ChartDataPoint>
                       <ChartDataPointValues>
-                        <Y>=Sum(Fields!AllSystems.Value - Fields!SystemsWithUpdatesMissing.Value)</Y>
+                        <Y>=Sum(Fields!SystemsWithNOUpdatesMissing.Value)</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>=IIf(Sum(Fields!AllSystems.Value - Fields!SystemsWithUpdatesMissing.Value)=0,False,True)</Visible>
+                        <Label>=Sum(Fields!SystemsWithNOUpdatesMissing.Value, "MissingUpdatesNOTDeployed") &amp; " systems (" &amp; FormatPercent(Sum(Fields!SystemsWithNOUpdatesMissing.Value, "MissingUpdatesNOTDeployed") / Fields!AllSystems.Value, 2) &amp; ")"</Label>
+                        <Visible>=IIf(Sum(Fields!SystemsWithNOUpdatesMissing.Value, "MissingUpdatesNOTDeployed")=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>All required security and critical updates are deployed to the systems. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <Style>
@@ -2693,11 +2733,11 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                   <ChartDataPoints>
                     <ChartDataPoint>
                       <ChartDataPointValues>
-                        <Y>=Fields!SystemsWithUpdatesMissing.Value</Y>
+                        <Y>=Sum(Fields!SystemsWithUpdatesMissing.Value)</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>=IIf(Fields!SystemsWithUpdatesMissing.Value = 0,False,True)</Visible>
+                        <Label>=Sum(Fields!SystemsWithUpdatesMissing.Value, "MissingUpdatesNOTDeployed") &amp; " systems (" &amp; FormatPercent(Sum(Fields!SystemsWithUpdatesMissing.Value, "MissingUpdatesNOTDeployed") / Fields!AllSystems.Value, 2) &amp; ")"</Label>
+                        <Visible>=IIf(Sum(Fields!SystemsWithUpdatesMissing.Value, "MissingUpdatesNOTDeployed")=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Not all required security or critical updates are deployed to the systems. May be intentional or by mistake. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <ActionInfo>
@@ -3089,7 +3129,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                         <Y>=Sum(IIf((Fields!LastRollupStatus.Value = 3), 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <UseValueAsLabel>true</UseValueAsLabel>
+                        <Label>=Sum(IIf(Fields!LastRollupStatus.Value = 3, 1, 0)) &amp; " systems (" &amp; FormatPercent(Sum(IIf(Fields!LastRollupStatus.Value = 3, 1, 0)) / Count(Fields!LastRollupStatus.Value), 2) &amp; ")"</Label>
                         <Visible>=IIf(Sum(IIf((Fields!LastRollupStatus.Value = 3), 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with the last rollup installed. Intended as additional KPI to the overall compliance state.</ToolTip>
@@ -3152,7 +3192,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                         <Y>=Sum(IIf((Fields!LastRollupStatus.Value &lt;&gt; 3), 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <UseValueAsLabel>true</UseValueAsLabel>
+                        <Label>=Sum(IIf(Fields!LastRollupStatus.Value &lt;&gt; 3, 1, 0)) &amp; " systems (" &amp; FormatPercent(Sum(IIf(Fields!LastRollupStatus.Value &lt;&gt; 3, 1, 0)) / Count(Fields!LastRollupStatus.Value), 2) &amp; ")"</Label>
                         <Visible>=IIf(Sum(IIf((Fields!LastRollupStatus.Value &lt;&gt; 3), 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with the last rollup missing. Intended as additional KPI to the overall compliance state.</ToolTip>
@@ -3459,7 +3499,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                         <Y>=Sum(IIf((Fields!CurrentRollupStatus.Value = 3), 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <UseValueAsLabel>true</UseValueAsLabel>
+                        <Label>=Sum(IIf(Fields!CurrentRollupStatus.Value = 3, 1, 0)) &amp; " systems (" &amp; FormatPercent(Sum(IIf(Fields!CurrentRollupStatus.Value = 3, 1, 0)) / Count(Fields!CurrentRollupStatus.Value), 2) &amp; ")"</Label>
                         <Visible>=IIf(Sum(IIf((Fields!CurrentRollupStatus.Value = 3), 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with the current rollup installed. Intended as additional KPI to the overall compliance state.</ToolTip>
@@ -3522,7 +3562,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                         <Y>=Sum(IIf((Fields!CurrentRollupStatus.Value &lt;&gt; 3), 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <UseValueAsLabel>true</UseValueAsLabel>
+                        <Label>=Sum(IIf(Fields!CurrentRollupStatus.Value &lt;&gt; 3, 1, 0)) &amp; " systems (" &amp; FormatPercent(Sum(IIf(Fields!CurrentRollupStatus.Value &lt;&gt; 3, 1, 0)) / Count(Fields!CurrentRollupStatus.Value), 2) &amp; ")"</Label>
                         <Visible>=IIf(Sum(IIf((Fields!CurrentRollupStatus.Value &lt;&gt; 3), 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with the current rollup missing. Intended as additional KPI to the overall compliance state.</ToolTip>
@@ -3873,7 +3913,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                         <Y>=Sum(IIf(Fields!PendingReboot.Value &gt;= 1, 0, 1))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <UseValueAsLabel>true</UseValueAsLabel>
+                        <Label>=Sum(IIf(Fields!PendingReboot.Value &gt;= 1, 0, 1)) &amp; " systems (" &amp; FormatPercent(Sum(IIf(Fields!PendingReboot.Value &gt;= 1, 0, 1)) / Count(Fields!PendingReboot.Value), 2) &amp; ")"</Label>
                         <Visible>=IIf(Sum(IIf(Fields!PendingReboot.Value &gt;= 1, 0, 1))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with no pending reboot. Intended as additional KPI to the overall compliance state.</ToolTip>
@@ -3910,7 +3950,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                         <Y>=Sum(IIf(Fields!PendingReboot.Value &gt;= 1, 1, 0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <UseValueAsLabel>true</UseValueAsLabel>
+                        <Label>=Sum(IIf(Fields!PendingReboot.Value &gt;= 1, 1, 0)) &amp; " systems (" &amp; FormatPercent(Sum(IIf(Fields!PendingReboot.Value &gt;= 1, 1, 0)) / Count(Fields!PendingReboot.Value), 2) &amp; ")"</Label>
                         <Visible>=IIf(Sum(IIf(Fields!PendingReboot.Value &gt;= 1, 1, 0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with a pending reboot which might block future update installations. Intended as additional KPI to the overall compliance state.</ToolTip>
@@ -4217,7 +4257,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                         <Y>=Sum(Fields!Counter.Value)</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <UseValueAsLabel>true</UseValueAsLabel>
+                        <Label>=Sum(IIf(Fields!WSUSScanError.Value = 0,1,0)) &amp; " systems (" &amp; FormatPercent(Sum(IIf(Fields!WSUSScanError.Value = 0,1,0)) / Count(Fields!WSUSScanError.Value), 2) &amp; ")"</Label>
                         <Visible>=IIf(Sum(Fields!Counter.Value)=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with no WSUS clien scan error. Intended as additional KPI to the overall compliance state.</ToolTip>
@@ -4254,7 +4294,7 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                         <Y>=Sum(IIf(Fields!WSUSScanError.Value &lt;&gt; 0,1,0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <UseValueAsLabel>true</UseValueAsLabel>
+                        <Label>=Sum(IIf(Fields!WSUSScanError.Value &lt;&gt; 0,1,0)) &amp; " systems (" &amp; FormatPercent(Sum(IIf(Fields!WSUSScanError.Value &lt;&gt; 0,1,0)) / Count(Fields!WSUSScanError.Value), 2) &amp; ")"</Label>
                         <Visible>=IIf(Sum(IIf(Fields!WSUSScanError.Value &lt;&gt; 0,1,0))=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with WSUS client scan error which prevents update installations. Intended as additional KPI to the overall compliance state.</ToolTip>
@@ -4592,8 +4632,8 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                         <Y>=Sum(Fields!Counter.Value)</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>=IIf(Sum(Fields!Counter.Value)=0,False,True)</Visible>
+                        <Label>=Sum(IIf(Fields!UpdatesApprovedMissingAndError.Value = 0,1,0)) &amp; " systems (" &amp; FormatPercent(Sum(IIf(Fields!UpdatesApprovedMissingAndError.Value = 0,1,0)) / Count(Fields!UpdatesApprovedMissingAndError.Value), 2) &amp; ")"</Label>
+                        <Visible>=IIf(Sum(Fields!UpdatesApprovedMissingAndError.Value)=0,True,False)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with no update installation errors. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <Style>
@@ -4629,8 +4669,8 @@ Select @LastRollupPrefix as [LastRollupPrefix]
                         <Y>=Sum(IIf(Fields!UpdatesApprovedMissingAndError.Value &gt; 0,1,0))</Y>
                       </ChartDataPointValues>
                       <ChartDataLabel>
-                        <UseValueAsLabel>true</UseValueAsLabel>
-                        <Visible>=IIf(Sum(IIf(Fields!UpdatesApprovedMissingAndError.Value &gt; 0,1,0))=0,False,True)</Visible>
+                        <Label>=Sum(IIf(Fields!UpdatesApprovedMissingAndError.Value &gt; 0,1,0)) &amp; " systems (" &amp; FormatPercent(Sum(IIf(Fields!UpdatesApprovedMissingAndError.Value &gt; 0,1,0)) / Count(Fields!UpdatesApprovedMissingAndError.Value), 2) &amp; ")"</Label>
+                        <Visible>=IIf(Sum(Fields!UpdatesApprovedMissingAndError.Value)=0,False,True)</Visible>
                       </ChartDataLabel>
                       <ToolTip>Systems with at least one update installation error for deployed updates. However the sub-report will also show errors for not deployed updates. Intended as additional KPI to the overall compliance state.</ToolTip>
                       <ActionInfo>
@@ -5726,10 +5766,10 @@ Select @LastRollupPrefix as [LastRollupPrefix]
     <ReportParameter Name="ExcludeProductList">
       <DataType>String</DataType>
       <DefaultValue>
-        <Values>
-          <Value>Microsoft Defender Antivirus</Value>
-          <Value>System Center Endpoint Protection</Value>
-        </Values>
+        <DataSetReference>
+          <DataSetName>ExcludeProductsByDefault</DataSetName>
+          <ValueField>ProductName</ValueField>
+        </DataSetReference>
       </DefaultValue>
       <Prompt>Exclude deployments containing the following products:</Prompt>
       <ValidValues>
