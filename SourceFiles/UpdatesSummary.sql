@@ -15,6 +15,7 @@
 -----------------------------------------------------------------------------------------------------------------------
 ---- Changelog:
 ---- 2025-09-19: Added is to some peroperties to avoid NULL values ISNULL()
+----			 Added query runtime to be able to show dataset runtime even if the data comes from a cached result
 ---- 2025-09-10: Changed the way Windows 11 and Server 2025 cumulative uodates are handled. Due to a change in cumulative update detection logic. 
 ---- 2024-05-06: Changed update compliance definition and removed "and (DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE()) <= 1+@MonthIndexInternal)"
 ---- 2022-04-04: Changed the way deployed updates are shown. "MissingUpdatesApproved" will not show updates for excluded deployments anymore. Makes it more consistant with the rest of the report
@@ -62,6 +63,9 @@ Declare @ExcludeDeplBitMaskInternal as varchar(20) = @ExcludeDeplBitMask
 DECLARE @LastRollupPrefix as char(7);
 DECLARE @CurrentRollupPrefix as char(7);
 DECLARE @SecondTuesdayOfMonth datetime;
+
+--- Adding query runtime as datasetruntime to easily add executiontime even if the report is coming from a cached dataset
+DECLARE @DataSetRuntime as datetime = GETDATE();
 
 -- Calculate 2nd Tuesday of month to add the correct date string in case install date is missing in v_GS_QUICK_FIX_ENGINEERING
 -- Also used to fill the gap between the first day of a month and the next time a rollup will be released
@@ -242,6 +246,7 @@ CuCurrStatus (ResourceID, CI_ID, Title, Status, RN) as
 select [Name] = VRS.Name0
               ,[ResourceID] = VRS.ResourceID
               ,[Counter] = 1 -- a counter to make it easier to count in reporting services
+			  ,[DatasetRuntime] = @DataSetRuntime
 			  ,[Domain] = VRS.Resource_Domain_OR_Workgr0
               ,[PendingReboot] = BGBL.ClientState                         
               ,[OSType] = GOS.Caption0
