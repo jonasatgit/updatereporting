@@ -6,6 +6,14 @@ The original blog and documentation can be found [HERE](https://techcommunity.mi
 All my other blogs can be found [HERE](https://aka.ms/JonasOhmsenBlogs "JonasOhmsenBlogs")
 and [HERE](https://techcommunity.microsoft.com/t5/core-infrastructure-and-security/mastering-configuration-manager-bandwidth-limitations-for-vpn/ba-p/1280002 "Mastering Configuration Manager Bandwidth limitations for VPN connected Clients")
 
+# Unblock downloaded files
+If you download the solution as a zip-file, you might need to unblock all files to be able to use them.
+Open a PowerShell session as admin and change into the directory of the unpacked files. Typically: ".\updatereporting-master"
+Run the following to unblock all files:
+```PowerShell
+Dir -recurse | Unblock-File
+```
+
 
 # MEM/MECM/ConfigMgr patch compliance report solution
 ![Update dashboard](/.attachments/Dashboard-B.png)
@@ -14,6 +22,14 @@ and [HERE](https://techcommunity.microsoft.com/t5/core-infrastructure-and-securi
 
 # Changes
 (The version number can be found in the lower left corner of the dashboard. No version number means v1.0)
+
+## 2025-09-19 v4.2:
+1. Fixed issue with Windows 11 and Server 2025 cumulative updates not being detected correctly and therefore counted as compliant. Reported in [Issue23](https://github.com/jonasatgit/updatereporting/issues/23)
+1. Added default parameter values for excluded updates in case Defender updates are not deployed via ConfigMgr
+1. Fixed issue with updates error compliance not being calculated correctly
+1. Added query runtime to be able to show dataset runtime even if the report is coming from a cached dataset
+1. Set legacy cardinality hint for SQL Server 2016 SP1 and higher to avoid performance issues with certain SQL versions as default
+1. Added absolute numbers per KPI as suggested in: [Issue22](https://github.com/jonasatgit/updatereporting/issues/22)
 
 ## 2024-05-06 v4.1:
 1. Changed update compliance definition and removed the dependency on "LastInstallTime"

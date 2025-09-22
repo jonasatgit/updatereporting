@@ -94,7 +94,7 @@ PS> .\Import-SSRSReports.ps1 -ReportServerURI "http://reportserver.domain.local/
 https://github.com/jonasatgit/updatereporting
 
 .LINK
-https://techcommunity.microsoft.com/t5/core-infrastructure-and-security/mastering-configuration-manager-patch-compliance-reporting/ba-p/1415088
+https://aka.ms/jonasohmsenblogs
 
 #>
 [CmdletBinding(DefaultParametersetName='None')]
@@ -140,6 +140,23 @@ param(
     [switch]$TryOverwrite
 
 )
+
+Write-Host "Start reporting import process" -ForegroundColor Yellow
+
+# Setting legacy cardinality estimation options for newer SQL versions to always on
+if ($ForceLegacyFormat -or $ForceLegacyCardinalityOlderThanSQL2016SP1)
+{
+    $ForceLegacyCardinalitySQL2016SP1AndHigher = $false
+}
+else 
+{
+    if (-not $ForceLegacyCardinalitySQL2016SP1AndHigher)
+    {
+        Write-Host "No cardinality estimation option chosen, defaulting to SQL2016SP1AndHigher" -ForegroundColor Yellow
+        Write-Host "Use -ForceLegacyCardinalitySQL2016SP1AndHigher:`$false to overwrite that if needed" -ForegroundColor Yellow
+        $ForceLegacyCardinalitySQL2016SP1AndHigher = $true
+    }    
+}
 
 #[string]$datasetUsingSQLView = 'UpdatesSummaryView'
 

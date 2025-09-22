@@ -1,4 +1,4 @@
----SCRIPTVERSION: 20220404
+---SCRIPTVERSION: 20250919
 
 -----------------------------------------------------------------------------------------------------------------------
 ---- Disclaimer
@@ -14,6 +14,10 @@
 ---- if Microsoft has been advised of the possibility of such damages.
 -----------------------------------------------------------------------------------------------------------------------
 ---- Changelog:
+---- 2025-09-19: Added is to some peroperties to avoid NULL values ISNULL()
+----			 Added query runtime to be able to show dataset runtime even if the data comes from a cached result
+---- 2025-09-10: Changed the way Windows 11 and Server 2025 cumulative uodates are handled. Due to a change in cumulative update detection logic. 
+---- 2024-05-06: Changed update compliance definition and removed "and (DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE()) <= 1+@MonthIndexInternal)"
 ---- 2022-04-04: Changed the way deployed updates are shown. "MissingUpdatesApproved" will not show updates for excluded deployments anymore. Makes it more consistant with the rest of the report
 ----			 Added systems domain name to the list
 ----			 Removed unnecessary where clause: "where (QFE.Description0 = 'Security Update' or QFE.Description0 is null)"
@@ -59,6 +63,9 @@ Declare @ExcludeDeplBitMaskInternal as varchar(20) = @ExcludeDeplBitMask
 DECLARE @LastRollupPrefix as char(7);
 DECLARE @CurrentRollupPrefix as char(7);
 DECLARE @SecondTuesdayOfMonth datetime;
+
+--- Adding query runtime as datasetruntime to easily add executiontime even if the report is coming from a cached dataset
+DECLARE @DataSetRuntime as datetime = GETDATE();
 
 -- Calculate 2nd Tuesday of month to add the correct date string in case install date is missing in v_GS_QUICK_FIX_ENGINEERING
 -- Also used to fill the gap between the first day of a month and the next time a rollup will be released
@@ -195,11 +202,43 @@ ExcludedDeployments (AssignmentID,AssignmentType, CI_ID) as
 			inner join CTE_Products PR on PR.Product = CICI.CategoryInstanceName
 ),
 -- list of cumulative updates of the current and the past month
-CumulativeUpdates (ArticleID,CI_ID, Latest) as
+CumulativeUpdates (ArticleID,CI_ID, Latest, Title) as
 (
-            Select 'KB' + updi.ArticleID as Article, CI_ID, Latest = 0 from v_updateinfo updi where (updi.Title like @LastRollupPrefix + ' Cumulative Update for Windows%' or updi.Title like @LastRollupPrefix + ' Security Monthly Quality Rollup%' or updi.Title like @LastRollupPrefix + ' Cumulative Update for Microsoft server operating system%')
+			Select 'KB' + updi.ArticleID as Article, updi.CI_ID, Latest = 0, updi.Title from v_updateinfo updi where (updi.Title like @LastRollupPrefix + ' Cumulative Update for Windows%' or updi.Title like @LastRollupPrefix + ' Security Monthly Quality Rollup%' or updi.Title like @LastRollupPrefix + ' Cumulative Update for Microsoft server operating system%')
             UNION ALL
-            Select 'KB' + updi.ArticleID as Article, CI_ID, Latest = 1 from v_updateinfo updi where (updi.Title like @CurrentRollupPrefix + ' Cumulative Update for Windows%' or updi.Title like @CurrentRollupPrefix + ' Security Monthly Quality Rollup%' or updi.Title like @CurrentRollupPrefix + ' Cumulative Update for Microsoft server operating system%')
+            Select 'KB' + updi.ArticleID as Article, updi.CI_ID, Latest = 1, updi.Title from v_updateinfo updi where (updi.Title like @CurrentRollupPrefix + ' Cumulative Update for Windows%' or updi.Title like @CurrentRollupPrefix + ' Security Monthly Quality Rollup%' or updi.Title like @CurrentRollupPrefix + ' Cumulative Update for Microsoft server operating system%')
+),
+-- New win 11 cumulative update detection logic might detect cus for older os versions as installed. Hence the change 
+-- Using ROW_NUMBER to narrow down the list of updates to the latest one later in the script
+CuLastStatus (ResourceID, CI_ID, Title, Status, RN) as
+(
+    SELECT 
+        UCS.ResourceID,
+        CUU.CI_ID,
+        CUU.Title,
+		UCS.Status,
+        ROW_NUMBER() OVER (
+            PARTITION BY UCS.ResourceID 
+            ORDER BY CUU.title DESC  -- order by title should work for tiles like 22H2, 23H2, 24H2 etc
+        ) AS RN
+    FROM v_UpdateComplianceStatus UCS
+    INNER JOIN ResourceList ON ResourceList.ResourceID = UCS.ResourceID
+    INNER JOIN CumulativeUpdates CUU ON CUU.CI_ID = UCS.CI_ID AND CUU.Latest = 0
+),
+CuCurrStatus (ResourceID, CI_ID, Title, Status, RN) as
+(
+    SELECT 
+        UCS.ResourceID,
+        CUU.CI_ID,
+        CUU.Title,
+		UCS.Status,
+        ROW_NUMBER() OVER (
+            PARTITION BY UCS.ResourceID 
+            ORDER BY CUU.title DESC  
+        ) AS RN
+    FROM v_UpdateComplianceStatus UCS
+    INNER JOIN ResourceList ON ResourceList.ResourceID = UCS.ResourceID
+    INNER JOIN CumulativeUpdates CUU ON CUU.CI_ID = UCS.CI_ID AND CUU.Latest = 1
 )
 
 
@@ -207,6 +246,7 @@ CumulativeUpdates (ArticleID,CI_ID, Latest) as
 select [Name] = VRS.Name0
               ,[ResourceID] = VRS.ResourceID
               ,[Counter] = 1 -- a counter to make it easier to count in reporting services
+			  ,[DatasetRuntime] = @DataSetRuntime
 			  ,[Domain] = VRS.Resource_Domain_OR_Workgr0
               ,[PendingReboot] = BGBL.ClientState                         
               ,[OSType] = GOS.Caption0
@@ -215,7 +255,7 @@ select [Name] = VRS.Name0
               ,[WSUSVersion] = USS.LastWUAVersion
               ,[DefenderPattern] = AHS.AntivirusSignatureVersion
               ,[DefenderPatternAge] = AHS.AntivirusSignatureAge
-              ,[WSUSScanError] = USS.LastErrorCode
+              ,[WSUSScanError] = ISNULL(USS.LastErrorCode,0)
               ,[DaysSinceLastOnline] = ISNULL((DateDiff(DAY,BGBL.LastPolicyRequest,GETDATE())),999)
               ,[DaysSinceLastAADSLogon] = ISNULL((DateDiff(DAY,VRS.Last_Logon_Timestamp0,GETDATE())), 999)
               ,[DaysSinceLastBoot] = ISNULL((DateDiff(DAY,GOS.LastBootUpTime0,GETDATE())), 999)
@@ -235,7 +275,7 @@ select [Name] = VRS.Name0
               ,[MonthSinceLastUpdateScan] = ISNULL((DateDiff(MONTH,USS.LastScanTime,GETDATE())), 999)
               ---- custom compliance state based on deploymentstatus, update status, last installdate and last rollup state. Last update install needs to be at least in the past month
 			  ---- 20210801: Changed compliance to contain the last rollup
-              ,[OverallComplianceState] = Case when AssignmentStatus.Compliant = AssignmentStatus.AssignmentSum and (DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE()) <= 1+@MonthIndexInternal) and (LASTROLLUPSTAT.Status = 3 or CURRROLLUPSTAT.Status = 3) then 1 else 0 end
+              ---- ,[OverallComplianceState] = Case when AssignmentStatus.Compliant = AssignmentStatus.AssignmentSum and (DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE()) <= 1+@MonthIndexInternal) and (LASTROLLUPSTAT.Status = 3 or CURRROLLUPSTAT.Status = 3) then 1 else 0 end
 			  ---- 20210801: Original UpdateAssignmentCompliance query without last rollup state and with UPDATESTATES.UpdatesApprovedAndMissing = 0
 			  ---- Query does not work anymore because of the way we filter future and not enabled update deployments and the changed name to "OverallComplianceState"
 			  --,[UpdateAssignmentCompliance] = Case when AssignmentStatus.Compliant = AssignmentStatus.AssignmentSum and UPDATESTATES.UpdatesApprovedAndMissing = 0 and (DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE()) <= 1) then 1 else 0 end
@@ -252,7 +292,7 @@ select [Name] = VRS.Name0
               ,[MissingUpdatesAll] = UPDATESTATES.UpdatesMissingAll
               ,[MissingUpdatesApproved] = UPDATESTATES.UpdatesApprovedAndMissing
               ,[UpdatesApprovedAll] = UPDATESTATES.UpdatesApproved
-                                     ,[UpdatesApprovedMissingAndError] = UPDATESTATES.UpdatesApprovedAndMissingAndError
+               ,[UpdatesApprovedMissingAndError] = ISNULL(UPDATESTATES.UpdatesApprovedAndMissingAndError,0)
               ---- show status of reference security rollup update
               ---- if current rollup ist installed, the last one doesn't matter and will be set to installed as well
 			  ,[LastRollupStatus] = case when LASTROLLUPSTAT.Status = 3 or CURRROLLUPSTAT.Status = 3 then 3 else 2 end
@@ -296,23 +336,9 @@ left join (
               group by ucs.ResourceID
 ) UPDATESTATES on UPDATESTATES.ResourceID = VRS.ResourceID
 --- join last Rollup as reference
-left join (
-              select UCS.ResourceID,
-              max(UCS.Status) as Status
-              from v_UpdateComplianceStatus UCS
-              inner join ResourceList on ResourceList.ResourceID = ucs.ResourceID
-              inner join CumulativeUpdates CUU on CUU.CI_ID = UCS.CI_ID and CUU.Latest = 0
-              group by UCS.ResourceID
-) as LASTROLLUPSTAT on LASTROLLUPSTAT.ResourceID = VRS.ResourceID
+left join CuLastStatus as LASTROLLUPSTAT on LASTROLLUPSTAT.ResourceID = VRS.ResourceID and LASTROLLUPSTAT.RN = 1
 --- join current Rollup as reference
-left join (
-              select UCS.ResourceID,
-              max(UCS.Status) as Status
-              from v_UpdateComplianceStatus UCS
-              inner join ResourceList on ResourceList.ResourceID = ucs.ResourceID
-              inner join CumulativeUpdates CUU on CUU.CI_ID = UCS.CI_ID and CUU.Latest = 1
-              group by UCS.ResourceID
-) as CURRROLLUPSTAT on CURRROLLUPSTAT.ResourceID = VRS.ResourceID
+left join CuCurrStatus as CURRROLLUPSTAT on CURRROLLUPSTAT.ResourceID = VRS.ResourceID and CURRROLLUPSTAT.RN = 1
 --- Join OS Information
 left join v_GS_OPERATING_SYSTEM GOS on GOS.ResourceID = VRS.ResourceID
 --- Join Client Health status
@@ -372,4 +398,4 @@ left join v_CombinedDeviceResources BGBL on BGBL.MachineID = VRS.ResourceID
 ---- Force legacy cardinality for SQL server versions before 2016 SP1 (SQL version less than 13.0.4001.0)
 --OPTION (QUERYTRACEON 9481)
 ---- Force legacy cardinality for SQL server versions 2016 SP1 and higher (SQL version equal or greater than 13.0.4001.0)
---OPTION (USE HINT ('FORCE_LEGACY_CARDINALITY_ESTIMATION'))
+OPTION (USE HINT ('FORCE_LEGACY_CARDINALITY_ESTIMATION'))

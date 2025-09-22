@@ -29,7 +29,7 @@
           <rd:DbType>String</rd:DbType>				
         </DataSetParameter>
       </DataSetParameters>
-      <CommandText>---SCRIPTVERSION: 20240506
+      <CommandText>----SCRIPTVERSION: 20250919
 
 -----------------------------------------------------------------------------------------------------------------------
 ---- Disclaimer
@@ -45,7 +45,10 @@
 ---- if Microsoft has been advised of the possibility of such damages.
 -----------------------------------------------------------------------------------------------------------------------
 ---- Changelog:
----- 2024-05-06: Changed update compliance definition and removed "and (DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE()) &lt;= 1+@MonthIndexInternal)"																																						   
+---- 2025-09-19: Added is to some peroperties to avoid NULL values ISNULL()
+----			 Added query runtime to be able to show dataset runtime even if the data comes from a cached result
+---- 2025-09-10: Changed the way Windows 11 and Server 2025 cumulative uodates are handled. Due to a change in cumulative update detection logic. 
+---- 2024-05-06: Changed update compliance definition and removed "and (DateDiff(MONTH,UPDINSTDATE.LastInstallTime,GETDATE()) &lt;= 1+@MonthIndexInternal)"	
 ---- 2022-04-04: Changed the way deployed updates are shown. "MissingUpdatesApproved" will not show updates for excluded deployments anymore. Makes it more consistant with the rest of the report
 ----			 Added systems domain name to the list
 ----			 Removed unnecessary where clause: "where (QFE.Description0 = 'Security Update' or QFE.Description0 is null)"
@@ -67,14 +70,14 @@
 ---- 2020-11-03: Changed 'max(CASE WHEN (ISDATE(QFE.InstalledOn0) = 0' to 'max(CASE WHEN (LEN(QFE.InstalledOn0) &gt; 10' due to language problems
 ---- 2020-11-03: Changed 'Windows Defender' to 'Microsoft Defender Antivirus'
 
------ START just for testing in SQL directly
+---- START just for testing in SQL directly
 --Declare @CollectionID as varchar(max) = 'SMS00001' ---- semicolon seperated list of collectionIDs
 --Declare @ExcludeProductList as varchar(max) = N'Microsoft Defender Antivirus;System Center Endpoint Protection'; ---- semicolon seperated list of update products
 --Declare @MonthIndex as int = 0; -- 0 = current month, 1 = previous month
 
 ---- Using a bitmask like parameter. Makes it possible to use a multivalue parameter instead of multiple parameters to filter out some deployments
 ---- Using the same CTE function to convert parameter arraylist to CTE as with other multi value parameters due to perf issues on some SQL systems
---Declare @ExcludeDeplBitMask as varchar(20) = '0'---'2;4;8;16';
+--Declare @ExcludeDeplBitMask as varchar(20) = '8;16'---'2;4;8;16';
 ---- 2 = Deployments with starttime in the future will be excluded 
 ---- 4 = Deployments with deadline in the future will be excluded
 ---- 8 = Available deployments will be excluded
@@ -91,6 +94,9 @@ Declare @ExcludeDeplBitMaskInternal as varchar(20) = @ExcludeDeplBitMask
 DECLARE @LastRollupPrefix as char(7);
 DECLARE @CurrentRollupPrefix as char(7);
 DECLARE @SecondTuesdayOfMonth datetime;
+
+--- Adding query runtime as datasetruntime to easily add executiontime even if the report is coming from a cached dataset
+DECLARE @DataSetRuntime as datetime = GETDATE();
 
 -- Calculate 2nd Tuesday of month to add the correct date string in case install date is missing in v_GS_QUICK_FIX_ENGINEERING
 -- Also used to fill the gap between the first day of a month and the next time a rollup will be released
@@ -227,11 +233,43 @@ ExcludedDeployments (AssignmentID,AssignmentType, CI_ID) as
 			inner join CTE_Products PR on PR.Product = CICI.CategoryInstanceName
 ),
 -- list of cumulative updates of the current and the past month
-CumulativeUpdates (ArticleID,CI_ID, Latest) as
+CumulativeUpdates (ArticleID,CI_ID, Latest, Title) as
 (
-            Select 'KB' + updi.ArticleID as Article, CI_ID, Latest = 0 from v_updateinfo updi where (updi.Title like @LastRollupPrefix + ' Cumulative Update for Windows%' or updi.Title like @LastRollupPrefix + ' Security Monthly Quality Rollup%' or updi.Title like @LastRollupPrefix + ' Cumulative Update for Microsoft server operating system%')
+			Select 'KB' + updi.ArticleID as Article, updi.CI_ID, Latest = 0, updi.Title from v_updateinfo updi where (updi.Title like @LastRollupPrefix + ' Cumulative Update for Windows%' or updi.Title like @LastRollupPrefix + ' Security Monthly Quality Rollup%' or updi.Title like @LastRollupPrefix + ' Cumulative Update for Microsoft server operating system%')
             UNION ALL
-            Select 'KB' + updi.ArticleID as Article, CI_ID, Latest = 1 from v_updateinfo updi where (updi.Title like @CurrentRollupPrefix + ' Cumulative Update for Windows%' or updi.Title like @CurrentRollupPrefix + ' Security Monthly Quality Rollup%' or updi.Title like @CurrentRollupPrefix + ' Cumulative Update for Microsoft server operating system%')
+            Select 'KB' + updi.ArticleID as Article, updi.CI_ID, Latest = 1, updi.Title from v_updateinfo updi where (updi.Title like @CurrentRollupPrefix + ' Cumulative Update for Windows%' or updi.Title like @CurrentRollupPrefix + ' Security Monthly Quality Rollup%' or updi.Title like @CurrentRollupPrefix + ' Cumulative Update for Microsoft server operating system%')
+),
+-- New win 11 cumulative update detection logic might detect cus for older os versions as installed. Hence the change 
+-- Using ROW_NUMBER to narrow down the list of updates to the latest one later in the script
+CuLastStatus (ResourceID, CI_ID, Title, Status, RN) as
+(
+    SELECT 
+        UCS.ResourceID,
+        CUU.CI_ID,
+        CUU.Title,
+		UCS.Status,
+        ROW_NUMBER() OVER (
+            PARTITION BY UCS.ResourceID 
+            ORDER BY CUU.title DESC  -- order by title should work for titles like 22H2, 23H2, 24H2 etc
+        ) AS RN
+    FROM v_UpdateComplianceStatus UCS
+    INNER JOIN ResourceList ON ResourceList.ResourceID = UCS.ResourceID
+    INNER JOIN CumulativeUpdates CUU ON CUU.CI_ID = UCS.CI_ID AND CUU.Latest = 0
+),
+CuCurrStatus (ResourceID, CI_ID, Title, Status, RN) as
+(
+    SELECT 
+        UCS.ResourceID,
+        CUU.CI_ID,
+        CUU.Title,
+		UCS.Status,
+        ROW_NUMBER() OVER (
+            PARTITION BY UCS.ResourceID 
+            ORDER BY CUU.title DESC  
+        ) AS RN
+    FROM v_UpdateComplianceStatus UCS
+    INNER JOIN ResourceList ON ResourceList.ResourceID = UCS.ResourceID
+    INNER JOIN CumulativeUpdates CUU ON CUU.CI_ID = UCS.CI_ID AND CUU.Latest = 1
 )
 
 
@@ -239,15 +277,16 @@ CumulativeUpdates (ArticleID,CI_ID, Latest) as
 select [Name] = VRS.Name0
               ,[ResourceID] = VRS.ResourceID
               ,[Counter] = 1 -- a counter to make it easier to count in reporting services
-			  ,[Domain] = VRS.Resource_Domain_OR_Workgr0
+			        ,[DatasetRuntime] = @DataSetRuntime              
+			        ,[Domain] = VRS.Resource_Domain_OR_Workgr0
               ,[PendingReboot] = BGBL.ClientState                         
               ,[OSType] = GOS.Caption0
-			  ,[OSBuild] = BGBL.DeviceOSBuild
+			        ,[OSBuild] = BGBL.DeviceOSBuild
               ,[ClientVersion] = VRS.Client_Version0
               ,[WSUSVersion] = USS.LastWUAVersion
               ,[DefenderPattern] = AHS.AntivirusSignatureVersion
               ,[DefenderPatternAge] = AHS.AntivirusSignatureAge
-              ,[WSUSScanError] = USS.LastErrorCode
+              ,[WSUSScanError] = ISNULL(USS.LastErrorCode,0)
               ,[DaysSinceLastOnline] = ISNULL((DateDiff(DAY,BGBL.LastPolicyRequest,GETDATE())),999)
               ,[DaysSinceLastAADSLogon] = ISNULL((DateDiff(DAY,VRS.Last_Logon_Timestamp0,GETDATE())), 999)
               ,[DaysSinceLastBoot] = ISNULL((DateDiff(DAY,GOS.LastBootUpTime0,GETDATE())), 999)
@@ -286,7 +325,7 @@ select [Name] = VRS.Name0
               ,[MissingUpdatesAll] = UPDATESTATES.UpdatesMissingAll
               ,[MissingUpdatesApproved] = UPDATESTATES.UpdatesApprovedAndMissing
               ,[UpdatesApprovedAll] = UPDATESTATES.UpdatesApproved
-                                     ,[UpdatesApprovedMissingAndError] = UPDATESTATES.UpdatesApprovedAndMissingAndError
+              ,[UpdatesApprovedMissingAndError] = ISNULL(UPDATESTATES.UpdatesApprovedAndMissingAndError,0)
               ---- show status of reference security rollup update
               ---- if current rollup ist installed, the last one doesn't matter and will be set to installed as well
 			  ,[LastRollupStatus] = case when LASTROLLUPSTAT.Status = 3 or CURRROLLUPSTAT.Status = 3 then 3 else 2 end
@@ -330,23 +369,9 @@ left join (
               group by ucs.ResourceID
 ) UPDATESTATES on UPDATESTATES.ResourceID = VRS.ResourceID
 --- join last Rollup as reference
-left join (
-              select UCS.ResourceID,
-              max(UCS.Status) as Status
-              from v_UpdateComplianceStatus UCS
-              inner join ResourceList on ResourceList.ResourceID = ucs.ResourceID
-              inner join CumulativeUpdates CUU on CUU.CI_ID = UCS.CI_ID and CUU.Latest = 0
-              group by UCS.ResourceID
-) as LASTROLLUPSTAT on LASTROLLUPSTAT.ResourceID = VRS.ResourceID
+left join CuLastStatus as LASTROLLUPSTAT on LASTROLLUPSTAT.ResourceID = VRS.ResourceID and LASTROLLUPSTAT.RN = 1
 --- join current Rollup as reference
-left join (
-              select UCS.ResourceID,
-              max(UCS.Status) as Status
-              from v_UpdateComplianceStatus UCS
-              inner join ResourceList on ResourceList.ResourceID = ucs.ResourceID
-              inner join CumulativeUpdates CUU on CUU.CI_ID = UCS.CI_ID and CUU.Latest = 1
-              group by UCS.ResourceID
-) as CURRROLLUPSTAT on CURRROLLUPSTAT.ResourceID = VRS.ResourceID
+left join CuCurrStatus as CURRROLLUPSTAT on CURRROLLUPSTAT.ResourceID = VRS.ResourceID and CURRROLLUPSTAT.RN = 1
 --- Join OS Information
 left join v_GS_OPERATING_SYSTEM GOS on GOS.ResourceID = VRS.ResourceID
 --- Join Client Health status
@@ -421,6 +446,10 @@ left join v_CombinedDeviceResources BGBL on BGBL.MachineID = VRS.ResourceID
       <Field Name="Counter">
         <DataField>Counter</DataField>
         <rd:TypeName>System.Int32</rd:TypeName>
+      </Field>
+      <Field Name="DatasetRuntime">
+        <DataField>DatasetRuntime</DataField>
+        <rd:TypeName>System.DateTime</rd:TypeName>
       </Field>
       <Field Name="Domain">
         <DataField>Domain</DataField>
