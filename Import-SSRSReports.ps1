@@ -193,7 +193,7 @@ if ($ReportServerUri -notmatch '^[a-z0-9\./:\{\}\-_ ]+$')
 }
 
 
-if ($TargetFolderPath -notmatch '^[a-z0-9\./:\{\}\-_ ]+$')
+if ($TargetFolderPath -notmatch '^[a-z0-9\./:\#\{\}\-_ ]+$')
 {
     Write-Host "Get-Help .\Import-SSRSReports.ps1 -Examples"
     Get-Help .\Import-SSRSReports.ps1 -Examples
